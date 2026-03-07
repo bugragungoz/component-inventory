@@ -19,6 +19,7 @@ export const state = {
   searchQuery: '',
   filterCat: '',
   filterSub: '',
+  viewCompact: true,
 };
 
 // ============================================================
@@ -283,6 +284,45 @@ function applyTheme(theme) {
 }
 
 // ============================================================
+// View toggle (compact / detailed)
+// ============================================================
+function initViewToggle() {
+  const btn       = document.getElementById('btn-view-toggle');
+  const lblEl     = document.getElementById('view-label');
+  const iconComp  = document.getElementById('icon-view-compact');
+  const iconFull  = document.getElementById('icon-view-full');
+
+  function applyView() {
+    if (state.viewCompact) {
+      document.body.classList.add('compact-view');
+      lblEl.textContent     = 'Detailed';
+      iconComp.style.display = 'none';
+      iconFull.style.display = '';
+    } else {
+      document.body.classList.remove('compact-view');
+      lblEl.textContent     = 'Compact';
+      iconComp.style.display = '';
+      iconFull.style.display = 'none';
+    }
+  }
+
+  applyView();
+
+  btn.addEventListener('click', () => {
+    state.viewCompact = !state.viewCompact;
+    localStorage.setItem('viewCompact', state.viewCompact ? '1' : '0');
+    applyView();
+  });
+
+  // Restore saved preference
+  const saved = localStorage.getItem('viewCompact');
+  if (saved !== null) {
+    state.viewCompact = saved === '1';
+    applyView();
+  }
+}
+
+// ============================================================
 // Search
 // ============================================================
 function initSearch() {
@@ -393,6 +433,7 @@ async function main() {
     await loadComponents();
     initModals();
     initSearch();
+    initViewToggle();
     initImport();
     initExport();
     initAI();

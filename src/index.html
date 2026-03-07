@@ -128,24 +128,30 @@
         </div>
       </div>
       <div class="topbar-right">
-        <button class="btn btn-ghost" id="btn-backup-mgr">
+        <button class="btn btn-ghost" id="btn-backup-mgr" title="Backup Manager">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
           Backups
         </button>
-        <button class="btn btn-ghost" id="btn-ai">
+        <button class="btn btn-ghost" id="btn-ai" title="AI Assistant (Ollama)">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           AI Assistant
         </button>
+        <!-- View toggle: compact / detailed -->
+        <button class="btn btn-ghost btn-view-toggle" id="btn-view-toggle" title="Toggle compact / detailed view">
+          <svg id="icon-view-compact" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          <svg id="icon-view-full" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          <span id="view-label">Compact</span>
+        </button>
         <div class="btn-divider"></div>
-        <button class="btn btn-blue" id="btn-import">
+        <button class="btn btn-import" id="btn-import">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           Import
         </button>
-        <button class="btn btn-green" id="btn-export">
+        <button class="btn btn-export" id="btn-export">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
           Export
         </button>
-        <button class="btn btn-primary" id="btn-add">
+        <button class="btn btn-add" id="btn-add">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           Add Component
         </button>
@@ -161,18 +167,18 @@
         <table id="inventory-table">
           <thead>
             <tr>
-              <th data-col="part_code" class="sortable">Part Code <span class="sort-icon"></span></th>
-              <th data-col="category" class="sortable">Category <span class="sort-icon"></span></th>
-              <th data-col="subcategory" class="sortable">Subcategory <span class="sort-icon"></span></th>
-              <th data-col="quantity" class="sortable num">Qty <span class="sort-icon"></span></th>
-              <th data-col="package" class="sortable">Package <span class="sort-icon"></span></th>
-              <th data-col="manufacturer" class="sortable">Manufacturer <span class="sort-icon"></span></th>
-              <th data-col="mpn" class="sortable">MPN <span class="sort-icon"></span></th>
-              <th data-col="location" class="sortable">Location <span class="sort-icon"></span></th>
-              <th data-col="voltage_max" class="sortable num">V Max <span class="sort-icon"></span></th>
-              <th data-col="current_max" class="sortable num">I Max <span class="sort-icon"></span></th>
-              <th data-col="description" class="sortable">Description <span class="sort-icon"></span></th>
-              <th data-col="unit_price" class="sortable num">Price <span class="sort-icon"></span></th>
+              <th data-col="part_code" class="sortable col-pc">Part Code <span class="sort-icon"></span></th>
+              <th data-col="category" class="sortable col-cat">Category <span class="sort-icon"></span></th>
+              <th data-col="subcategory" class="sortable col-sub">Subcategory <span class="sort-icon"></span></th>
+              <th data-col="quantity" class="sortable num col-qty">Qty <span class="sort-icon"></span></th>
+              <th data-col="package" class="sortable col-pkg">Package <span class="sort-icon"></span></th>
+              <th data-col="manufacturer" class="sortable col-mfr">Manufacturer <span class="sort-icon"></span></th>
+              <th data-col="mpn" class="sortable col-mpn">MPN <span class="sort-icon"></span></th>
+              <th data-col="location" class="sortable col-loc">Location <span class="sort-icon"></span></th>
+              <th data-col="voltage_max" class="sortable num col-vmax">V Max <span class="sort-icon"></span></th>
+              <th data-col="current_max" class="sortable num col-imax">I Max <span class="sort-icon"></span></th>
+              <th data-col="description" class="sortable col-desc">Description <span class="sort-icon"></span></th>
+              <th data-col="unit_price" class="sortable num col-price">Price <span class="sort-icon"></span></th>
               <th class="col-actions">Actions</th>
             </tr>
           </thead>
@@ -500,6 +506,24 @@
 
   <!-- Toast container -->
   <div id="toast-container"></div>
+
+  <!-- Auto-categorize progress overlay -->
+  <div id="categorize-progress" style="display:none" class="modal-overlay">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h2>Auto-Categorizing</h2>
+      </div>
+      <div class="modal-body" style="padding:24px 20px">
+        <div class="progress-info">
+          <p id="progress-label" style="font-size:13px;color:var(--text-secondary);margin-bottom:12px">Initializing...</p>
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill" id="progress-bar-fill" style="width:0%"></div>
+          </div>
+          <p id="progress-sub" style="font-size:11px;color:var(--text-tertiary);margin-top:8px;font-family:var(--font-mono)"></p>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- CDN: SheetJS -->
   <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
