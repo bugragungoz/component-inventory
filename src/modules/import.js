@@ -1,58 +1,152 @@
 import { upsertComponents, showToast, escHtml } from '../app.js';
 
-// Column header normalization map
+// Normalize Turkish diacritics to ASCII for header matching
+function asciiNormalize(str) {
+  return str
+    .replace(/[\u015f\u015e]/g, 's') // s with cedilla
+    .replace(/[\u0131]/g, 'i')        // dotless i
+    .replace(/[\u0130]/g, 'i')        // I with dot
+    .replace(/[\u00f6\u00d6]/g, 'o') // o with umlaut
+    .replace(/[\u00fc\u00dc]/g, 'u') // u with umlaut
+    .replace(/[\u00e7\u00c7]/g, 'c') // c with cedilla
+    .replace(/[\u011f\u011e]/g, 'g') // g with breve
+    .replace(/[\u00e2\u00c2]/g, 'a') // a with circumflex
+    .replace(/[\u00ee\u00ce]/g, 'i') // i with circumflex
+    .replace(/[\u00fb\u00db]/g, 'u'); // u with circumflex
+}
+
+// Column header normalization map (English + Turkish variants)
 const HEADER_MAP = {
-  // Standard English
-  'part_code': 'part_code', 'part code': 'part_code', 'partcode': 'part_code', 'part': 'part_code',
-  'category': 'category', 'cat': 'category',
-  'subcategory': 'subcategory', 'sub': 'subcategory', 'sub_category': 'subcategory', 'sub category': 'subcategory',
+  // Part code - English
+  'part_code': 'part_code', 'part code': 'part_code', 'partcode': 'part_code',
+  'part': 'part_code', 'code': 'part_code', 'sku': 'part_code', 'item': 'part_code',
+  // Part code - Turkish (ASCII normalized)
+  'parca_kodu': 'part_code', 'parca kodu': 'part_code', 'parcakodu': 'part_code',
+  'parcakod': 'part_code', 'parca': 'part_code', 'urun_kodu': 'part_code',
+  'urun kodu': 'part_code', 'malzeme kodu': 'part_code', 'malzeme_kodu': 'part_code',
+
+  // Category - English
+  'category': 'category', 'cat': 'category', 'type': 'category',
+  // Category - Turkish
+  'kategori': 'category', 'kat': 'category', 'tur': 'category',
+
+  // Subcategory - English
+  'subcategory': 'subcategory', 'sub': 'subcategory', 'sub_category': 'subcategory',
+  'sub category': 'subcategory', 'subcat': 'subcategory',
+  // Subcategory - Turkish
+  'alt_kategori': 'subcategory', 'alt kategori': 'subcategory', 'altkategori': 'subcategory',
+  'alt kat': 'subcategory', 'alt': 'subcategory',
+
+  // Quantity - English
   'quantity': 'quantity', 'qty': 'quantity', 'stock': 'quantity', 'count': 'quantity',
-  'package': 'package', 'footprint': 'package', 'pkg': 'package',
+  'amount': 'quantity', 'units': 'quantity', 'stok': 'quantity',
+  // Quantity - Turkish
+  'adet': 'quantity', 'miktar': 'quantity', 'stok miktari': 'quantity',
+
+  // Package - English
+  'package': 'package', 'footprint': 'package', 'pkg': 'package', 'case': 'package',
+  // Package - Turkish
+  'paket': 'package', 'kasa': 'package',
+
+  // Manufacturer - English
   'manufacturer': 'manufacturer', 'mfr': 'manufacturer', 'brand': 'manufacturer',
+  'vendor': 'manufacturer', 'supplier': 'manufacturer', 'make': 'manufacturer',
+  // Manufacturer - Turkish
+  'uretici': 'manufacturer', 'marka': 'manufacturer', 'firma': 'manufacturer',
+
+  // MPN - English
   'mpn': 'mpn', 'manufacturer part number': 'mpn', 'part number': 'mpn',
+  'model': 'mpn', 'model number': 'mpn', 'mfr part number': 'mpn',
+  // MPN - Turkish
+  'uretici parca no': 'mpn', 'model no': 'mpn',
+
+  // Location - English
   'location': 'location', 'bin': 'location', 'storage': 'location',
-  'voltage_max': 'voltage_max', 'voltage max': 'voltage_max', 'vmax': 'voltage_max', 'v max': 'voltage_max',
-  'current_max': 'current_max', 'current max': 'current_max', 'imax': 'current_max', 'i max': 'current_max',
-  'description': 'description', 'desc': 'description',
-  'datasheet_url': 'datasheet_url', 'datasheet': 'datasheet_url', 'datasheet url': 'datasheet_url',
-  'unit_price': 'unit_price', 'price': 'unit_price', 'unit price': 'unit_price', 'cost': 'unit_price',
-  'notes': 'notes', 'note': 'notes', 'remarks': 'notes', 'comment': 'notes',
+  'shelf': 'location', 'drawer': 'location', 'slot': 'location',
+  // Location - Turkish
+  'konum': 'location', 'depo': 'location', 'raf': 'location', 'kutu': 'location',
+
+  // Voltage - English
+  'voltage_max': 'voltage_max', 'voltage max': 'voltage_max', 'vmax': 'voltage_max',
+  'v max': 'voltage_max', 'max voltage': 'voltage_max', 'voltage': 'voltage_max',
+  // Voltage - Turkish
+  'gerilim': 'voltage_max', 'gerilim_max': 'voltage_max', 'gerilim max': 'voltage_max',
+  'max gerilim': 'voltage_max', 'voltaj': 'voltage_max',
+
+  // Current - English
+  'current_max': 'current_max', 'current max': 'current_max', 'imax': 'current_max',
+  'i max': 'current_max', 'max current': 'current_max', 'current': 'current_max',
+  // Current - Turkish
+  'akim': 'current_max', 'akim_max': 'current_max', 'akim max': 'current_max',
+  'max akim': 'current_max', 'akım': 'current_max',
+
+  // Description - English
+  'description': 'description', 'desc': 'description', 'info': 'description',
+  'details': 'description', 'notes': 'description',
+  // Description - Turkish
+  'aciklama': 'description', 'tanim': 'description', 'bilgi': 'description',
+  'detay': 'description', 'not': 'description',
+
+  // Datasheet - English
+  'datasheet_url': 'datasheet_url', 'datasheet': 'datasheet_url',
+  'datasheet url': 'datasheet_url', 'ds url': 'datasheet_url', 'ds': 'datasheet_url',
+  'url': 'datasheet_url', 'link': 'datasheet_url',
+
+  // Price - English
+  'unit_price': 'unit_price', 'price': 'unit_price', 'unit price': 'unit_price',
+  'cost': 'unit_price', 'fiyat': 'unit_price', 'birim fiyat': 'unit_price',
 };
 
 function normalizeHeader(h) {
-  return HEADER_MAP[h.toLowerCase().trim()] || null;
+  const ascii = asciiNormalize(h.toLowerCase().trim());
+  return HEADER_MAP[ascii] || null;
+}
+
+// Detect CSV delimiter (comma or semicolon)
+function detectDelimiter(text) {
+  const firstLine = text.split(/[\r\n]/)[0];
+  const commas    = (firstLine.match(/,/g) || []).length;
+  const semis     = (firstLine.match(/;/g) || []).length;
+  const tabs      = (firstLine.match(/\t/g) || []).length;
+  if (tabs > commas && tabs > semis) return '\t';
+  if (semis > commas) return ';';
+  return ',';
 }
 
 function normalizeRows(rows) {
   if (!rows || rows.length === 0) return [];
   const headers = Object.keys(rows[0]);
-  const mapped = {};
+  const mapped  = {};
   headers.forEach(h => {
     const norm = normalizeHeader(h);
     if (norm) mapped[h] = norm;
   });
 
+  if (Object.keys(mapped).length === 0) return [];
+
   return rows
     .map(row => {
       const out = {};
       Object.entries(mapped).forEach(([orig, norm]) => {
-        out[norm] = row[orig];
+        const val = row[orig];
+        out[norm] = val !== undefined && val !== null ? String(val).trim() : '';
       });
       return out;
     })
-    .filter(r => r.part_code);
+    .filter(r => r.part_code && r.part_code.length > 0);
 }
 
 // ============================================================
-// CSV parser (RFC 4180 compatible)
+// CSV parser (RFC 4180, auto-detects delimiter)
 // ============================================================
 function parseCSV(text) {
+  const delimiter = detectDelimiter(text);
   const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
-  const rows = [];
+  const rows  = [];
 
   function parseLine(line) {
     const fields = [];
-    let cur = '';
+    let cur     = '';
     let inQuote = false;
     for (let i = 0; i < line.length; i++) {
       const ch = line[i];
@@ -65,7 +159,7 @@ function parseCSV(text) {
         }
       } else {
         if (ch === '"') { inQuote = true; }
-        else if (ch === ',') { fields.push(cur); cur = ''; }
+        else if (ch === delimiter) { fields.push(cur); cur = ''; }
         else { cur += ch; }
       }
     }
@@ -77,7 +171,7 @@ function parseCSV(text) {
   for (let i = 1; i < lines.length; i++) {
     if (!lines[i].trim()) continue;
     const fields = parseLine(lines[i]);
-    const row = {};
+    const row    = {};
     headers.forEach((h, idx) => { row[h] = fields[idx] ?? ''; });
     rows.push(row);
   }
@@ -89,7 +183,7 @@ function parseCSV(text) {
 // ============================================================
 function parseExcel(arrayBuffer) {
   const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-  const sheet = workbook.Sheets[workbook.SheetNames[0]];
+  const sheet    = workbook.Sheets[workbook.SheetNames[0]];
   return XLSX.utils.sheet_to_json(sheet, { defval: '' });
 }
 
@@ -97,22 +191,65 @@ function parseExcel(arrayBuffer) {
 // PDF parser (PDF.js - text extraction)
 // ============================================================
 async function parsePDF(arrayBuffer) {
-  const pdfjsLib = await import('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.269/pdf.min.mjs');
-  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.269/pdf.worker.min.mjs';
-
-  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-  let fullText = '';
-  const maxPages = Math.min(pdf.numPages, 20);
-  for (let p = 1; p <= maxPages; p++) {
-    const page = await pdf.getPage(p);
-    const content = await page.getTextContent();
-    fullText += content.items.map(i => i.str).join(' ') + '\n';
+  if (!window.pdfjsLib) {
+    throw new Error('PDF.js is not loaded. Make sure you are connected to the internet on first launch.');
   }
 
-  // Try to extract table-like CSV data from text
-  const lines = fullText.split('\n').map(l => l.trim()).filter(Boolean);
-  const csvText = lines.join('\n');
-  return parseCSV(csvText);
+  window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+  const pdf = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  let fullText = '';
+  const maxPages = Math.min(pdf.numPages, 30);
+  for (let p = 1; p <= maxPages; p++) {
+    const page    = await pdf.getPage(p);
+    const content = await page.getTextContent();
+    // Preserve spacing between items to form readable lines
+    const items   = content.items;
+    let lineText  = '';
+    let prevY     = null;
+    for (const item of items) {
+      const y = item.transform ? item.transform[5] : 0;
+      if (prevY !== null && Math.abs(y - prevY) > 3) {
+        lineText += '\n';
+      } else if (lineText.length > 0 && !lineText.endsWith('\t')) {
+        lineText += '\t';
+      }
+      lineText += item.str;
+      prevY = y;
+    }
+    fullText += lineText + '\n';
+  }
+
+  // Try tab-separated first (better for columnar PDF data)
+  const tabRows = parseCSVWithDelimiter(fullText, '\t');
+  const tabNorm = normalizeRows(tabRows);
+  if (tabNorm.length > 0) return tabNorm;
+
+  // Fallback: try comma-separated
+  const csvNorm = normalizeRows(parseCSV(fullText));
+  if (csvNorm.length > 0) return csvNorm;
+
+  return [];
+}
+
+function parseCSVWithDelimiter(text, delimiter) {
+  const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
+  const rows  = [];
+  let headers = null;
+  for (const line of lines) {
+    if (!line.trim()) continue;
+    const fields = line.split(delimiter).map(f => f.trim());
+    if (!headers) {
+      headers = fields;
+      continue;
+    }
+    if (fields.length < 2) continue;
+    const row = {};
+    headers.forEach((h, idx) => { row[h] = fields[idx] ?? ''; });
+    rows.push(row);
+  }
+  return rows;
 }
 
 // ============================================================
@@ -120,7 +257,6 @@ async function parsePDF(arrayBuffer) {
 // ============================================================
 function buildPreviewHTML(rows) {
   if (!rows.length) return '<p style="color:var(--text-tertiary)">No recognizable rows found.</p>';
-
   const sample = rows.slice(0, 6);
   const keys   = Object.keys(sample[0]);
 
@@ -143,7 +279,6 @@ export function initImport() {
   const fileInput  = document.getElementById('file-input');
   const browseBtn  = document.getElementById('btn-browse-file');
   const confirmBtn = document.getElementById('btn-confirm-import');
-  const preview    = document.getElementById('import-preview');
 
   browseBtn.addEventListener('click', () => fileInput.click());
 
@@ -155,16 +290,13 @@ export function initImport() {
     e.preventDefault();
     dropZone.classList.add('drag-over');
   });
-
   dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
-
   dropZone.addEventListener('drop', e => {
     e.preventDefault();
     dropZone.classList.remove('drag-over');
     const file = e.dataTransfer.files[0];
     if (file) handleFile(file);
   });
-
   dropZone.addEventListener('click', () => fileInput.click());
   browseBtn.addEventListener('click', e => e.stopPropagation());
 
@@ -186,25 +318,51 @@ export function initImport() {
 }
 
 async function handleFile(file) {
-  const ext = file.name.split('.').pop().toLowerCase();
-  let rawRows = [];
+  const ext    = file.name.split('.').pop().toLowerCase();
+  let rawRows  = [];
+  let normalized = [];
 
   try {
     if (ext === 'csv') {
       const text = await file.text();
-      rawRows = parseCSV(text);
+      rawRows    = parseCSV(text);
+      normalized = normalizeRows(rawRows);
+
+      if (normalized.length === 0) {
+        const headers = Object.keys(rawRows[0] || {});
+        showToast(
+          `No recognized column headers in CSV. Found: ${headers.slice(0, 5).join(', ')}`,
+          'warning',
+          8000
+        );
+        return;
+      }
     } else if (ext === 'json') {
-      const text = await file.text();
+      const text   = await file.text();
       const parsed = JSON.parse(text);
-      rawRows = Array.isArray(parsed) ? parsed : [];
+      rawRows      = Array.isArray(parsed) ? parsed : [];
+      normalized   = normalizeRows(rawRows);
+      if (normalized.length === 0 && rawRows.length > 0) {
+        // JSON might already have correct field names
+        normalized = rawRows.filter(r => r.part_code);
+      }
     } else if (ext === 'xlsx' || ext === 'xls') {
-      const buf = await file.arrayBuffer();
-      rawRows = parseExcel(buf);
+      const buf  = await file.arrayBuffer();
+      rawRows    = parseExcel(buf);
+      normalized = normalizeRows(rawRows);
     } else if (ext === 'pdf') {
-      const buf = await file.arrayBuffer();
-      rawRows = await parsePDF(buf);
+      const buf  = await file.arrayBuffer();
+      normalized = await parsePDF(buf);
+      if (normalized.length === 0) {
+        showToast(
+          'PDF import: no structured table data found. PDFs must contain text-based tables with recognized column headers.',
+          'warning',
+          8000
+        );
+        return;
+      }
     } else {
-      showToast('Unsupported file type. Use CSV, JSON, Excel, or PDF.', 'error');
+      showToast('Unsupported file type. Use CSV, JSON, Excel (.xlsx), or PDF.', 'error');
       return;
     }
   } catch (err) {
@@ -212,25 +370,22 @@ async function handleFile(file) {
     return;
   }
 
-  const normalized = normalizeRows(rawRows);
-
   if (normalized.length === 0) {
     showToast('No valid component rows found. Check column headers.', 'warning');
     return;
   }
 
   _importRows = normalized;
-
   document.getElementById('import-filename').textContent  = file.name;
   document.getElementById('import-row-count').textContent = `${normalized.length} rows`;
-  document.getElementById('table-preview').innerHTML = buildPreviewHTML(normalized);
+  document.getElementById('table-preview').innerHTML      = buildPreviewHTML(normalized);
   document.getElementById('import-preview').style.display = '';
-  document.getElementById('btn-confirm-import').disabled = false;
+  document.getElementById('btn-confirm-import').disabled  = false;
 }
 
 function resetImportUI() {
   _importRows = [];
-  document.getElementById('file-input').value = '';
+  document.getElementById('file-input').value             = '';
   document.getElementById('import-preview').style.display = 'none';
-  document.getElementById('btn-confirm-import').disabled = true;
+  document.getElementById('btn-confirm-import').disabled  = true;
 }

@@ -1,11 +1,29 @@
 import { state, showToast, loadComponents } from '../app.js';
+import { invoke } from '@tauri-apps/api/core';
 
 const OLLAMA_BASE = 'http://localhost:11434';
 const CHAT_HISTORY_LIMIT = 40;
 
-let _currentModel   = '';
+let _currentModel    = '';
 let _availableModels = [];
 let _chatHistory     = [];
+
+// ============================================================
+// Ollama HTTP via Rust proxy (bypasses WebView CORS)
+// ============================================================
+async function ollamaGet(path) {
+  const text = await invoke('ollama_get', { url: OLLAMA_BASE + path });
+  return JSON.parse(text);
+}
+
+async function ollamaPost(path, bodyObj, timeoutSecs = 120) {
+  const text = await invoke('ollama_post', {
+    url: OLLAMA_BASE + path,
+    body: JSON.stringify(bodyObj),
+    timeoutSecs,
+  });
+  return JSON.parse(text);
+}
 
 // ============================================================
 // Ollama status polling
@@ -18,26 +36,21 @@ export function pollOllamaStatus() {
 async function checkOllamaStatus() {
   const dot   = document.getElementById('ollama-dot');
   const label = document.getElementById('ollama-label');
-
   if (!dot || !label) return;
-  dot.className = 'status-dot checking';
+
+  dot.className     = 'status-dot checking';
   label.textContent = 'Checking...';
 
   try {
-    const res = await fetch(`${OLLAMA_BASE}/api/tags`, { signal: AbortSignal.timeout(5000) });
-    if (res.ok) {
-      const data = await res.json();
-      _availableModels = (data.models || []).map(m => m.name);
-      dot.className   = 'status-dot online';
-      label.textContent = `Ollama: ${_availableModels.length} model${_availableModels.length !== 1 ? 's' : ''}`;
-      refreshModelSelect();
-    } else {
-      throw new Error('Non-OK response');
-    }
-  } catch (_) {
-    dot.className   = 'status-dot offline';
+    const data       = await ollamaGet('/api/tags');
+    _availableModels = (data.models || []).map(m => m.name);
+    dot.className    = 'status-dot online';
+    label.textContent = `Ollama: ${_availableModels.length} model${_availableModels.length !== 1 ? 's' : ''}`;
+    refreshModelSelect();
+  } catch (err) {
+    dot.className     = 'status-dot offline';
     label.textContent = 'Ollama offline';
-    _availableModels = [];
+    _availableModels  = [];
     refreshModelSelect();
   }
 }
@@ -55,7 +68,7 @@ function refreshModelSelect() {
 
   if (_availableModels.length > 0 && !_currentModel) {
     _currentModel = _availableModels[0];
-    sel.value = _currentModel;
+    sel.value     = _currentModel;
   }
 
   const badge = document.getElementById('ai-model-badge');
@@ -67,15 +80,15 @@ function refreshModelSelect() {
 // ============================================================
 function buildSystemPrompt() {
   const header = 'Part Code | Category | Subcategory | Qty | Package | Manufacturer | MPN | Location | V Max | I Max | Description';
-  const rows = state.components.map(c => [
+  const rows   = state.components.map(c => [
     c.part_code || '',
-    c.category || '',
+    c.category  || '',
     c.subcategory || '',
-    c.quantity ?? '',
-    c.package || '',
+    c.quantity  ?? '',
+    c.package   || '',
     c.manufacturer || '',
-    c.mpn || '',
-    c.location || '',
+    c.mpn       || '',
+    c.location  || '',
     c.voltage_max ?? '',
     c.current_max ?? '',
     c.description || '',
@@ -110,26 +123,16 @@ async function sendMessage(userText) {
   setSendDisabled(true);
 
   try {
-    const body = {
+    const data  = await ollamaPost('/api/chat', {
       model: _currentModel,
       messages: [
         { role: 'system', content: buildSystemPrompt() },
         ..._chatHistory,
       ],
       stream: false,
-    };
+    }, 120);
 
-    const res = await fetch(`${OLLAMA_BASE}/api/chat`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-      signal: AbortSignal.timeout(120000),
-    });
-
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
     const reply = data.message?.content || '';
-
     thinkingEl.remove();
     appendMessage('assistant', reply);
     _chatHistory.push({ role: 'assistant', content: reply });
@@ -177,21 +180,18 @@ Components:
 ${compList}`;
 
   try {
-    const res = await fetch(`${OLLAMA_BASE}/api/generate`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: _currentModel, prompt, stream: false }),
-      signal: AbortSignal.timeout(300000),
-    });
+    const data  = await ollamaPost('/api/generate', {
+      model: _currentModel,
+      prompt,
+      stream: false,
+    }, 300);
 
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data  = await res.json();
     const text  = data.response || '';
     const match = text.match(/\[[\s\S]*\]/);
     if (!match) throw new Error('No JSON array in response');
 
     const results = JSON.parse(match[0]);
-    let updated = 0;
+    let updated   = 0;
 
     for (const item of results) {
       const comp = state.components.find(c => c.id === item.id);
@@ -213,7 +213,7 @@ ${compList}`;
 }
 
 // ============================================================
-// AI Enrich (fill component fields)
+// AI Enrich (fill component fields from part code)
 // ============================================================
 async function enrichComponent(partCode) {
   if (!_currentModel) {
@@ -237,21 +237,17 @@ Be concise. If unknown, use null for numbers and empty string for text.`;
   showToast(`AI enriching "${partCode}"...`, 'info', 3000);
 
   try {
-    const res = await fetch(`${OLLAMA_BASE}/api/generate`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: _currentModel, prompt, stream: false }),
-      signal: AbortSignal.timeout(60000),
-    });
+    const data  = await ollamaPost('/api/generate', {
+      model: _currentModel,
+      prompt,
+      stream: false,
+    }, 60);
 
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data  = await res.json();
     const text  = data.response || '';
     const match = text.match(/\{[\s\S]*\}/);
     if (!match) throw new Error('No JSON in response');
 
     const info = JSON.parse(match[0]);
-
     if (info.category)     setFormField('edit-category',     info.category);
     if (info.subcategory)  setFormField('edit-subcategory',  info.subcategory);
     if (info.package)      setFormField('edit-package',      info.package);
@@ -276,9 +272,9 @@ function setFormField(id, value) {
 // ============================================================
 function appendMessage(role, content) {
   const container = document.getElementById('ai-messages');
-  const div = document.createElement('div');
-  div.className = `ai-message ${role}`;
-  div.innerHTML = `
+  const div       = document.createElement('div');
+  div.className   = `ai-message ${role}`;
+  div.innerHTML   = `
     <span class="msg-role">${role === 'user' ? 'You' : 'AI'}</span>
     <div class="msg-content">${escapeHtml(content)}</div>`;
   container.appendChild(div);
@@ -288,9 +284,9 @@ function appendMessage(role, content) {
 
 function appendThinking() {
   const container = document.getElementById('ai-messages');
-  const div = document.createElement('div');
-  div.className = 'ai-message assistant';
-  div.innerHTML = `
+  const div       = document.createElement('div');
+  div.className   = 'ai-message assistant';
+  div.innerHTML   = `
     <span class="msg-role">AI</span>
     <div class="msg-thinking">
       <span></span><span></span><span></span>
@@ -326,7 +322,7 @@ export function initAI() {
   const modelSelect = document.getElementById('ai-model-select');
 
   sendBtn.addEventListener('click', () => {
-    const text = inputEl.value.trim();
+    const text   = inputEl.value.trim();
     inputEl.value = '';
     inputEl.style.height = '';
     sendMessage(text);
@@ -335,14 +331,13 @@ export function initAI() {
   inputEl.addEventListener('keydown', e => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      const text = inputEl.value.trim();
+      const text   = inputEl.value.trim();
       inputEl.value = '';
       inputEl.style.height = '';
       sendMessage(text);
     }
   });
 
-  // Auto-resize textarea
   inputEl.addEventListener('input', () => {
     inputEl.style.height = 'auto';
     inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + 'px';
@@ -352,6 +347,9 @@ export function initAI() {
     _chatHistory = [];
     document.getElementById('ai-messages').innerHTML = `
       <div class="ai-welcome">
+        <div class="ai-welcome-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
         <p>Chat cleared. I have full access to your component inventory. Ask me anything.</p>
       </div>`;
   });
@@ -360,16 +358,14 @@ export function initAI() {
 
   modelSelect.addEventListener('change', () => {
     _currentModel = modelSelect.value;
-    const badge = document.getElementById('ai-model-badge');
+    const badge   = document.getElementById('ai-model-badge');
     if (badge) badge.textContent = _currentModel || 'No model';
   });
 
-  // AI enrich from edit modal
   document.addEventListener('ai-enrich-request', async e => {
     await enrichComponent(e.detail.partCode);
   });
 
-  // Focus chat input when modal opens
   document.addEventListener('ai-modal-opened', () => {
     setTimeout(() => inputEl.focus(), 80);
     checkOllamaStatus();
