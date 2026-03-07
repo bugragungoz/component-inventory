@@ -107,13 +107,6 @@
       </div>
     </nav>
 
-    <!-- Ollama status -->
-    <div class="sidebar-footer">
-      <div class="ollama-status" id="ollama-status">
-        <span class="status-dot" id="ollama-dot"></span>
-        <span id="ollama-label">Ollama — checking...</span>
-      </div>
-    </div>
   </aside>
 
   <!-- ===================== MAIN ===================== -->
@@ -131,10 +124,6 @@
         <button class="btn btn-ghost" id="btn-backup-mgr" title="Backup Manager">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
           Backups
-        </button>
-        <button class="btn btn-ghost" id="btn-ai" title="AI Assistant (Ollama)">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          AI Assistant
         </button>
         <!-- View toggle: compact / detailed -->
         <button class="btn btn-ghost btn-view-toggle" id="btn-view-toggle" title="Toggle compact / detailed view">
@@ -302,9 +291,9 @@
       </div>
       <div class="modal-footer">
         <button class="btn btn-ghost" data-close="overlay-edit">Cancel</button>
-        <button class="btn btn-ghost" id="btn-ai-enrich">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
-          AI Enrich
+        <button class="btn btn-ghost" id="btn-db-lookup" title="Lookup specs from built-in component database">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          Lookup DB
         </button>
         <button class="btn btn-primary" id="btn-save-component">Save</button>
       </div>
@@ -410,7 +399,7 @@
     </div>
   </div>
 
-  <!-- ========== MODAL: AI Chat ========== -->
+  <!-- AI Chat modal removed -->
   <div class="modal-overlay" id="overlay-ai" style="display:none">
     <div class="modal modal-ai" id="modal-ai">
       <div class="modal-header ai-modal-header">
@@ -507,23 +496,6 @@
   <!-- Toast container -->
   <div id="toast-container"></div>
 
-  <!-- Auto-categorize progress overlay -->
-  <div id="categorize-progress" style="display:none" class="modal-overlay">
-    <div class="modal modal-sm">
-      <div class="modal-header">
-        <h2>Auto-Categorizing</h2>
-      </div>
-      <div class="modal-body" style="padding:24px 20px">
-        <div class="progress-info">
-          <p id="progress-label" style="font-size:13px;color:var(--text-secondary);margin-bottom:12px">Initializing...</p>
-          <div class="progress-bar-track">
-            <div class="progress-bar-fill" id="progress-bar-fill" style="width:0%"></div>
-          </div>
-          <p id="progress-sub" style="font-size:11px;color:var(--text-tertiary);margin-top:8px;font-family:var(--font-mono)"></p>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <!-- CDN: SheetJS -->
   <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>

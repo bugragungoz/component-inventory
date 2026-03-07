@@ -3,6 +3,7 @@ import {
   showToast, refreshDatalistsGlobal
 } from '../app.js';
 import { initSortHeaders } from './table.js';
+import { lookupComponent } from './hardcoded_datasheet.js';
 
 // ============================================================
 // Initialize all modal interactions
@@ -87,14 +88,29 @@ function initEditForm() {
     }
   });
 
-  // AI Enrich button
-  document.getElementById('btn-ai-enrich').addEventListener('click', async () => {
+  // Hardcoded DB lookup button
+  document.getElementById('btn-db-lookup').addEventListener('click', () => {
     const partCode = document.getElementById('edit-part-code').value.trim();
     if (!partCode) {
-      showToast('Enter a Part Code first to use AI Enrich', 'warning');
+      showToast('Enter a Part Code first', 'warning');
       return;
     }
-    document.dispatchEvent(new CustomEvent('ai-enrich-request', { detail: { partCode } }));
+    const data = lookupComponent(partCode);
+    if (!data) {
+      showToast(`"${partCode}" not found in built-in database`, 'info');
+      return;
+    }
+    if (data.category    && !document.getElementById('edit-category').value)    setField('edit-category',     data.category);
+    if (data.subcategory && !document.getElementById('edit-subcategory').value) setField('edit-subcategory',  data.subcategory);
+    if (data.package     && !document.getElementById('edit-package').value)     setField('edit-package',      data.package);
+    if (data.manufacturer&& !document.getElementById('edit-manufacturer').value)setField('edit-manufacturer', data.manufacturer);
+    if (data.description && !document.getElementById('edit-description').value) setField('edit-description',  data.description);
+    if (data.datasheet_url&&!document.getElementById('edit-datasheet-url').value)setField('edit-datasheet-url',data.datasheet_url);
+    if (data.voltage_max != null && !document.getElementById('edit-voltage-max').value)
+      setField('edit-voltage-max', data.voltage_max);
+    if (data.current_max != null && !document.getElementById('edit-current-max').value)
+      setField('edit-current-max', data.current_max);
+    showToast(`Data applied from built-in database for "${partCode}"`, 'success');
   });
 }
 
@@ -199,11 +215,6 @@ function initDetailActions() {
 
   document.getElementById('btn-export').addEventListener('click', () => {
     document.getElementById('overlay-export').style.display = '';
-  });
-
-  document.getElementById('btn-ai').addEventListener('click', () => {
-    document.getElementById('overlay-ai').style.display = '';
-    document.dispatchEvent(new CustomEvent('ai-modal-opened'));
   });
 
   document.getElementById('btn-backup-mgr').addEventListener('click', () => {

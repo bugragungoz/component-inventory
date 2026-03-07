@@ -4,7 +4,6 @@ import { renderTable, applyFilters } from './modules/table.js';
 import { initModals } from './modules/modals.js';
 import { initImport } from './modules/import.js';
 import { initExport } from './modules/export.js';
-import { initAI, pollOllamaStatus } from './modules/ai.js';
 import { initBackupUI } from './modules/backup.js';
 
 // ============================================================
@@ -436,9 +435,7 @@ async function main() {
     initViewToggle();
     initImport();
     initExport();
-    initAI();
     initBackupUI();
-    pollOllamaStatus();
 
     // Hide boot loader
     if (bootLoader) {
