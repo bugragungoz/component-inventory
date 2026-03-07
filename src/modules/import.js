@@ -16,91 +16,112 @@ function asciiNormalize(str) {
 }
 
 // Column header normalization map (English + Turkish variants)
+// Covers inventory exports, order forms (siparis), BOM sheets, supplier lists.
 const HEADER_MAP = {
-  // Part code - English
+  // ---- Part code ----
   'part_code': 'part_code', 'part code': 'part_code', 'partcode': 'part_code',
   'part': 'part_code', 'code': 'part_code', 'sku': 'part_code', 'item': 'part_code',
-  // Part code - Turkish (ASCII normalized)
+  'item code': 'part_code', 'item no': 'part_code', 'item number': 'part_code',
+  'ref': 'part_code', 'reference': 'part_code', 'designator': 'part_code',
+  'component': 'part_code',
+  // Turkish
   'parca_kodu': 'part_code', 'parca kodu': 'part_code', 'parcakodu': 'part_code',
-  'parcakod': 'part_code', 'parca': 'part_code', 'urun_kodu': 'part_code',
-  'urun kodu': 'part_code', 'malzeme kodu': 'part_code', 'malzeme_kodu': 'part_code',
+  'parcakod': 'part_code', 'parca': 'part_code',
+  'urun_kodu': 'part_code', 'urun kodu': 'part_code', 'urunkodu': 'part_code',
+  'urun no': 'part_code', 'urun_no': 'part_code',
+  'malzeme kodu': 'part_code', 'malzeme_kodu': 'part_code', 'malzeme no': 'part_code',
+  'stok kodu': 'part_code', 'stok_kodu': 'part_code', 'stokkodu': 'part_code',
+  'siparis kodu': 'part_code', 'siparis_kodu': 'part_code',
+  'katalog no': 'part_code', 'katalog_no': 'part_code', 'katalogno': 'part_code',
+  'barkod': 'part_code', 'barcode': 'part_code',
 
-  // Category - English
-  'category': 'category', 'cat': 'category', 'type': 'category',
-  // Category - Turkish
-  'kategori': 'category', 'kat': 'category', 'tur': 'category',
+  // ---- Category ----
+  'category': 'category', 'cat': 'category', 'type': 'category', 'group': 'category',
+  'component type': 'category',
+  'kategori': 'category', 'kat': 'category', 'tur': 'category', 'grup': 'category',
 
-  // Subcategory - English
+  // ---- Subcategory ----
   'subcategory': 'subcategory', 'sub': 'subcategory', 'sub_category': 'subcategory',
-  'sub category': 'subcategory', 'subcat': 'subcategory',
-  // Subcategory - Turkish
+  'sub category': 'subcategory', 'subcat': 'subcategory', 'subgroup': 'subcategory',
   'alt_kategori': 'subcategory', 'alt kategori': 'subcategory', 'altkategori': 'subcategory',
-  'alt kat': 'subcategory', 'alt': 'subcategory',
+  'alt kat': 'subcategory', 'alt grup': 'subcategory',
 
-  // Quantity - English
+  // ---- Quantity ----
   'quantity': 'quantity', 'qty': 'quantity', 'stock': 'quantity', 'count': 'quantity',
   'amount': 'quantity', 'units': 'quantity', 'stok': 'quantity',
-  // Quantity - Turkish
+  'ordered qty': 'quantity', 'order qty': 'quantity', 'siparis adedi': 'quantity',
   'adet': 'quantity', 'miktar': 'quantity', 'stok miktari': 'quantity',
+  'toplam adet': 'quantity', 'net adet': 'quantity', 'kalan adet': 'quantity',
+  'siparis miktari': 'quantity', 'talep miktari': 'quantity',
 
-  // Package - English
+  // ---- Package ----
   'package': 'package', 'footprint': 'package', 'pkg': 'package', 'case': 'package',
-  // Package - Turkish
-  'paket': 'package', 'kasa': 'package',
+  'housing': 'package', 'enclosure': 'package',
+  'paket': 'package', 'kasa': 'package', 'ambalaj': 'package',
 
-  // Manufacturer - English
+  // ---- Manufacturer ----
   'manufacturer': 'manufacturer', 'mfr': 'manufacturer', 'brand': 'manufacturer',
   'vendor': 'manufacturer', 'supplier': 'manufacturer', 'make': 'manufacturer',
-  // Manufacturer - Turkish
+  'mfgr': 'manufacturer', 'oem': 'manufacturer',
   'uretici': 'manufacturer', 'marka': 'manufacturer', 'firma': 'manufacturer',
+  'tedarikci': 'manufacturer', 'tedarikçi': 'manufacturer',
 
-  // MPN - English
+  // ---- MPN ----
   'mpn': 'mpn', 'manufacturer part number': 'mpn', 'part number': 'mpn',
   'model': 'mpn', 'model number': 'mpn', 'mfr part number': 'mpn',
-  // MPN - Turkish
-  'uretici parca no': 'mpn', 'model no': 'mpn',
+  'mfr pn': 'mpn', 'mfg pn': 'mpn', 'manufacturer pn': 'mpn',
+  'uretici parca no': 'mpn', 'model no': 'mpn', 'seri no': 'mpn',
+  'lot no': 'mpn',
 
-  // Location - English
+  // ---- Location ----
   'location': 'location', 'bin': 'location', 'storage': 'location',
-  'shelf': 'location', 'drawer': 'location', 'slot': 'location',
-  // Location - Turkish
+  'shelf': 'location', 'drawer': 'location', 'slot': 'location', 'rack': 'location',
+  'warehouse': 'location', 'room': 'location',
   'konum': 'location', 'depo': 'location', 'raf': 'location', 'kutu': 'location',
+  'gozde': 'location', 'bolme': 'location', 'dolap': 'location',
+  'gonderi': 'location', 'teslimat yeri': 'location',
 
-  // Voltage - English
+  // ---- Voltage ----
   'voltage_max': 'voltage_max', 'voltage max': 'voltage_max', 'vmax': 'voltage_max',
   'v max': 'voltage_max', 'max voltage': 'voltage_max', 'voltage': 'voltage_max',
-  // Voltage - Turkish
+  'rated voltage': 'voltage_max', 'working voltage': 'voltage_max',
   'gerilim': 'voltage_max', 'gerilim_max': 'voltage_max', 'gerilim max': 'voltage_max',
   'max gerilim': 'voltage_max', 'voltaj': 'voltage_max',
 
-  // Current - English
+  // ---- Current ----
   'current_max': 'current_max', 'current max': 'current_max', 'imax': 'current_max',
   'i max': 'current_max', 'max current': 'current_max', 'current': 'current_max',
-  // Current - Turkish
+  'rated current': 'current_max',
   'akim': 'current_max', 'akim_max': 'current_max', 'akim max': 'current_max',
-  'max akim': 'current_max', 'akım': 'current_max',
+  'max akim': 'current_max',
 
-  // Description - English
+  // ---- Description ----
   'description': 'description', 'desc': 'description', 'info': 'description',
-  'details': 'description',
-  // Description - Turkish
+  'details': 'description', 'specification': 'description', 'spec': 'description',
+  'product name': 'description', 'product description': 'description', 'name': 'description',
   'aciklama': 'description', 'tanim': 'description', 'bilgi': 'description',
-  'detay': 'description',
+  'detay': 'description', 'urun adi': 'description', 'urun_adi': 'description',
+  'mal adi': 'description', 'malzeme adi': 'description', 'komponent adi': 'description',
+  'komponent': 'description',
 
-  // Notes - English
+  // ---- Notes ----
   'notes': 'notes', 'note': 'notes', 'comment': 'notes', 'comments': 'notes',
-  'remarks': 'notes', 'remark': 'notes',
-  // Notes - Turkish
+  'remarks': 'notes', 'remark': 'notes', 'memo': 'notes',
   'not': 'notes', 'notlar': 'notes', 'yorum': 'notes', 'aciklamalar': 'notes',
+  'gozlem': 'notes',
 
-  // Datasheet - English
+  // ---- Datasheet ----
   'datasheet_url': 'datasheet_url', 'datasheet': 'datasheet_url',
   'datasheet url': 'datasheet_url', 'ds url': 'datasheet_url', 'ds': 'datasheet_url',
-  'url': 'datasheet_url', 'link': 'datasheet_url',
+  'url': 'datasheet_url', 'link': 'datasheet_url', 'pdf': 'datasheet_url',
+  'pdf url': 'datasheet_url',
 
-  // Price - English
+  // ---- Price ----
   'unit_price': 'unit_price', 'price': 'unit_price', 'unit price': 'unit_price',
-  'cost': 'unit_price', 'fiyat': 'unit_price', 'birim fiyat': 'unit_price',
+  'cost': 'unit_price', 'unit cost': 'unit_price', 'each': 'unit_price',
+  'birim fiyat': 'unit_price', 'fiyat': 'unit_price', 'birim maliyet': 'unit_price',
+  'tl fiyat': 'unit_price', 'usd fiyat': 'unit_price', 'kdv haric fiyat': 'unit_price',
+  'liste fiyati': 'unit_price', 'satis fiyati': 'unit_price',
 };
 
 function normalizeHeader(h) {
@@ -130,16 +151,43 @@ function normalizeRows(rows) {
 
   if (Object.keys(mapped).length === 0) return [];
 
+  const hasPartCode = Object.values(mapped).includes('part_code');
+
   return rows
-    .map(row => {
+    .map((row, idx) => {
       const out = {};
       Object.entries(mapped).forEach(([orig, norm]) => {
         const val = row[orig];
         out[norm] = val !== undefined && val !== null ? String(val).trim() : '';
       });
+
+      // Auto-generate part_code from description or sequential ID when not present
+      if (!hasPartCode || !out.part_code) {
+        if (out.description && out.description.length > 0) {
+          // Derive a slug from description (first 24 chars, alphanumeric + dash)
+          const slug = out.description
+            .substring(0, 24)
+            .replace(/[^a-zA-Z0-9\-_]/g, '-')
+            .replace(/-+/g, '-')
+            .replace(/^-|-$/g, '')
+            .toUpperCase();
+          out.part_code = slug || `IMP-${String(idx + 1).padStart(4, '0')}`;
+        } else {
+          out.part_code = `IMP-${String(idx + 1).padStart(4, '0')}`;
+        }
+      }
+
       return out;
     })
     .filter(r => r.part_code && r.part_code.length > 0);
+}
+
+// Returns recognized headers for debug feedback
+function getMappedHeaderNames(rows) {
+  if (!rows || rows.length === 0) return { found: [], mapped: [] };
+  const found = Object.keys(rows[0]);
+  const mapped = found.filter(h => normalizeHeader(h) !== null);
+  return { found, mapped };
 }
 
 // ============================================================
@@ -400,11 +448,11 @@ async function handleFile(file) {
       normalized = normalizeRows(rawRows);
 
       if (normalized.length === 0) {
-        const headers = Object.keys(rawRows[0] || {});
+        const { found } = getMappedHeaderNames(rawRows);
         showToast(
-          `No recognized column headers in CSV. Found: ${headers.slice(0, 5).join(', ')}`,
+          `No recognized columns in CSV. Found headers: ${found.slice(0, 6).join(', ')}`,
           'warning',
-          8000
+          10000
         );
         return;
       }
@@ -421,6 +469,15 @@ async function handleFile(file) {
       const buf  = await file.arrayBuffer();
       rawRows    = parseExcel(buf);
       normalized = normalizeRows(rawRows);
+      if (normalized.length === 0 && rawRows.length > 0) {
+        const { found } = getMappedHeaderNames(rawRows);
+        showToast(
+          `No recognized columns in Excel. Found headers: ${found.slice(0, 6).join(', ')}`,
+          'warning',
+          10000
+        );
+        return;
+      }
     } else if (ext === 'pdf') {
       const buf  = await file.arrayBuffer();
       normalized = await parsePDF(buf);
