@@ -4,6 +4,10 @@ import {
 } from '../app.js';
 import { initSortHeaders } from './table.js';
 import { lookupComponent } from './hardcoded_datasheet.js';
+import { fetchOzdisanPrice } from './price.js';
+import { readFile, copyFile, mkdir } from '@tauri-apps/plugin-fs';
+import { open as openDialog } from '@tauri-apps/plugin-dialog';
+import { invoke } from '@tauri-apps/api/core';
 
 // ============================================================
 // Initialize all modal interactions
@@ -14,6 +18,8 @@ export function initModals() {
   initEditForm();
   initDeleteConfirm();
   initDetailActions();
+  initImagePicker();
+  initPriceFetch();
 }
 
 // ============================================================
@@ -57,10 +63,12 @@ function openEditModal(comp) {
     setField('edit-description', comp.description);
     setField('edit-datasheet-url', comp.datasheet_url);
     setField('edit-notes',       comp.notes);
+    setImagePreview(comp.image_path || '');
   } else {
     title.textContent = 'Add Component';
     idEl.value = '';
     document.getElementById('form-edit').reset();
+    setImagePreview('');
   }
 
   document.getElementById('overlay-edit').style.display = '';
@@ -138,6 +146,7 @@ async function handleSave() {
     datasheet_url:document.getElementById('edit-datasheet-url').value.trim(),
     unit_price:   parseFloat(document.getElementById('edit-unit-price').value) || null,
     notes:        document.getElementById('edit-notes').value.trim(),
+    image_path:   document.getElementById('edit-image-path').value.trim(),
   };
 
   const saveBtn = document.getElementById('btn-save-component');
@@ -157,6 +166,96 @@ async function handleSave() {
   } finally {
     saveBtn.disabled = false;
   }
+}
+
+// ============================================================
+// Image attachment helpers
+// ============================================================
+async function setImagePreview(imagePath) {
+  const pathInput  = document.getElementById('edit-image-path');
+  const preview    = document.getElementById('image-preview');
+  const clearBtn   = document.getElementById('btn-clear-image');
+  const placeholder = document.getElementById('image-preview-wrap').querySelector('svg');
+
+  pathInput.value = imagePath;
+
+  if (imagePath) {
+    try {
+      const bytes = await readFile(imagePath);
+      const ext   = imagePath.split('.').pop().toLowerCase();
+      const mime  = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', gif: 'image/gif', webp: 'image/webp' }[ext] || 'image/png';
+      const blob  = new Blob([bytes], { type: mime });
+      const url   = URL.createObjectURL(blob);
+      preview.src           = url;
+      preview.style.display = '';
+      if (placeholder) placeholder.style.display = 'none';
+      clearBtn.style.display = '';
+    } catch (_) {
+      setImagePreview('');
+    }
+  } else {
+    preview.src           = '';
+    preview.style.display = 'none';
+    if (placeholder) placeholder.style.display = '';
+    clearBtn.style.display = 'none';
+  }
+}
+
+function initImagePicker() {
+  document.getElementById('btn-pick-image').addEventListener('click', async () => {
+    try {
+      const selected = await openDialog({
+        multiple: false,
+        filters:  [{ name: 'Images', extensions: ['jpg', 'jpeg', 'png', 'gif', 'webp'] }],
+      });
+      if (!selected) return;
+
+      const appDataDir = await invoke('get_app_data_dir');
+      const imagesDir  = appDataDir + '/images';
+      await mkdir(imagesDir, { recursive: true });
+
+      const ext      = selected.split('.').pop().toLowerCase();
+      const partCode = document.getElementById('edit-part-code').value.trim() || 'image';
+      const destPath = imagesDir + '/' + partCode + '_' + Date.now() + '.' + ext;
+
+      await copyFile(selected, destPath);
+      await setImagePreview(destPath);
+    } catch (err) {
+      showToast('Image pick failed: ' + (err.message || err), 'error');
+    }
+  });
+
+  document.getElementById('btn-clear-image').addEventListener('click', () => setImagePreview(''));
+}
+
+// ============================================================
+// Ozdisan price fetch
+// ============================================================
+function initPriceFetch() {
+  document.getElementById('btn-fetch-price').addEventListener('click', async () => {
+    const partCode = document.getElementById('edit-part-code').value.trim();
+    if (!partCode) {
+      showToast('Enter a Part Code first', 'warning');
+      return;
+    }
+    const btn = document.getElementById('btn-fetch-price');
+    btn.disabled = true;
+    showToast(`Searching Ozdisan for "${partCode}"...`, 'info', 2500);
+
+    try {
+      const price = await fetchOzdisanPrice(partCode);
+      if (price !== null) {
+        setField('edit-unit-price', price);
+        showToast(`Price from Ozdisan: $${price.toFixed(2)}`, 'success');
+      } else {
+        showToast('Price not found automatically — browser opened for manual check', 'info');
+      }
+    } catch (err) {
+      showToast('Price fetch failed: ' + (err.message || err), 'error');
+    } finally {
+      btn.disabled = false;
+    }
+  });
 }
 
 // ============================================================

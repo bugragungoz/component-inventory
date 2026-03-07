@@ -1,5 +1,7 @@
 import { state, escHtml } from '../app.js';
 import { lookupComponent, applyDbData } from './hardcoded_datasheet.js';
+import { setLabelComponent } from './labels.js';
+import { readFile } from '@tauri-apps/plugin-fs';
 
 // ============================================================
 // Component type icon + color resolution
@@ -282,6 +284,18 @@ export function applyFilters() {
   if (state.filterSub) {
     result = result.filter(c => c.subcategory === state.filterSub);
   }
+  if (state.filterLoc) {
+    result = result.filter(c => {
+      const loc = (c.location || '').trim();
+      if (state.filterLocSub) {
+        // Match "top / sub" combined
+        return loc.startsWith(state.filterLoc) && loc.includes(state.filterLocSub);
+      }
+      // Match by top-level location segment
+      const parts = loc.split(/\s*[\/\\|>]\s*/);
+      return parts[0] === state.filterLoc;
+    });
+  }
 
   if (state.searchQuery) {
     const q = state.searchQuery;
@@ -440,8 +454,9 @@ export function initSortHeaders() {
 // ============================================================
 let _detailComp = null;
 
-function showDetail(comp) {
+async function showDetail(comp) {
   _detailComp = comp;
+  setLabelComponent(comp);
   const dbRecord  = lookupComponent(comp.part_code);
   // Merge comp with DB (DB fills only empty fields)
   const effective = applyDbData(comp, dbRecord);
@@ -510,8 +525,22 @@ function showDetail(comp) {
       Open <em>Edit</em> → <em>Lookup DB</em> to persist full data.
     </div>` : '';
 
+  // Component image (if stored)
+  let imageHtml = '';
+  if (comp.image_path) {
+    try {
+      const bytes   = await readFile(comp.image_path);
+      const ext     = comp.image_path.split('.').pop().toLowerCase();
+      const mime    = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', gif: 'image/gif', webp: 'image/webp' }[ext] || 'image/png';
+      const blob    = new Blob([bytes], { type: mime });
+      const dataUrl = URL.createObjectURL(blob);
+      imageHtml = `<div class="detail-image-wrap"><img src="${dataUrl}" alt="${escHtml(comp.part_code)}" /></div>`;
+    } catch (_) { /* image not accessible */ }
+  }
+
   body.innerHTML = `
     ${dbBanner}
+    ${imageHtml}
     ${pdfBtn}
 
     <!-- Type header -->

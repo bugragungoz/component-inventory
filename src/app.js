@@ -5,6 +5,7 @@ import { initModals } from './modules/modals.js';
 import { initImport } from './modules/import.js';
 import { initExport } from './modules/export.js';
 import { initBackupUI } from './modules/backup.js';
+import { initLabels } from './modules/labels.js';
 
 // ============================================================
 // State singleton
@@ -18,6 +19,8 @@ export const state = {
   searchQuery: '',
   filterCat: '',
   filterSub: '',
+  filterLoc: '',
+  filterLocSub: '',
   viewCompact: true,
 };
 
@@ -45,10 +48,16 @@ async function initDB() {
       datasheet_url TEXT DEFAULT '',
       unit_price    REAL,
       notes         TEXT DEFAULT '',
+      image_path    TEXT DEFAULT '',
       created_at    TEXT DEFAULT (datetime('now')),
       updated_at    TEXT DEFAULT (datetime('now'))
     );
   `);
+
+  // Migration: add image_path to existing tables that predate this column
+  try {
+    await db.execute(`ALTER TABLE components ADD COLUMN image_path TEXT DEFAULT ''`);
+  } catch (_) { /* column already exists */ }
 
 }
 
@@ -62,22 +71,24 @@ export async function loadComponents() {
   renderTable();
   updateStats();
   updateCategoryTree();
+  updateLocationTree();
 }
 
 export async function addComponent(data) {
   const { part_code, category, subcategory, quantity, package: pkg,
     manufacturer, mpn, location, voltage_max, current_max,
-    description, datasheet_url, unit_price, notes } = data;
+    description, datasheet_url, unit_price, notes, image_path } = data;
 
   await state.db.execute(
     `INSERT INTO components
       (part_code, category, subcategory, quantity, package, manufacturer, mpn, location,
-       voltage_max, current_max, description, datasheet_url, unit_price, notes)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       voltage_max, current_max, description, datasheet_url, unit_price, notes, image_path)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [part_code, category || '', subcategory || '', quantity || 0, pkg || '',
      manufacturer || '', mpn || '', location || '',
      voltage_max || null, current_max || null,
-     description || '', datasheet_url || '', unit_price || null, notes || '']
+     description || '', datasheet_url || '', unit_price || null, notes || '',
+     image_path || '']
   );
   await triggerBackup();
   await loadComponents();
@@ -86,20 +97,20 @@ export async function addComponent(data) {
 export async function updateComponent(id, data) {
   const { part_code, category, subcategory, quantity, package: pkg,
     manufacturer, mpn, location, voltage_max, current_max,
-    description, datasheet_url, unit_price, notes } = data;
+    description, datasheet_url, unit_price, notes, image_path } = data;
 
   await state.db.execute(
     `UPDATE components SET
       part_code=?, category=?, subcategory=?, quantity=?, package=?,
       manufacturer=?, mpn=?, location=?, voltage_max=?, current_max=?,
-      description=?, datasheet_url=?, unit_price=?, notes=?,
+      description=?, datasheet_url=?, unit_price=?, notes=?, image_path=?,
       updated_at=datetime('now')
      WHERE id=?`,
     [part_code, category || '', subcategory || '', quantity || 0, pkg || '',
      manufacturer || '', mpn || '', location || '',
      voltage_max || null, current_max || null,
      description || '', datasheet_url || '', unit_price || null, notes || '',
-     id]
+     image_path || '', id]
   );
   await triggerBackup();
   await loadComponents();
@@ -126,8 +137,8 @@ export async function upsertComponents(rows, mode = 'merge') {
     await state.db.execute(
       `INSERT INTO components
         (part_code, category, subcategory, quantity, package, manufacturer, mpn, location,
-         voltage_max, current_max, description, datasheet_url, unit_price, notes)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         voltage_max, current_max, description, datasheet_url, unit_price, notes, image_path)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
        ON CONFLICT(part_code) DO UPDATE SET
          category=excluded.category,
          subcategory=excluded.subcategory,
@@ -148,7 +159,7 @@ export async function upsertComponents(rows, mode = 'merge') {
        voltage_max ? Number(voltage_max) : null,
        current_max ? Number(current_max) : null,
        description || '', datasheet_url || '',
-       unit_price ? Number(unit_price) : null, notes || '']
+       unit_price ? Number(unit_price) : null, notes || '', '']
     );
   }
   await triggerBackup();
@@ -171,9 +182,23 @@ function updateStats() {
   const units = state.components.reduce((s, c) => s + (Number(c.quantity) || 0), 0);
   const cats  = new Set(state.components.map(c => c.category).filter(Boolean)).size;
 
+  // Total stock value: sum(qty * unit_price) for components that have a price
+  const value = state.components.reduce((s, c) => {
+    const qty   = Number(c.quantity)   || 0;
+    const price = Number(c.unit_price) || 0;
+    return s + qty * price;
+  }, 0);
+
   document.getElementById('stat-types').textContent = total;
   document.getElementById('stat-units').textContent = units;
   document.getElementById('stat-cats').textContent  = cats;
+
+  const valEl = document.getElementById('stat-value');
+  if (valEl) {
+    valEl.textContent = value >= 1000
+      ? `$${(value / 1000).toFixed(1)}k`
+      : `$${value.toFixed(value < 10 ? 2 : 0)}`;
+  }
 
   const exportCount = document.getElementById('export-count');
   if (exportCount) exportCount.textContent = total;
@@ -233,6 +258,74 @@ function updateCategoryTree() {
       applyFilters();
       renderTable();
       updateCategoryTree();
+    });
+  });
+}
+
+// ============================================================
+// Location hierarchy tree
+// ============================================================
+export function updateLocationTree() {
+  const tree = document.getElementById('location-tree');
+  if (!tree) return;
+
+  // Parse location field: "Cabinet-A / Shelf-3 / Bin-7" → hierarchy levels
+  const locationMap = {};
+  for (const c of state.components) {
+    const loc = (c.location || '').trim();
+    if (!loc) continue;
+    // Support separators: " / ", " > ", " \ ", "|"
+    const parts = loc.split(/\s*[\/\\|>]\s*/).map(p => p.trim()).filter(Boolean);
+    const top   = parts[0];
+    if (!locationMap[top]) locationMap[top] = { children: {}, count: 0 };
+    locationMap[top].count++;
+    if (parts[1]) {
+      const sub = parts.slice(1).join(' / ');
+      locationMap[top].children[sub] = (locationMap[top].children[sub] || 0) + 1;
+    }
+  }
+
+  if (Object.keys(locationMap).length === 0) {
+    tree.innerHTML = `<div class="tree-sub" style="cursor:default;opacity:0.5">No locations set</div>`;
+    return;
+  }
+
+  let html = '';
+  const sortedLocs = Object.keys(locationMap).sort();
+  for (const loc of sortedLocs) {
+    const isActive = state.filterLoc === loc && !state.filterLocSub;
+    html += `<div class="tree-cat${isActive ? ' active' : ''}" data-loc="${loc}" data-loc-sub="">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      ${escHtml(loc)}
+      <span class="tree-count">${locationMap[loc].count}</span>
+    </div>`;
+    const subs = Object.keys(locationMap[loc].children).sort();
+    for (const sub of subs) {
+      const isActiveSub = state.filterLoc === loc && state.filterLocSub === sub;
+      html += `<div class="tree-sub${isActiveSub ? ' active' : ''}" data-loc="${loc}" data-loc-sub="${sub}">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="12" x2="20" y2="12"/><polyline points="14 6 20 12 14 18"/></svg>
+        ${escHtml(sub)}
+        <span class="tree-count">${locationMap[loc].children[sub]}</span>
+      </div>`;
+    }
+  }
+
+  tree.innerHTML = html;
+
+  tree.querySelectorAll('[data-loc]').forEach(el => {
+    el.addEventListener('click', () => {
+      const loc    = el.dataset.loc;
+      const locSub = el.dataset.locSub;
+      if (state.filterLoc === loc && state.filterLocSub === locSub) {
+        state.filterLoc = '';
+        state.filterLocSub = '';
+      } else {
+        state.filterLoc    = loc;
+        state.filterLocSub = locSub;
+      }
+      applyFilters();
+      renderTable();
+      updateLocationTree();
     });
   });
 }
@@ -413,6 +506,7 @@ async function main() {
     await initDB();
     await loadComponents();
     initModals();
+    initLabels();
     initSearch();
     initViewToggle();
     initImport();

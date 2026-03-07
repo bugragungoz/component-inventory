@@ -34,6 +34,26 @@ fn get_app_data_dir(state: State<AppDataDir>) -> Result<String, String> {
     Ok(dir.to_string_lossy().to_string())
 }
 
+// ============================================================
+// Generic HTTP GET — used by the price lookup module to bypass WebView CORS
+// ============================================================
+#[tauri::command]
+async fn fetch_url(url: String) -> Result<String, String> {
+    let client = reqwest::Client::builder()
+        .timeout(std::time::Duration::from_secs(10))
+        .user_agent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+        .build()
+        .map_err(|e| e.to_string())?;
+
+    let res = client
+        .get(&url)
+        .send()
+        .await
+        .map_err(|e| e.to_string())?;
+
+    res.text().await.map_err(|e| e.to_string())
+}
+
 // Use std::thread to avoid requiring a Tokio runtime context during setup.
 fn start_backup_scheduler(data_dir: Arc<Mutex<PathBuf>>) {
     std::thread::Builder::new()
@@ -79,6 +99,7 @@ pub fn run() {
             list_backups_cmd,
             restore_backup_cmd,
             get_app_data_dir,
+            fetch_url,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

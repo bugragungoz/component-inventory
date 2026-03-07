@@ -143,6 +143,56 @@ function normalizeRows(rows) {
 }
 
 // ============================================================
+// Validation layer — annotates each row with _warnings and _errors
+// ============================================================
+const URL_RE = /^https?:\/\/.+/i;
+
+function validateRows(rows) {
+  let warnCount = 0;
+  let errorCount = 0;
+
+  const validated = rows.map(row => {
+    const warnings = [];
+    const errors   = [];
+
+    if (!row.part_code || row.part_code.length > 64) {
+      errors.push('part_code');
+    }
+
+    const qty = Number(row.quantity);
+    if (row.quantity !== '' && (isNaN(qty) || qty < 0 || qty > 999999)) {
+      warnings.push('quantity');
+    }
+
+    const vMax = Number(row.voltage_max);
+    if (row.voltage_max !== '' && (isNaN(vMax) || vMax < 0 || vMax > 100000)) {
+      warnings.push('voltage_max');
+    }
+
+    const iMax = Number(row.current_max);
+    if (row.current_max !== '' && (isNaN(iMax) || iMax < 0 || iMax > 10000)) {
+      warnings.push('current_max');
+    }
+
+    if (row.datasheet_url && !URL_RE.test(row.datasheet_url)) {
+      warnings.push('datasheet_url');
+    }
+
+    const price = Number(row.unit_price);
+    if (row.unit_price !== '' && (isNaN(price) || price < 0)) {
+      warnings.push('unit_price');
+    }
+
+    warnCount  += warnings.length;
+    errorCount += errors.length;
+
+    return { ...row, _warnings: warnings, _errors: errors };
+  });
+
+  return { rows: validated, warnCount, errorCount };
+}
+
+// ============================================================
 // CSV parser (RFC 4180, auto-detects delimiter)
 // ============================================================
 function parseCSV(text) {
@@ -259,20 +309,35 @@ function parseCSVWithDelimiter(text, delimiter) {
 }
 
 // ============================================================
-// Build preview table HTML
+// Build preview table HTML — with validation highlight
 // ============================================================
 function buildPreviewHTML(rows) {
   if (!rows.length) return '<p style="color:var(--text-tertiary)">No recognizable rows found.</p>';
-  const sample = rows.slice(0, 6);
-  const keys   = Object.keys(sample[0]);
 
-  return `<table>
+  const { rows: validated, warnCount, errorCount } = validateRows(rows);
+  const sample = validated.slice(0, 8);
+  const keys   = Object.keys(sample[0]).filter(k => !k.startsWith('_'));
+
+  const summaryHtml = (warnCount + errorCount) > 0 ? `
+    <div class="import-validation-summary">
+      <span class="val-ok">&#10003; ${rows.length} rows</span>
+      ${warnCount  > 0 ? `<span class="val-warn">&#9888; ${warnCount} warnings</span>`  : ''}
+      ${errorCount > 0 ? `<span class="val-err">&#10007; ${errorCount} errors</span>`   : ''}
+    </div>` : `<div class="import-validation-summary"><span class="val-ok">&#10003; ${rows.length} rows — no issues</span></div>`;
+
+  const tableHtml = `<table>
     <thead><tr>${keys.map(k => `<th>${escHtml(k)}</th>`).join('')}</tr></thead>
-    <tbody>${sample.map(r =>
-      `<tr>${keys.map(k => `<td>${escHtml(String(r[k] ?? ''))}</td>`).join('')}</tr>`
-    ).join('')}
+    <tbody>${sample.map(r => {
+      const cells = keys.map(k => {
+        const cls = r._errors.includes(k) ? 'cell-error' : r._warnings.includes(k) ? 'cell-warn' : '';
+        return `<td${cls ? ` class="${cls}"` : ''}>${escHtml(String(r[k] ?? ''))}</td>`;
+      }).join('');
+      return `<tr>${cells}</tr>`;
+    }).join('')}
     </tbody>
   </table>`;
+
+  return summaryHtml + tableHtml;
 }
 
 // ============================================================
