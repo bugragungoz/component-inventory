@@ -1,5 +1,5 @@
 import { state, escHtml } from '../app.js';
-import { lookupComponent } from './hardcoded_datasheet.js';
+import { lookupComponent, applyDbData } from './hardcoded_datasheet.js';
 
 // ============================================================
 // Component type icon + color resolution
@@ -442,31 +442,35 @@ let _detailComp = null;
 
 function showDetail(comp) {
   _detailComp = comp;
-  const dbRecord = lookupComponent(comp.part_code);
+  const dbRecord  = lookupComponent(comp.part_code);
+  // Merge comp with DB (DB fills only empty fields)
+  const effective = applyDbData(comp, dbRecord);
 
-  const typeDef = resolveType(comp.category, comp.subcategory);
+  const typeDef = resolveType(
+    effective.category || comp.category,
+    effective.subcategory || comp.subcategory
+  );
 
   document.getElementById('detail-part-code').textContent = comp.part_code;
 
   const body = document.getElementById('detail-body');
-  const val  = (v, cls = '') => v
+  const val  = (v, cls = '') => (v != null && v !== '')
     ? `<span class="detail-value ${cls}">${escHtml(String(v))}</span>`
     : `<span class="detail-value empty">—</span>`;
 
-  // Electrical specs section
-  const hasElec = comp.voltage_max != null || comp.current_max != null || comp.package;
+  // Spec cards — pulled from effective (component OR hardcoded DB)
   const specCards = [
-    comp.voltage_max != null ? `<div class="spec-card">
+    effective.voltage_max != null ? `<div class="spec-card">
       <span class="spec-label">Voltage Max</span>
-      <span class="spec-value">${comp.voltage_max}<span class="spec-unit"> V</span></span>
+      <span class="spec-value">${effective.voltage_max}<span class="spec-unit"> V</span></span>
     </div>` : '',
-    comp.current_max != null ? `<div class="spec-card">
+    effective.current_max != null ? `<div class="spec-card">
       <span class="spec-label">Current Max</span>
-      <span class="spec-value">${comp.current_max}<span class="spec-unit"> A</span></span>
+      <span class="spec-value">${effective.current_max}<span class="spec-unit"> A</span></span>
     </div>` : '',
-    comp.package ? `<div class="spec-card">
+    effective.package ? `<div class="spec-card">
       <span class="spec-label">Package</span>
-      <span class="spec-value" style="font-size:13px">${escHtml(comp.package)}</span>
+      <span class="spec-value" style="font-size:13px">${escHtml(effective.package)}</span>
     </div>` : '',
     comp.quantity != null ? `<div class="spec-card">
       <span class="spec-label">In Stock</span>
@@ -476,33 +480,40 @@ function showDetail(comp) {
       <span class="spec-label">Unit Price</span>
       <span class="spec-value" style="font-size:13px">$${Number(comp.unit_price).toFixed(4)}</span>
     </div>` : '',
+    effective.manufacturer ? `<div class="spec-card">
+      <span class="spec-label">Manufacturer</span>
+      <span class="spec-value" style="font-size:11px;font-family:var(--font-body)">${escHtml(effective.manufacturer)}</span>
+    </div>` : '',
   ].filter(Boolean);
 
-  // Resolve datasheet URL: from component, or from hardcoded DB
+  // Datasheet URL from component or DB
   const datasheetUrl = comp.datasheet_url || (dbRecord && dbRecord.datasheet_url) || '';
-  const datasheetBtn = datasheetUrl
-    ? `<a href="${escHtml(datasheetUrl)}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm" style="text-decoration:none">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-        Datasheet PDF
+
+  // Prominent PDF button (full-width, red)
+  const pdfBtn = datasheetUrl
+    ? `<a href="${escHtml(datasheetUrl)}" target="_blank" rel="noopener" class="btn-pdf">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Open Datasheet PDF
       </a>`
     : '';
 
-  // Banner shown when DB has data the component doesn't
-  const hasDbData = dbRecord && (
-    (!comp.category     && dbRecord.category)    ||
-    (!comp.description  && dbRecord.description) ||
-    (!comp.voltage_max  && dbRecord.voltage_max) ||
-    (!comp.datasheet_url && dbRecord.datasheet_url)
+  // Suggestion banner when DB has unapplied data
+  const hasGap = dbRecord && (
+    (!comp.category      && dbRecord.category)     ||
+    (!comp.description   && dbRecord.description)  ||
+    (comp.voltage_max == null && dbRecord.voltage_max != null)
   );
-  const dbBanner = hasDbData ? `
+  const dbBanner = hasGap ? `
     <div class="db-suggestion-banner">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-      Built-in database has additional data for <strong>${escHtml(comp.part_code)}</strong>.
-      Open <em>Edit</em> and click <em>Lookup DB</em> to apply it.
+      <strong>${escHtml(comp.part_code)}</strong> found in built-in database.
+      Open <em>Edit</em> → <em>Lookup DB</em> to persist full data.
     </div>` : '';
 
   body.innerHTML = `
     ${dbBanner}
+    ${pdfBtn}
+
     <!-- Type header -->
     <div class="detail-type-header">
       <div class="detail-type-icon" style="background:${typeDef.bg};border-color:${typeDef.border};color:${typeDef.color}">
@@ -511,49 +522,40 @@ function showDetail(comp) {
       <div class="detail-type-info">
         <div class="detail-type-name">${typeDef.label}</div>
         <div class="detail-type-badge">
-          ${comp.category    ? `<span class="badge badge-cat">${escHtml(comp.category)}</span>` : ''}
-          ${comp.subcategory ? `<span class="badge badge-sub">${escHtml(comp.subcategory)}</span>` : ''}
+          ${(effective.category || comp.category)    ? `<span class="badge badge-cat">${escHtml(effective.category || comp.category)}</span>` : ''}
+          ${(effective.subcategory || comp.subcategory) ? `<span class="badge badge-sub">${escHtml(effective.subcategory || comp.subcategory)}</span>` : ''}
         </div>
-        <div class="detail-actions-row">
-          ${datasheetBtn}
-          ${comp.location ? `<span style="font-size:11px;color:var(--text-tertiary);font-family:var(--font-mono);align-self:center">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-1px"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-            ${escHtml(comp.location)}
-          </span>` : ''}
-        </div>
+        ${comp.location ? `<div style="margin-top:5px;font-size:11px;color:var(--text-tertiary);font-family:var(--font-mono)">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-1px"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          ${escHtml(comp.location)}
+        </div>` : ''}
       </div>
     </div>
 
-    <!-- Electrical / key specs -->
+    <!-- Key specifications (from component + DB) -->
     ${specCards.length > 0 ? `
     <div class="detail-section-title">Key Specifications</div>
     <div class="spec-grid">${specCards.join('')}</div>
     ` : ''}
 
-    <!-- Details grid -->
+    <!-- Description / Notes -->
     <div class="detail-section-title">Component Details</div>
     <div class="detail-grid">
-      <div class="detail-field">
-        <span class="detail-label">Manufacturer</span>
-        ${val(comp.manufacturer)}
-      </div>
       <div class="detail-field">
         <span class="detail-label">MPN</span>
         ${val(comp.mpn, 'mono')}
       </div>
       <div class="detail-field full">
         <span class="detail-label">Description</span>
-        ${val(comp.description)}
-      </div>
-      <div class="detail-field full">
-        <span class="detail-label">Datasheet URL</span>
-        ${comp.datasheet_url
-          ? `<a href="${escHtml(comp.datasheet_url)}" target="_blank" rel="noopener" class="detail-value" style="color:var(--accent-blue);word-break:break-all">${escHtml(comp.datasheet_url)}</a>`
-          : `<span class="detail-value empty">—</span>`}
+        ${val(effective.description || comp.description)}
       </div>
       ${comp.notes ? `<div class="detail-field full">
         <span class="detail-label">Notes</span>
         ${val(comp.notes)}
+      </div>` : ''}
+      ${datasheetUrl && comp.datasheet_url ? `<div class="detail-field full">
+        <span class="detail-label">Datasheet URL</span>
+        <a href="${escHtml(datasheetUrl)}" target="_blank" rel="noopener" class="detail-value" style="color:var(--accent-blue);word-break:break-all;font-size:11px">${escHtml(datasheetUrl)}</a>
       </div>` : ''}
       <div class="detail-field">
         <span class="detail-label">Created</span>

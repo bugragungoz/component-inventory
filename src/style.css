@@ -41,9 +41,9 @@
   --accent-amber:    #c49a2a;
   --accent-amber-dim:rgba(196, 154, 42, 0.14);
 
-  --danger:          #c0392b;
-  --danger-hover:    #a93226;
-  --danger-dim:      rgba(192, 57, 43, 0.14);
+  --danger:          #c94444;
+  --danger-hover:    #b33030;
+  --danger-dim:      rgba(201, 68, 68, 0.14);
   --low-stock:       #e05040;
 
   /* Typography */
@@ -90,9 +90,9 @@ html.light {
   --accent-teal-dim: rgba(52, 122, 110, 0.1);
   --accent-amber:    #a07c10;
   --accent-amber-dim:rgba(160, 124, 16, 0.1);
-  --danger:          #c0392b;
-  --danger-hover:    #a93226;
-  --danger-dim:      rgba(192, 57, 43, 0.1);
+  --danger:          #c94444;
+  --danger-hover:    #b33030;
+  --danger-dim:      rgba(201, 68, 68, 0.1);
   --low-stock:       #c0392b;
 }
 
@@ -476,29 +476,29 @@ a:hover { text-decoration: underline; }
 .btn:disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
 .btn:not(:disabled):active { transform: translateY(1px); }
 
-/* Import — Muted blue (matches badge-sub palette) */
+/* Import — app blue (#5a8fc4, same as badge-sub) */
 .btn-import {
-  background: #4a7aad;
+  background: var(--blue);
   color: #fff;
-  border-color: #4a7aad;
+  border-color: var(--blue);
 }
-.btn-import:hover { background: #3d6a96; border-color: #3d6a96; box-shadow: 0 2px 8px rgba(74,122,173,0.35); }
+.btn-import:hover { background: #4a7fbb; border-color: #4a7fbb; box-shadow: 0 2px 8px rgba(90,143,196,0.3); }
 
-/* Export — Muted green */
+/* Export — app green (#6a9e5e, same as accent-green) */
 .btn-export {
-  background: #4e8847;
+  background: var(--green);
   color: #fff;
-  border-color: #4e8847;
+  border-color: var(--green);
 }
-.btn-export:hover { background: #40733a; border-color: #40733a; box-shadow: 0 2px 8px rgba(78,136,71,0.35); }
+.btn-export:hover { background: #5a8a4e; border-color: #5a8a4e; box-shadow: 0 2px 8px rgba(106,158,94,0.3); }
 
-/* Add — Muted orange (matches badge-cat / accent palette) */
+/* Add — app orange (#d97757, same as main accent) */
 .btn-add {
-  background: #c47050;
+  background: var(--accent);
   color: #fff;
-  border-color: #c47050;
+  border-color: var(--accent);
 }
-.btn-add:hover { background: #b05e3f; border-color: #b05e3f; box-shadow: 0 2px 8px rgba(196,112,80,0.35); }
+.btn-add:hover { background: var(--accent-hover); border-color: var(--accent-hover); box-shadow: 0 2px 8px rgba(217,119,87,0.3); }
 
 .btn-primary {
   background: var(--accent);
@@ -508,18 +508,18 @@ a:hover { text-decoration: underline; }
 .btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); box-shadow: 0 2px 8px rgba(217,119,87,0.3); }
 
 .btn-blue {
-  background: #4a7aad;
+  background: var(--blue);
   color: #fff;
-  border-color: #4a7aad;
+  border-color: var(--blue);
 }
-.btn-blue:hover { background: #3d6a96; box-shadow: 0 2px 8px rgba(74,122,173,0.3); }
+.btn-blue:hover { background: #4a7fbb; box-shadow: 0 2px 8px rgba(90,143,196,0.3); }
 
 .btn-green {
-  background: #4e8847;
+  background: var(--green);
   color: #fff;
-  border-color: #4e8847;
+  border-color: var(--green);
 }
-.btn-green:hover { background: #40733a; box-shadow: 0 2px 8px rgba(78,136,71,0.3); }
+.btn-green:hover { background: #5a8a4e; box-shadow: 0 2px 8px rgba(106,158,94,0.3); }
 
 .btn-ghost {
   background: transparent;
@@ -602,20 +602,30 @@ a:hover { text-decoration: underline; }
   table-layout: fixed;
 }
 
-/* Column widths */
-.col-pc   { width: 130px; }
-.col-cat  { width: 130px; }
-.col-sub  { width: 150px; }
-.col-qty  { width: 58px;  }
-.col-pkg  { width: 88px;  }
-.col-mfr  { width: 110px; }
-.col-mpn  { width: 110px; }
-.col-loc  { width: 80px;  }
-.col-vmax { width: 70px;  }
-.col-imax { width: 70px;  }
-.col-desc { width: auto;  }
-.col-price{ width: 72px;  }
-.col-actions { width: 68px; text-align: center !important; }
+/* Column widths — tighter to prevent overflow */
+.col-pc   { width: 120px; }
+.col-cat  { width: 120px; }
+.col-sub  { width: 130px; }
+.col-qty  { width: 52px;  }
+.col-pkg  { width: 78px;  }
+.col-mfr  { width: 100px; }
+.col-mpn  { width: 100px; }
+.col-loc  { width: 72px;  }
+.col-vmax { width: 62px;  }
+.col-imax { width: 62px;  }
+.col-desc { width: auto;  min-width: 80px; }
+.col-price{ width: 68px;  }
+.col-actions { width: 64px; text-align: center !important; }
+
+/* Badges inside table cells must not overflow their column */
+#inventory-table td .badge {
+  max-width: 100%;
+  display: inline-block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: bottom;
+}
 
 /* ---- Compact view: hide extended columns ---- */
 body.compact-view .col-pkg,
@@ -1412,6 +1422,34 @@ textarea { resize: vertical; min-height: 52px; }
 /* ================================================================
    DETAIL MODAL ENHANCEMENTS
    ================================================================ */
+/* Prominent datasheet PDF button in detail modal */
+.btn-pdf {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 11px 16px;
+  margin-bottom: 14px;
+  background: var(--danger);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  text-decoration: none;
+  font-family: var(--font-heading);
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.2px;
+  transition: background var(--t), box-shadow var(--t), transform var(--t);
+}
+.btn-pdf:hover {
+  background: var(--danger-hover);
+  box-shadow: 0 3px 12px rgba(201,68,68,0.35);
+  transform: translateY(-1px);
+}
+.btn-pdf:active { transform: translateY(0); }
+
 .db-suggestion-banner {
   display: flex;
   align-items: center;
