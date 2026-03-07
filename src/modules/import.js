@@ -284,11 +284,64 @@ function parseCSV(text) {
 
 // ============================================================
 // Excel parser (SheetJS)
+// Scans up to the first 20 rows to find the actual header row,
+// allowing files that have title/logo/company rows above the data table.
 // ============================================================
 function parseExcel(arrayBuffer) {
-  const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-  const sheet    = workbook.Sheets[workbook.SheetNames[0]];
-  return XLSX.utils.sheet_to_json(sheet, { defval: '' });
+  if (typeof XLSX === 'undefined') {
+    throw new Error('SheetJS library not loaded.');
+  }
+  const workbook  = XLSX.read(arrayBuffer, { type: 'array' });
+  const sheetName = workbook.SheetNames[0];
+  const sheet     = workbook.Sheets[sheetName];
+
+  // Read entire sheet as raw 2D array (no header assumption)
+  const raw = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+  if (!raw || raw.length === 0) return [];
+
+  // Find the row index that has the most cells matching known headers.
+  // Only scan the first 20 rows.
+  let bestRowIdx   = 0;
+  let bestScore    = 0;
+
+  const scanLimit = Math.min(raw.length, 20);
+  for (let i = 0; i < scanLimit; i++) {
+    const row = raw[i];
+    if (!row || row.length === 0) continue;
+    const score = row.filter(cell => {
+      const v = String(cell ?? '').toLowerCase().trim();
+      return v && normalizeHeader(v) !== null;
+    }).length;
+    if (score > bestScore) {
+      bestScore  = score;
+      bestRowIdx = i;
+    }
+  }
+
+  // No row matched any known header — fall back to first non-empty row
+  if (bestScore === 0) {
+    // Try to find first row with at least 2 non-empty cells as a last resort
+    for (let i = 0; i < scanLimit; i++) {
+      const row = raw[i];
+      if (row && row.filter(c => String(c ?? '').trim()).length >= 2) {
+        bestRowIdx = i;
+        break;
+      }
+    }
+  }
+
+  const headerRow = raw[bestRowIdx].map(c => String(c ?? '').trim());
+  const dataRows  = raw.slice(bestRowIdx + 1);
+
+  return dataRows
+    .filter(row => row.some(c => String(c ?? '').trim()))  // skip blank rows
+    .map(row => {
+      const obj = {};
+      headerRow.forEach((h, idx) => {
+        if (h) obj[h] = String(row[idx] ?? '').trim();
+      });
+      return obj;
+    });
 }
 
 // ============================================================
