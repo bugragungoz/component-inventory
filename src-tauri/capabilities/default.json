@@ -1,0 +1,24 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Capability for the main window",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "opener:default",
+    "sql:default",
+    "fs:default",
+    "fs:allow-read-text-file",
+    "fs:allow-write-text-file",
+    "fs:allow-read-file",
+    "fs:allow-write-file",
+    "fs:allow-create-dir",
+    "fs:allow-read-dir",
+    "fs:allow-remove-file",
+    "dialog:default",
+    "dialog:allow-open",
+    "dialog:allow-save",
+    "shell:default",
+    "shell:allow-open"
+  ]
+}
