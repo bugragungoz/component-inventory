@@ -68,6 +68,7 @@ export function renderTable() {
   if (state.filtered.length === 0) {
     tbody.innerHTML = '';
     empty.style.display = 'flex';
+    empty.style.flexDirection = 'column';
     tableScroll.style.display = 'none';
     return;
   }

@@ -21,6 +21,13 @@ export function initModals() {
 function initAddButton() {
   document.getElementById('btn-add').addEventListener('click', () => openEditModal(null));
   document.getElementById('btn-add-empty').addEventListener('click', () => openEditModal(null));
+
+  const importEmpty = document.getElementById('btn-import-empty');
+  if (importEmpty) {
+    importEmpty.addEventListener('click', () => {
+      document.getElementById('overlay-import').style.display = '';
+    });
+  }
 }
 
 // ============================================================

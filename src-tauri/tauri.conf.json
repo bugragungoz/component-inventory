@@ -14,12 +14,14 @@
     "windows": [
       {
         "title": "Component Inventory",
-        "width": 1400,
-        "height": 860,
+        "width": 1440,
+        "height": 900,
         "minWidth": 1100,
         "minHeight": 680,
         "resizable": true,
-        "center": true
+        "center": true,
+        "decorations": true,
+        "transparent": false
       }
     ],
     "security": {
@@ -36,13 +38,5 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ]
-  },
-  "plugins": {
-    "sql": {
-      "preloadConnections": ["sqlite:component_inventory.db"]
-    },
-    "shell": {
-      "open": true
-    }
   }
 }
