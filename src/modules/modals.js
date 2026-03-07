@@ -191,7 +191,11 @@ async function setImagePreview(imagePath) {
       if (placeholder) placeholder.style.display = 'none';
       clearBtn.style.display = '';
     } catch (_) {
-      setImagePreview('');
+      // File temporarily inaccessible — hide preview but preserve stored path
+      preview.src           = '';
+      preview.style.display = 'none';
+      if (placeholder) placeholder.style.display = '';
+      clearBtn.style.display = 'none';
     }
   } else {
     preview.src           = '';

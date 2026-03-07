@@ -286,13 +286,13 @@ export function applyFilters() {
   }
   if (state.filterLoc) {
     result = result.filter(c => {
-      const loc = (c.location || '').trim();
+      const loc   = (c.location || '').trim();
+      const parts = loc.split(/\s*[\/\\|>]\s*/).map(p => p.trim()).filter(Boolean);
       if (state.filterLocSub) {
-        // Match "top / sub" combined
-        return loc.startsWith(state.filterLoc) && loc.includes(state.filterLocSub);
+        // Exact segment match: top must equal filterLoc, sub must equal filterLocSub
+        const sub = parts.slice(1).join(' / ');
+        return parts[0] === state.filterLoc && sub === state.filterLocSub;
       }
-      // Match by top-level location segment
-      const parts = loc.split(/\s*[\/\\|>]\s*/);
       return parts[0] === state.filterLoc;
     });
   }

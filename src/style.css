@@ -1583,7 +1583,7 @@ textarea { resize: vertical; min-height: 52px; }
 }
 
 .pill-wide {
-  /* Value pill spans full row so its number doesn't clip */
+  grid-column: span 2;
 }
 
 /* Location tree: constrained so category tree remains primary */

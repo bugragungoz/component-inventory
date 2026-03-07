@@ -255,9 +255,13 @@ function updateCategoryTree() {
     el.addEventListener('click', () => {
       state.filterCat = el.dataset.cat;
       state.filterSub = el.dataset.sub;
+      // Reset location filter when switching category selection
+      state.filterLoc    = '';
+      state.filterLocSub = '';
       applyFilters();
       renderTable();
       updateCategoryTree();
+      updateLocationTree();
     });
   });
 }
@@ -265,7 +269,7 @@ function updateCategoryTree() {
 // ============================================================
 // Location hierarchy tree
 // ============================================================
-export function updateLocationTree() {
+function updateLocationTree() {
   const tree = document.getElementById('location-tree');
   if (!tree) return;
 

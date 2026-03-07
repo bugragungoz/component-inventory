@@ -4,6 +4,8 @@
  * Each label includes part code, category, location, qty, and a QR code.
  */
 
+import { showToast } from '../app.js';
+
 let _labelComp = null;
 
 // ============================================================
@@ -53,6 +55,7 @@ function generateQRDataUrl(text) {
         document.body.removeChild(tmpDiv);
       }, 80);
     } catch (_) {
+      try { document.body.removeChild(tmpDiv); } catch (_2) {}
       resolve(null);
     }
   });
@@ -129,11 +132,12 @@ async function generateLabelPDF(comp, copies) {
     doc.setLineWidth(0.4);
     doc.roundedRect(cx, cy, lW, lH, 2, 2);
 
-    // Part code
+    // Part code — truncate to prevent overflow beyond QR code area
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(11);
     doc.setTextColor(217, 119, 87);
-    doc.text(comp.part_code || '—', cx + 3, cy + 7);
+    const displayCode = (comp.part_code || '—').substring(0, 26);
+    doc.text(displayCode, cx + 3, cy + 7, { maxWidth: lW - 32 });
 
     // Category / Subcategory
     doc.setFont('helvetica', 'normal');
@@ -200,6 +204,7 @@ export function initLabels() {
       await generateLabelPDF(_labelComp, copies);
     } catch (err) {
       console.error('Label PDF generation failed:', err);
+      showToast('PDF generation failed: ' + (err.message || String(err)), 'error');
     }
   });
 }
