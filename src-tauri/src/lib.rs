@@ -2,7 +2,7 @@ mod backup;
 
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
-use tauri::{AppHandle, Manager, State};
+use tauri::{Manager, State};
 use backup::{BackupEntry, create_backup_file, list_backups, restore_backup_file};
 
 pub struct AppDataDir(pub Arc<Mutex<PathBuf>>);

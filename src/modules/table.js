@@ -1,5 +1,4 @@
-import { state } from '../app.js';
-import { escHtml } from '../app.js';
+import { state, escHtml } from '../app.js';
 
 // ============================================================
 // Filter & sort
