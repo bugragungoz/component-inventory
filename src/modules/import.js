@@ -82,10 +82,16 @@ const HEADER_MAP = {
 
   // Description - English
   'description': 'description', 'desc': 'description', 'info': 'description',
-  'details': 'description', 'notes': 'description',
+  'details': 'description',
   // Description - Turkish
   'aciklama': 'description', 'tanim': 'description', 'bilgi': 'description',
-  'detay': 'description', 'not': 'description',
+  'detay': 'description',
+
+  // Notes - English
+  'notes': 'notes', 'note': 'notes', 'comment': 'notes', 'comments': 'notes',
+  'remarks': 'notes', 'remark': 'notes',
+  // Notes - Turkish
+  'not': 'notes', 'notlar': 'notes', 'yorum': 'notes', 'aciklamalar': 'notes',
 
   // Datasheet - English
   'datasheet_url': 'datasheet_url', 'datasheet': 'datasheet_url',

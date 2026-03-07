@@ -53,7 +53,8 @@ function exportCSV() {
     }).join(',')
   );
   const csv = [header, ...lines].join('\r\n');
-  downloadBlob(new Blob([csv], { type: 'text/csv;charset=utf-8;' }), timestampedName('csv'));
+  // UTF-8 BOM ensures Excel opens the file with correct encoding (critical for non-ASCII chars)
+  downloadBlob(new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' }), timestampedName('csv'));
 }
 
 // ============================================================

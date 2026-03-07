@@ -8,70 +8,30 @@ use backup::{BackupEntry, create_backup_file, list_backups, restore_backup_file}
 pub struct AppDataDir(pub Arc<Mutex<PathBuf>>);
 
 // ============================================================
-// Backup commands
+// Backup commands — lock is released before any file I/O
 // ============================================================
 #[tauri::command]
 fn create_backup(state: State<AppDataDir>) -> Result<BackupEntry, String> {
-    let dir = state.0.lock().map_err(|e| e.to_string())?;
+    let dir = state.0.lock().map_err(|e| e.to_string())?.clone();
     create_backup_file(&dir)
 }
 
 #[tauri::command]
 fn list_backups_cmd(state: State<AppDataDir>) -> Result<Vec<BackupEntry>, String> {
-    let dir = state.0.lock().map_err(|e| e.to_string())?;
+    let dir = state.0.lock().map_err(|e| e.to_string())?.clone();
     list_backups(&dir)
 }
 
 #[tauri::command]
 fn restore_backup_cmd(backup_path: String, state: State<AppDataDir>) -> Result<(), String> {
-    let dir = state.0.lock().map_err(|e| e.to_string())?;
+    let dir = state.0.lock().map_err(|e| e.to_string())?.clone();
     restore_backup_file(&dir, &backup_path)
 }
 
 #[tauri::command]
 fn get_app_data_dir(state: State<AppDataDir>) -> Result<String, String> {
-    let dir = state.0.lock().map_err(|e| e.to_string())?;
+    let dir = state.0.lock().map_err(|e| e.to_string())?.clone();
     Ok(dir.to_string_lossy().to_string())
-}
-
-// ============================================================
-// Ollama proxy commands (bypass WebView CORS restrictions)
-// ============================================================
-#[tauri::command]
-async fn ollama_get(url: String) -> Result<String, String> {
-    let client = reqwest::Client::builder()
-        .timeout(std::time::Duration::from_secs(6))
-        .danger_accept_invalid_certs(false)
-        .build()
-        .map_err(|e| e.to_string())?;
-
-    let res = client
-        .get(&url)
-        .send()
-        .await
-        .map_err(|e| e.to_string())?;
-
-    res.text().await.map_err(|e| e.to_string())
-}
-
-#[tauri::command]
-async fn ollama_post(url: String, body: String, timeout_secs: Option<u64>) -> Result<String, String> {
-    let secs = timeout_secs.unwrap_or(120);
-    let client = reqwest::Client::builder()
-        .timeout(std::time::Duration::from_secs(secs))
-        .danger_accept_invalid_certs(false)
-        .build()
-        .map_err(|e| e.to_string())?;
-
-    let res = client
-        .post(&url)
-        .header("Content-Type", "application/json")
-        .body(body)
-        .send()
-        .await
-        .map_err(|e| e.to_string())?;
-
-    res.text().await.map_err(|e| e.to_string())
 }
 
 // Use std::thread to avoid requiring a Tokio runtime context during setup.
@@ -119,8 +79,6 @@ pub fn run() {
             list_backups_cmd,
             restore_backup_cmd,
             get_app_data_dir,
-            ollama_get,
-            ollama_post,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

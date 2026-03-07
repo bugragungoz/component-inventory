@@ -50,14 +50,6 @@ async function initDB() {
     );
   `);
 
-  await db.execute(`
-    CREATE TABLE IF NOT EXISTS chat_history (
-      id         INTEGER PRIMARY KEY AUTOINCREMENT,
-      role       TEXT NOT NULL,
-      content    TEXT NOT NULL,
-      created_at TEXT DEFAULT (datetime('now'))
-    );
-  `);
 }
 
 // ============================================================
@@ -294,16 +286,20 @@ function initViewToggle() {
   function applyView() {
     if (state.viewCompact) {
       document.body.classList.add('compact-view');
-      lblEl.textContent     = 'Detailed';
+      lblEl.textContent      = 'Detailed';
       iconComp.style.display = 'none';
       iconFull.style.display = '';
     } else {
       document.body.classList.remove('compact-view');
-      lblEl.textContent     = 'Compact';
+      lblEl.textContent      = 'Compact';
       iconComp.style.display = '';
       iconFull.style.display = 'none';
     }
   }
+
+  // Restore saved preference BEFORE first render to avoid layout flash
+  const saved = localStorage.getItem('viewCompact');
+  if (saved !== null) state.viewCompact = saved === '1';
 
   applyView();
 
@@ -312,13 +308,6 @@ function initViewToggle() {
     localStorage.setItem('viewCompact', state.viewCompact ? '1' : '0');
     applyView();
   });
-
-  // Restore saved preference
-  const saved = localStorage.getItem('viewCompact');
-  if (saved !== null) {
-    state.viewCompact = saved === '1';
-    applyView();
-  }
 }
 
 // ============================================================
@@ -392,13 +381,6 @@ export function escHtml(str) {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
-}
-
-export function formatDate(str) {
-  if (!str) return '';
-  return new Date(str).toLocaleDateString('en-US', {
-    year: 'numeric', month: 'short', day: '2-digit'
-  });
 }
 
 export function getAutocompleteValues(field) {
