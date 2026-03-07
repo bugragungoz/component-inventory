@@ -16,11 +16,15 @@
     "fs:allow-write-text-file",
     "fs:allow-read-file",
     "fs:allow-write-file",
+    "fs:allow-copy-file",
     "fs:allow-mkdir",
     "fs:allow-read-dir",
     "fs:allow-remove",
     "dialog:default",
     "dialog:allow-open",
-    "dialog:allow-save"
+    "dialog:allow-save",
+    "opener:default",
+    "opener:allow-open-url",
+    "opener:allow-open-path"
   ]
 }

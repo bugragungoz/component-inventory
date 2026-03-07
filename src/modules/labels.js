@@ -21,7 +21,8 @@ function generateQRDataUrl(text) {
     try {
       // QRCode.js renders to a temporary div, we capture via canvas
       const tmpDiv = document.createElement('div');
-      tmpDiv.style.display = 'none';
+      // Must be positioned off-screen (not display:none) for QRCode.js to render canvas
+      tmpDiv.style.cssText = 'position:absolute;left:-9999px;top:-9999px;width:120px;height:120px;';
       document.body.appendChild(tmpDiv);
 
       new window.QRCode(tmpDiv, {

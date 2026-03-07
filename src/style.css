@@ -1574,10 +1574,23 @@ textarea { resize: vertical; min-height: 52px; }
 }
 
 /* ================================================================
-   STAT PILLS — Value pill wide variant
+   STAT PILLS — 2x2 grid layout for 4 pills
    ================================================================ */
+.stat-pills {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+}
+
 .pill-wide {
-  min-width: 64px;
+  /* Value pill spans full row so its number doesn't clip */
+}
+
+/* Location tree: constrained so category tree remains primary */
+#location-tree {
+  flex: 0 1 auto;
+  max-height: 28vh;
+  overflow-y: auto;
 }
 
 /* ================================================================
