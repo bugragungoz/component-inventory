@@ -31,17 +31,19 @@ fn get_app_data_dir(state: State<AppDataDir>) -> Result<String, String> {
     Ok(dir.to_string_lossy().to_string())
 }
 
+// Use std::thread to avoid requiring a Tokio runtime context during setup.
 fn start_backup_scheduler(data_dir: Arc<Mutex<PathBuf>>) {
-    tokio::spawn(async move {
-        let mut interval = tokio::time::interval(tokio::time::Duration::from_secs(900)); // 15 minutes
-        interval.tick().await; // skip the first immediate tick
-        loop {
-            interval.tick().await;
-            if let Ok(dir) = data_dir.lock() {
-                let _ = create_backup_file(&dir);
+    std::thread::Builder::new()
+        .name("backup-scheduler".into())
+        .spawn(move || {
+            loop {
+                std::thread::sleep(std::time::Duration::from_secs(900)); // 15 minutes
+                if let Ok(dir) = data_dir.lock() {
+                    let _ = create_backup_file(&dir);
+                }
             }
-        }
-    });
+        })
+        .ok();
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -51,14 +53,17 @@ pub fn run() {
         .plugin(tauri_plugin_sql::Builder::default().build())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
-        .plugin(tauri_plugin_shell::init())
         .setup(|app| {
             let data_dir = app
                 .path()
                 .app_data_dir()
-                .expect("failed to get app data dir");
-            std::fs::create_dir_all(&data_dir).expect("failed to create app data dir");
-            backup::ensure_backup_dir(&data_dir).expect("failed to create backup dir");
+                .map_err(|e| format!("failed to get app data dir: {e}"))?;
+
+            std::fs::create_dir_all(&data_dir)
+                .map_err(|e| format!("failed to create app data dir: {e}"))?;
+
+            backup::ensure_backup_dir(&data_dir)
+                .map_err(|e| format!("failed to create backup dir: {e}"))?;
 
             let data_arc = Arc::new(Mutex::new(data_dir));
             app.manage(AppDataDir(Arc::clone(&data_arc)));
