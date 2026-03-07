@@ -1,11 +1,11 @@
 mod backup;
 
 use std::path::PathBuf;
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 use tauri::{AppHandle, Manager, State};
 use backup::{BackupEntry, create_backup_file, list_backups, restore_backup_file};
 
-pub struct AppDataDir(pub Mutex<PathBuf>);
+pub struct AppDataDir(pub Arc<Mutex<PathBuf>>);
 
 #[tauri::command]
 fn create_backup(state: State<AppDataDir>) -> Result<BackupEntry, String> {
@@ -31,14 +31,13 @@ fn get_app_data_dir(state: State<AppDataDir>) -> Result<String, String> {
     Ok(dir.to_string_lossy().to_string())
 }
 
-fn start_backup_scheduler(app_handle: AppHandle) {
+fn start_backup_scheduler(data_dir: Arc<Mutex<PathBuf>>) {
     tokio::spawn(async move {
         let mut interval = tokio::time::interval(tokio::time::Duration::from_secs(900)); // 15 minutes
         interval.tick().await; // skip the first immediate tick
         loop {
             interval.tick().await;
-            let state = app_handle.state::<AppDataDir>();
-            if let Ok(dir) = state.0.lock() {
+            if let Ok(dir) = data_dir.lock() {
                 let _ = create_backup_file(&dir);
             }
         }
@@ -61,10 +60,9 @@ pub fn run() {
             std::fs::create_dir_all(&data_dir).expect("failed to create app data dir");
             backup::ensure_backup_dir(&data_dir).expect("failed to create backup dir");
 
-            app.manage(AppDataDir(Mutex::new(data_dir)));
-
-            let handle = app.handle().clone();
-            start_backup_scheduler(handle);
+            let data_arc = Arc::new(Mutex::new(data_dir));
+            app.manage(AppDataDir(Arc::clone(&data_arc)));
+            start_backup_scheduler(data_arc);
 
             Ok(())
         })
