@@ -501,16 +501,18 @@ async function showDetail(comp) {
     </div>` : '',
   ].filter(Boolean);
 
-  // Datasheet URL from component or DB
+  // Datasheet URL from component or DB — wire up the header PDF button
   const datasheetUrl = comp.datasheet_url || (dbRecord && dbRecord.datasheet_url) || '';
-
-  // Prominent PDF button (full-width, red)
-  const pdfBtn = datasheetUrl
-    ? `<a href="${escHtml(datasheetUrl)}" target="_blank" rel="noopener" class="btn-pdf">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-        Open Datasheet PDF
-      </a>`
-    : '';
+  const pdfHeaderBtn = document.getElementById('btn-detail-pdf');
+  if (pdfHeaderBtn) {
+    if (datasheetUrl) {
+      pdfHeaderBtn.href = datasheetUrl;
+      pdfHeaderBtn.style.display = '';
+    } else {
+      pdfHeaderBtn.style.display = 'none';
+    }
+  }
+  const pdfBtn = '';
 
   // Suggestion banner when DB has unapplied data
   const hasGap = dbRecord && (

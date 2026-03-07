@@ -4,7 +4,6 @@ import {
 } from '../app.js';
 import { initSortHeaders } from './table.js';
 import { lookupComponent } from './hardcoded_datasheet.js';
-import { fetchOzdisanPrice } from './price.js';
 import { readFile, copyFile, mkdir } from '@tauri-apps/plugin-fs';
 import { open as openDialog } from '@tauri-apps/plugin-dialog';
 import { invoke } from '@tauri-apps/api/core';
@@ -19,7 +18,6 @@ export function initModals() {
   initDeleteConfirm();
   initDetailActions();
   initImagePicker();
-  initPriceFetch();
 }
 
 // ============================================================
@@ -232,35 +230,6 @@ function initImagePicker() {
   document.getElementById('btn-clear-image').addEventListener('click', () => setImagePreview(''));
 }
 
-// ============================================================
-// Ozdisan price fetch
-// ============================================================
-function initPriceFetch() {
-  document.getElementById('btn-fetch-price').addEventListener('click', async () => {
-    const partCode = document.getElementById('edit-part-code').value.trim();
-    if (!partCode) {
-      showToast('Enter a Part Code first', 'warning');
-      return;
-    }
-    const btn = document.getElementById('btn-fetch-price');
-    btn.disabled = true;
-    showToast(`Searching Ozdisan for "${partCode}"...`, 'info', 2500);
-
-    try {
-      const price = await fetchOzdisanPrice(partCode);
-      if (price !== null) {
-        setField('edit-unit-price', price);
-        showToast(`Price from Ozdisan: $${price.toFixed(2)}`, 'success');
-      } else {
-        showToast('Price not found automatically — browser opened for manual check', 'info');
-      }
-    } catch (err) {
-      showToast('Price fetch failed: ' + (err.message || err), 'error');
-    } finally {
-      btn.disabled = false;
-    }
-  });
-}
 
 // ============================================================
 // Delete confirm

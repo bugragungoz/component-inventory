@@ -91,10 +91,6 @@
         <span class="pill-value" id="stat-cats">0</span>
         <span class="pill-label">Categories</span>
       </div>
-      <div class="pill pill-wide" title="Total inventory value (qty × unit price)">
-        <span class="pill-value" id="stat-value">$0</span>
-        <span class="pill-label">Value</span>
-      </div>
     </div>
 
     <!-- Category search -->
@@ -329,10 +325,6 @@
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           Lookup DB
         </button>
-        <button class="btn btn-ghost" id="btn-fetch-price" title="Fetch price from Ozdisan.com">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-          Ozdisan Price
-        </button>
         <button class="btn btn-primary" id="btn-save-component">Save</button>
       </div>
     </div>
@@ -346,6 +338,10 @@
           <span class="detail-badge-pc" id="detail-part-code">—</span>
         </div>
         <div class="detail-header-right">
+          <a href="#" target="_blank" rel="noopener" class="btn btn-pdf btn-sm" id="btn-detail-pdf" style="display:none">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            Datasheet PDF
+          </a>
           <button class="btn btn-ghost btn-sm" id="btn-print-label" title="Print component label with QR code">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
             Print Label

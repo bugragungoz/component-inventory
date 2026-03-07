@@ -41,9 +41,9 @@
   --accent-amber:    #c49a2a;
   --accent-amber-dim:rgba(196, 154, 42, 0.14);
 
-  --danger:          #c94444;
-  --danger-hover:    #b33030;
-  --danger-dim:      rgba(201, 68, 68, 0.14);
+  --danger:          #f87171;
+  --danger-hover:    #e05050;
+  --danger-dim:      rgba(248, 113, 113, 0.14);
   --low-stock:       #e05040;
 
   /* Typography */
@@ -90,9 +90,9 @@ html.light {
   --accent-teal-dim: rgba(52, 122, 110, 0.1);
   --accent-amber:    #a07c10;
   --accent-amber-dim:rgba(160, 124, 16, 0.1);
-  --danger:          #c94444;
-  --danger-hover:    #b33030;
-  --danger-dim:      rgba(201, 68, 68, 0.1);
+  --danger:          #f87171;
+  --danger-hover:    #e05050;
+  --danger-dim:      rgba(248, 113, 113, 0.1);
   --low-stock:       #c0392b;
 }
 
@@ -1422,33 +1422,30 @@ textarea { resize: vertical; min-height: 52px; }
 /* ================================================================
    DETAIL MODAL ENHANCEMENTS
    ================================================================ */
-/* Prominent datasheet PDF button in detail modal */
+/* Datasheet PDF button in detail modal */
 .btn-pdf {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  width: 100%;
-  padding: 11px 16px;
-  margin-bottom: 14px;
-  background: var(--danger);
-  color: #fff;
-  border: none;
+  gap: 6px;
+  padding: 6px 14px;
+  background: transparent;
+  color: var(--danger);
+  border: 1px solid var(--danger);
   border-radius: var(--radius);
   text-decoration: none;
   font-family: var(--font-heading);
-  font-size: 13.5px;
+  font-size: 12.5px;
   font-weight: 600;
   cursor: pointer;
   letter-spacing: 0.2px;
-  transition: background var(--t), box-shadow var(--t), transform var(--t);
+  transition: background var(--t), color var(--t), box-shadow var(--t);
 }
 .btn-pdf:hover {
-  background: var(--danger-hover);
-  box-shadow: 0 3px 12px rgba(201,68,68,0.35);
-  transform: translateY(-1px);
+  background: var(--danger);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(248,113,113,0.3);
 }
-.btn-pdf:active { transform: translateY(0); }
+.btn-pdf:active { opacity: 0.85; }
 
 .db-suggestion-banner {
   display: flex;
@@ -1573,18 +1570,7 @@ textarea { resize: vertical; min-height: 52px; }
   font-family: var(--font-heading);
 }
 
-/* ================================================================
-   STAT PILLS — 2x2 grid layout for 4 pills
-   ================================================================ */
-.stat-pills {
-  display: grid !important;
-  grid-template-columns: 1fr 1fr;
-  gap: 5px;
-}
-
-.pill-wide {
-  grid-column: span 2;
-}
+/* Stat pills: flex wrap, 3 pills fit in a row */
 
 /* Location tree: constrained so category tree remains primary */
 #location-tree {

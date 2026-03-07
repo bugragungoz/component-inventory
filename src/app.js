@@ -182,23 +182,9 @@ function updateStats() {
   const units = state.components.reduce((s, c) => s + (Number(c.quantity) || 0), 0);
   const cats  = new Set(state.components.map(c => c.category).filter(Boolean)).size;
 
-  // Total stock value: sum(qty * unit_price) for components that have a price
-  const value = state.components.reduce((s, c) => {
-    const qty   = Number(c.quantity)   || 0;
-    const price = Number(c.unit_price) || 0;
-    return s + qty * price;
-  }, 0);
-
   document.getElementById('stat-types').textContent = total;
   document.getElementById('stat-units').textContent = units;
   document.getElementById('stat-cats').textContent  = cats;
-
-  const valEl = document.getElementById('stat-value');
-  if (valEl) {
-    valEl.textContent = value >= 1000
-      ? `$${(value / 1000).toFixed(1)}k`
-      : `$${value.toFixed(value < 10 ? 2 : 0)}`;
-  }
 
   const exportCount = document.getElementById('export-count');
   if (exportCount) exportCount.textContent = total;
