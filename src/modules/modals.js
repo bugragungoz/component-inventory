@@ -360,8 +360,15 @@ function initImagePicker() {
       const imagesDir  = appDataDir + '/images';
       await mkdir(imagesDir, { recursive: true });
 
-      const ext      = selected.split('.').pop().toLowerCase();
-      const partCode = document.getElementById('edit-part-code').value.trim() || 'image';
+      const allowedExt = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'];
+      const ext        = (selected.split('.').pop() || '').toLowerCase();
+      if (!allowedExt.includes(ext)) {
+        showToast('Unsupported image format. Use JPG, PNG, GIF, or WebP.', 'error');
+        return;
+      }
+      // Sanitize part code: keep only alphanumeric, dash, underscore (no path separators)
+      const rawCode  = document.getElementById('edit-part-code').value.trim() || 'image';
+      const partCode = rawCode.replace(/[^a-zA-Z0-9_\-]/g, '_').slice(0, 60);
       const destPath = imagesDir + '/' + partCode + '_' + Date.now() + '.' + ext;
 
       await copyFile(selected, destPath);

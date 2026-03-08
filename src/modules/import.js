@@ -511,7 +511,8 @@ export function initImport() {
 
   confirmBtn.addEventListener('click', async () => {
     if (!_importRows.length) return;
-    const mode = document.querySelector('input[name="import-mode"]:checked').value;
+    const modeEl = document.querySelector('input[name="import-mode"]:checked');
+    const mode   = modeEl ? modeEl.value : 'merge';
     confirmBtn.disabled = true;
     try {
       // Snapshot before writing so the user can undo

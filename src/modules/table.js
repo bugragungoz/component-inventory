@@ -514,8 +514,9 @@ async function showDetail(comp) {
     </div>` : '',
   ].filter(Boolean);
 
-  // Datasheet URL from component or DB — wire up the header PDF button
-  const datasheetUrl = comp.datasheet_url || (dbRecord && dbRecord.datasheet_url) || '';
+  // Datasheet URL from component or DB — sanitize to https?:// only
+  const rawUrl       = comp.datasheet_url || (dbRecord && dbRecord.datasheet_url) || '';
+  const datasheetUrl = /^https?:\/\//i.test(rawUrl) ? rawUrl : '';
   const pdfHeaderBtn = document.getElementById('btn-detail-pdf');
   if (pdfHeaderBtn) {
     if (datasheetUrl) {

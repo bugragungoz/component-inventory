@@ -47,7 +47,7 @@ function exportCSV() {
     EXPORT_COLUMNS.map(col => {
       const val = row[col.key] ?? '';
       const str = String(val).replace(/"/g, '""');
-      return str.includes(',') || str.includes('"') || str.includes('\n')
+      return str.includes(',') || str.includes('"') || str.includes('\n') || str.includes('\r')
         ? `"${str}"`
         : str;
     }).join(',')

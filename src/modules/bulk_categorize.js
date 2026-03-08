@@ -1,20 +1,5 @@
-import { lookupComponent }        from './hardcoded_datasheet.js';
-import { state, loadComponents }  from '../app.js';
-import { showToast }              from '../app.js';
-import { invoke }                 from '@tauri-apps/api/core';
-
-// ================================================================
-// Bulk Categorize — scans all Uncategorized components against
-// the built-in DB and presents a review modal with checkboxes.
-// ================================================================
-
-function escHtml(str) {
-  return String(str ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
+import { lookupComponent }                                      from './hardcoded_datasheet.js';
+import { state, updateComponent, showToast, escHtml }           from '../app.js';
 
 /** Returns components that are in the Uncategorized bucket. */
 function getUncategorized() {
@@ -96,15 +81,13 @@ async function applySelected(suggestions) {
         current_max:  comp.current_max  ?? hit.current_max  ?? null,
       };
 
-      await invoke('upsert_components_cmd', { components: [updated] });
+      await updateComponent(comp.id, updated);
       success++;
     } catch (err) {
       console.error('bulk categorize error:', comp.part_code, err);
       failed++;
     }
   }
-
-  await loadComponents();
 
   closeOverlay();
   if (failed === 0) {

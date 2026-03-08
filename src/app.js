@@ -678,7 +678,7 @@ async function main() {
       bootLoader.innerHTML = `
         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
         <span style="color:#c0392b;font-weight:600">Startup Error</span>
-        <span style="max-width:360px;text-align:center;color:#b0aea5;font-size:12px">${err.message || String(err)}</span>
+        <span style="max-width:360px;text-align:center;color:#b0aea5;font-size:12px">${escHtml(err.message || String(err))}</span>
         <button onclick="location.reload()" style="margin-top:8px;padding:8px 16px;background:#d97757;color:#fff;border:none;border-radius:6px;cursor:pointer;font-family:Arial;font-size:13px">Retry</button>
       `;
     }
