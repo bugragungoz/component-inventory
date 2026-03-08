@@ -63,4 +63,10 @@ npm run tauri build  # produces installer in src-tauri/target/release/bundle/
 
 ---
 
+## License
+
+[MIT](LICENSE)
+
+---
+
 *Coded with [Claude Sonnet 4.6](https://www.anthropic.com/).*
