@@ -956,6 +956,13 @@ label {
   color: var(--text-secondary);
 }
 label .required { color: var(--accent); }
+label .attr-unit {
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 10px;
+  color: var(--text-tertiary);
+}
 
 input[type="text"],
 input[type="number"],

@@ -7,6 +7,11 @@ import { lookupComponent, categorizeByDescription } from './hardcoded_datasheet.
 import { readFile, copyFile, mkdir } from '@tauri-apps/plugin-fs';
 import { open as openDialog } from '@tauri-apps/plugin-dialog';
 import { invoke } from '@tauri-apps/api/core';
+import {
+  getSchemaForCategory,
+  renderAttributeFields,
+  collectAttributeValues,
+} from './attribute_schemas.js';
 
 // ============================================================
 // Initialize all modal interactions
@@ -44,6 +49,7 @@ function openEditModal(comp) {
 
   refreshDatalistsGlobal();
 
+  let existingAttrs = {};
   if (comp) {
     title.textContent = 'Edit Component';
     idEl.value = comp.id;
@@ -65,6 +71,7 @@ function openEditModal(comp) {
     setField('edit-tolerance',   comp.tolerance   || '');
     setField('edit-power-rating',comp.power_rating ?? '');
     setImagePreview(comp.image_path || '');
+    existingAttrs = parseAttrs(comp.attributes);
   } else {
     title.textContent = 'Add Component';
     idEl.value = '';
@@ -72,7 +79,10 @@ function openEditModal(comp) {
     setImagePreview('');
   }
 
-  updateTypeFields(document.getElementById('edit-category').value);
+  const cat = document.getElementById('edit-category').value;
+  const sub = document.getElementById('edit-subcategory').value;
+  updateTypeFields(cat);
+  updateAttributeFields(cat, sub, existingAttrs);
   document.getElementById('overlay-edit').style.display = '';
   setTimeout(() => document.getElementById('edit-part-code').focus(), 60);
 }
@@ -80,6 +90,12 @@ function openEditModal(comp) {
 function setField(id, value) {
   const el = document.getElementById(id);
   if (el) el.value = value ?? '';
+}
+
+/** Safely parse the JSON attributes string stored in the database. */
+function parseAttrs(raw) {
+  if (!raw) return {};
+  try { return JSON.parse(raw) || {}; } catch (_) { return {}; }
 }
 
 // ============================================================
@@ -127,6 +143,32 @@ function updateTypeFields(category) {
   const lblI = document.getElementById('lbl-current-max');
   if (lblV) lblV.textContent = type === 'capacitor' ? 'Voltage Rating (V)' : 'Voltage Max (V)';
   if (lblI) lblI.textContent = type === 'transistor' ? 'Current Max / I_D (A)' : 'Current Max (A)';
+}
+
+/**
+ * Renders (or hides) the "Advanced Parameters" section based on
+ * the selected category and subcategory. Preserves existing
+ * attribute values passed via `attrs`.
+ *
+ * @param {string} category
+ * @param {string} [subcategory]
+ * @param {Object} [attrs]  - existing attribute values (from DB)
+ */
+function updateAttributeFields(category, subcategory = '', attrs = {}) {
+  const section   = document.getElementById('attr-fields-section');
+  const container = document.getElementById('attr-fields-container');
+  const titleEl   = document.getElementById('attr-fields-title');
+  if (!section || !container) return;
+
+  const schema = getSchemaForCategory(category, subcategory);
+  if (schema) {
+    titleEl.textContent = schema.label;
+    renderAttributeFields(container, schema, attrs);
+    section.style.display = '';
+  } else {
+    section.style.display = 'none';
+    container.innerHTML = '';
+  }
 }
 
 /** Builds a description string from the form fields based on component type. */
@@ -207,7 +249,16 @@ function initEditForm() {
 
   // Dynamic type fields when category changes
   catInput?.addEventListener('input', function() {
+    const sub = document.getElementById('edit-subcategory')?.value || '';
     updateTypeFields(this.value);
+    updateAttributeFields(this.value, sub);
+  });
+
+  // Refresh attribute fields when subcategory changes (BJT vs MOSFET distinction)
+  const subInput = document.getElementById('edit-subcategory');
+  subInput?.addEventListener('input', function() {
+    const cat = document.getElementById('edit-category')?.value || '';
+    updateAttributeFields(cat, this.value);
   });
 
   // Auto-fill: use Description text to suggest Category + Subcategory
@@ -226,6 +277,7 @@ function initEditForm() {
     const subEl = document.getElementById('edit-subcategory');
     if (result.category)    { catEl.value = result.category;    updateTypeFields(result.category); }
     if (result.subcategory) { subEl.value = result.subcategory; }
+    updateAttributeFields(catEl.value, subEl.value);
     showToast(`Category set from description: ${result.category}`, 'success');
   });
 
@@ -252,6 +304,12 @@ function initEditForm() {
       setField('edit-voltage-max', data.voltage_max);
     if (data.current_max != null && !document.getElementById('edit-current-max').value)
       setField('edit-current-max', data.current_max);
+    // Refresh attribute section in case category/subcategory changed
+    updateTypeFields(document.getElementById('edit-category').value);
+    updateAttributeFields(
+      document.getElementById('edit-category').value,
+      document.getElementById('edit-subcategory').value
+    );
     showToast(`Data applied from built-in database for "${partCode}"`, 'success');
   });
 }
@@ -292,6 +350,7 @@ async function handleSave() {
     resistance:   document.getElementById('edit-resistance')?.value.trim() || '',
     tolerance:    document.getElementById('edit-tolerance')?.value.trim()  || '',
     power_rating: parseOptFloat('edit-power-rating'),
+    attributes:   collectAttributeValues(document.getElementById('attr-fields-container')),
   };
 
   const saveBtn = document.getElementById('btn-save-component');

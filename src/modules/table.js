@@ -74,6 +74,22 @@ function qtyBadge(q) {
   return `<span class="${q <= lowStockThreshold() ? 'qty-badge low' : 'qty-badge'}">${q}</span>`;
 }
 
+/**
+ * Safely read a value from the `attributes` JSON column of a component row.
+ * Returns `defaultVal` when the key is absent or the JSON is invalid.
+ */
+function getAttr(comp, key, defaultVal = null) {
+  try {
+    const attrs = typeof comp.attributes === 'string'
+      ? JSON.parse(comp.attributes || '{}')
+      : (comp.attributes || {});
+    const val = attrs[key];
+    return (val !== undefined && val !== null && val !== '') ? val : defaultVal;
+  } catch (_) {
+    return defaultVal;
+  }
+}
+
 // ============================================================
 // Category-specific column configuration
 // ============================================================
@@ -92,6 +108,44 @@ const DEFAULT_COLS = [
 ];
 
 const CATEGORY_COL_OVERRIDES = {
+  'MOSFETs': [
+    { key:'part_code',   label:'Part Code',   sort:'part_code',   width:'col-pc',      render: c => `<span class="td-truncate mono" style="font-size:12px;font-weight:500" title="${escHtml(c.part_code)}">${escHtml(c.part_code)}</span>` },
+    { key:'subcategory', label:'Channel',     sort:'subcategory', width:'col-sub',      render: c => {
+      const ch = getAttr(c, 'channel') || c.subcategory;
+      return ch ? `<span class="badge badge-sub">${escHtml(ch)}</span>` : '';
+    }},
+    { key:'quantity',    label:'Qty',         sort:'quantity',    width:'num col-qty',  render: c => { const q=Number(c.quantity)||0; return qtyBadge(q); } },
+    { key:'voltage_max', label:'V_DS (V)',    sort:'voltage_max', width:'num col-vmax', render: c => c.voltage_max != null ? `<span class="mono" style="font-size:11px">${c.voltage_max}V</span>` : '' },
+    { key:'current_max', label:'I_D (A)',     sort:'current_max', width:'num col-imax', render: c => c.current_max != null ? `<span class="mono" style="font-size:11px">${c.current_max}A</span>` : '' },
+    { key:'_rds_on',     label:'R_DS(on)',    sort:'',            width:'num col-vmax', render: c => { const v=getAttr(c,'rds_on'); return v != null ? `<span class="mono" style="font-size:11px">${v}mΩ</span>` : ''; } },
+    { key:'_vgs_th',     label:'V_GS(th)',    sort:'',            width:'num col-imax', render: c => { const v=getAttr(c,'vgs_th'); return v != null ? `<span class="mono" style="font-size:11px">${v}V</span>` : ''; } },
+    { key:'package',     label:'Package',     sort:'package',     width:'col-pkg',      render: c => `<span class="td-truncate mono" style="font-size:11px">${escHtml(c.package)}</span>` },
+    { key:'description', label:'Description', sort:'description', width:'col-desc',     render: c => `<span class="td-truncate" style="font-size:12px;color:var(--text-secondary)" title="${escHtml(c.description)}">${escHtml(c.description)}</span>` },
+  ],
+  'BJTs': [
+    { key:'part_code',   label:'Part Code',   sort:'part_code',   width:'col-pc',      render: c => `<span class="td-truncate mono" style="font-size:12px;font-weight:500" title="${escHtml(c.part_code)}">${escHtml(c.part_code)}</span>` },
+    { key:'subcategory', label:'Type',        sort:'subcategory', width:'col-sub',      render: c => {
+      const t = getAttr(c, 'bjt_type') || c.subcategory;
+      return t ? `<span class="badge badge-sub">${escHtml(t)}</span>` : '';
+    }},
+    { key:'quantity',    label:'Qty',         sort:'quantity',    width:'num col-qty',  render: c => { const q=Number(c.quantity)||0; return qtyBadge(q); } },
+    { key:'_hfe',        label:'h_FE (β)',    sort:'',            width:'num col-vmax', render: c => { const v=getAttr(c,'hfe'); return v != null ? `<span class="mono" style="font-size:11px">${v}</span>` : ''; } },
+    { key:'voltage_max', label:'V_CEO (V)',   sort:'voltage_max', width:'num col-vmax', render: c => c.voltage_max != null ? `<span class="mono" style="font-size:11px">${c.voltage_max}V</span>` : '' },
+    { key:'current_max', label:'I_C (A)',     sort:'current_max', width:'num col-imax', render: c => c.current_max != null ? `<span class="mono" style="font-size:11px">${c.current_max}A</span>` : '' },
+    { key:'_vce_sat',    label:'V_CE(sat)',   sort:'',            width:'num col-imax', render: c => { const v=getAttr(c,'vce_sat'); return v != null ? `<span class="mono" style="font-size:11px">${v}V</span>` : ''; } },
+    { key:'package',     label:'Package',     sort:'package',     width:'col-pkg',      render: c => `<span class="td-truncate mono" style="font-size:11px">${escHtml(c.package)}</span>` },
+    { key:'description', label:'Description', sort:'description', width:'col-desc',     render: c => `<span class="td-truncate" style="font-size:12px;color:var(--text-secondary)" title="${escHtml(c.description)}">${escHtml(c.description)}</span>` },
+  ],
+  'IGBTs': [
+    { key:'part_code',   label:'Part Code',   sort:'part_code',   width:'col-pc',      render: c => `<span class="td-truncate mono" style="font-size:12px;font-weight:500" title="${escHtml(c.part_code)}">${escHtml(c.part_code)}</span>` },
+    { key:'subcategory', label:'Type',        sort:'subcategory', width:'col-sub',      render: c => c.subcategory ? `<span class="badge badge-sub">${escHtml(c.subcategory)}</span>` : '' },
+    { key:'quantity',    label:'Qty',         sort:'quantity',    width:'num col-qty',  render: c => { const q=Number(c.quantity)||0; return qtyBadge(q); } },
+    { key:'voltage_max', label:'V_CES (V)',   sort:'voltage_max', width:'num col-vmax', render: c => c.voltage_max != null ? `<span class="mono" style="font-size:11px">${c.voltage_max}V</span>` : '' },
+    { key:'current_max', label:'I_C (A)',     sort:'current_max', width:'num col-imax', render: c => c.current_max != null ? `<span class="mono" style="font-size:11px">${c.current_max}A</span>` : '' },
+    { key:'_vce_sat',    label:'V_CE(sat)',   sort:'',            width:'num col-imax', render: c => { const v=getAttr(c,'vce_sat'); return v != null ? `<span class="mono" style="font-size:11px">${v}V</span>` : ''; } },
+    { key:'package',     label:'Package',     sort:'package',     width:'col-pkg',      render: c => `<span class="td-truncate mono" style="font-size:11px">${escHtml(c.package)}</span>` },
+    { key:'description', label:'Description', sort:'description', width:'col-desc',     render: c => `<span class="td-truncate" style="font-size:12px;color:var(--text-secondary)" title="${escHtml(c.description)}">${escHtml(c.description)}</span>` },
+  ],
   'Transistors': [
     { key:'part_code',   label:'Part Code',  sort:'part_code',   width:'col-pc',   render: c => `<span class="td-truncate mono" style="font-size:12px;font-weight:500" title="${escHtml(c.part_code)}">${escHtml(c.part_code)}</span>` },
     { key:'subcategory', label:'Type',       sort:'subcategory', width:'col-sub',   render: c => c.subcategory ? `<span class="badge badge-sub">${escHtml(c.subcategory)}</span>` : '' },
@@ -710,6 +764,10 @@ async function showDetail(comp) {
     ? `<span class="detail-value ${cls}">${escHtml(String(v))}</span>`
     : `<span class="detail-value empty">—</span>`;
 
+  // Parse stored JSON attributes
+  let parsedAttrs = {};
+  try { parsedAttrs = JSON.parse(comp.attributes || '{}') || {}; } catch (_) {}
+
   // Spec cards — pulled from effective (component OR hardcoded DB)
   const specCards = [
     comp.resistance ? `<div class="spec-card">
@@ -749,6 +807,66 @@ async function showDetail(comp) {
       <span class="spec-value" style="font-size:11px;font-family:var(--font-body)">${escHtml(effective.manufacturer)}</span>
     </div>` : '',
   ].filter(Boolean);
+
+  // Attribute spec cards — from JSON attributes column (category-specific params)
+  const ATTR_LABELS = {
+    // MOSFET
+    channel: 'Channel', vgs_th: 'V_GS(th)', vgs_max: 'V_GS Max', rds_on: 'R_DS(on)',
+    qg: 'Gate Charge', ciss: 'C_ISS',
+    // BJT
+    bjt_type: 'Type', hfe: 'h_FE (β)', vce_sat: 'V_CE(sat)', vceo: 'V_CEO', ft: 'f_T',
+    // IGBT
+    vces: 'V_CES', vge_th: 'V_GE(th)',
+    // Thyristor
+    vdrm: 'V_DRM', it_av: 'I_T(AV)', igt: 'I_GT', vgt: 'V_GT', tq: 'Turn-off',
+    // Diode
+    diode_type: 'Diode Type', vf: 'V_F', trr: 't_rr', ir: 'I_R',
+    // Zener
+    vz: 'V_Z', iz_max: 'I_Z Max', pz: 'Power', ztol: 'Tolerance',
+    // LED
+    color: 'Color', if_max: 'I_F Max', wavelength: 'Wavelength', luminosity: 'Luminosity',
+    // Op-amp
+    channels: 'Channels', v_supply: 'Supply', gbw: 'GBW', slew_rate: 'Slew Rate', vos: 'V_OS',
+    // Voltage regulator
+    reg_type: 'Type', v_out: 'V_OUT', v_in_max: 'V_IN Max', i_out: 'I_OUT Max', dropout: 'Dropout',
+    // Crystal
+    frequency: 'Frequency', load_cap: 'Load Cap.', freq_tol: 'Tolerance',
+    // Inductor
+    inductance: 'Inductance', isat: 'I_SAT', dcr: 'DCR', srf: 'SRF',
+    // Transformer
+    turns_ratio: 'Turns Ratio', power_va: 'Power', freq_range: 'Freq. Range',
+    // Sensor
+    interface: 'Interface', measurement: 'Measures', range: 'Range',
+    accuracy: 'Accuracy', supply_v: 'Supply',
+    // MCU
+    core: 'CPU Core', freq_max: 'Max Freq.', flash: 'Flash', ram: 'RAM', io_pins: 'I/O Pins',
+  };
+  const ATTR_UNITS = {
+    vgs_th: 'V', vgs_max: 'V', rds_on: 'mΩ', qg: 'nC', ciss: 'pF',
+    vce_sat: 'V', vceo: 'V', ft: 'MHz',
+    vces: 'V', vge_th: 'V',
+    vdrm: 'V', it_av: 'A', igt: 'mA', vgt: 'V', tq: 'µs',
+    vf: 'V', trr: 'ns', ir: 'µA',
+    vz: 'V', iz_max: 'mA', pz: 'W', ztol: '%',
+    if_max: 'mA', wavelength: 'nm', luminosity: 'mcd',
+    gbw: 'MHz', slew_rate: 'V/µs', vos: 'mV',
+    v_out: 'V', v_in_max: 'V', i_out: 'A', dropout: 'V',
+    frequency: 'MHz', load_cap: 'pF', freq_tol: 'ppm',
+    inductance: 'µH', isat: 'A', dcr: 'mΩ', srf: 'MHz',
+    power_va: 'VA',
+    freq_max: 'MHz', flash: 'KB', ram: 'KB',
+  };
+  const attrCards = Object.entries(parsedAttrs)
+    .filter(([, v]) => v !== '' && v !== null && v !== undefined)
+    .map(([k, v]) => {
+      const label = ATTR_LABELS[k] || k;
+      const unit  = ATTR_UNITS[k]  ? ` ${ATTR_UNITS[k]}` : '';
+      return `<div class="spec-card">
+        <span class="spec-label">${escHtml(label)}</span>
+        <span class="spec-value" style="font-size:13px">${escHtml(String(v))}${unit ? `<span class="spec-unit">${escHtml(unit)}</span>` : ''}</span>
+      </div>`;
+    });
+
 
   // Datasheet URL from component or DB — sanitize to https?:// only
   const rawUrl       = comp.datasheet_url || (dbRecord && dbRecord.datasheet_url) || '';
@@ -823,6 +941,12 @@ async function showDetail(comp) {
     ${specCards.length > 0 ? `
     <div class="detail-section-title">Key Specifications</div>
     <div class="spec-grid">${specCards.join('')}</div>
+    ` : ''}
+
+    <!-- Category-specific advanced parameters (from JSON attributes column) -->
+    ${attrCards.length > 0 ? `
+    <div class="detail-section-title">Advanced Parameters</div>
+    <div class="spec-grid">${attrCards.join('')}</div>
     ` : ''}
 
     <!-- Description / Notes -->
