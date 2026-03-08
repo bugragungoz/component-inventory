@@ -134,32 +134,43 @@ export async function upsertComponents(rows, mode = 'merge') {
 
     if (!part_code) continue;
 
+    // New components without a category land in Uncategorized.
+    // In merge mode, never overwrite an existing category/subcategory with an empty value.
+    const catVal    = category    || 'Uncategorized';
+    const subVal    = subcategory || '';
+    const qtyVal    = parseLocaleNumber(quantity)   ?? 0;
+    const vMaxVal   = parseLocaleNumber(voltage_max);
+    const iMaxVal   = parseLocaleNumber(current_max);
+    const priceVal  = parseLocaleNumber(unit_price);
+
     await state.db.execute(
       `INSERT INTO components
         (part_code, category, subcategory, quantity, package, manufacturer, mpn, location,
          voltage_max, current_max, description, datasheet_url, unit_price, notes, image_path)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
        ON CONFLICT(part_code) DO UPDATE SET
-         category=excluded.category,
-         subcategory=excluded.subcategory,
-         quantity=excluded.quantity,
-         package=excluded.package,
-         manufacturer=excluded.manufacturer,
-         mpn=excluded.mpn,
-         location=excluded.location,
-         voltage_max=excluded.voltage_max,
-         current_max=excluded.current_max,
-         description=excluded.description,
-         datasheet_url=excluded.datasheet_url,
-         unit_price=excluded.unit_price,
-         notes=excluded.notes,
-         updated_at=datetime('now')`,
-      [part_code, category || '', subcategory || '', Number(quantity) || 0, pkg || '',
+         category    = CASE WHEN excluded.category    != '' AND excluded.category != 'Uncategorized'
+                            THEN excluded.category    ELSE components.category    END,
+         subcategory = CASE WHEN excluded.subcategory != ''
+                            THEN excluded.subcategory ELSE components.subcategory END,
+         quantity    = excluded.quantity,
+         package     = CASE WHEN excluded.package  != '' THEN excluded.package  ELSE components.package  END,
+         manufacturer= CASE WHEN excluded.manufacturer != '' THEN excluded.manufacturer ELSE components.manufacturer END,
+         mpn         = CASE WHEN excluded.mpn  != '' THEN excluded.mpn  ELSE components.mpn  END,
+         location    = CASE WHEN excluded.location != '' THEN excluded.location ELSE components.location END,
+         voltage_max = CASE WHEN excluded.voltage_max IS NOT NULL THEN excluded.voltage_max ELSE components.voltage_max END,
+         current_max = CASE WHEN excluded.current_max IS NOT NULL THEN excluded.current_max ELSE components.current_max END,
+         description = CASE WHEN excluded.description != '' THEN excluded.description ELSE components.description END,
+         datasheet_url=CASE WHEN excluded.datasheet_url != '' THEN excluded.datasheet_url ELSE components.datasheet_url END,
+         unit_price  = CASE WHEN excluded.unit_price IS NOT NULL THEN excluded.unit_price ELSE components.unit_price END,
+         notes       = CASE WHEN excluded.notes != '' THEN excluded.notes ELSE components.notes END,
+         updated_at  = datetime('now')`,
+      [part_code, catVal, subVal, isNaN(qtyVal) ? 0 : qtyVal, pkg || '',
        manufacturer || '', mpn || '', location || '',
-       voltage_max ? Number(voltage_max) : null,
-       current_max ? Number(current_max) : null,
+       (vMaxVal != null && !isNaN(vMaxVal)) ? vMaxVal : null,
+       (iMaxVal != null && !isNaN(iMaxVal)) ? iMaxVal : null,
        description || '', datasheet_url || '',
-       unit_price ? Number(unit_price) : null, notes || '', '']
+       (priceVal != null && !isNaN(priceVal)) ? priceVal : null, notes || '', '']
     );
   }
   await triggerBackup();
@@ -416,6 +427,36 @@ function initSearch() {
 // ============================================================
 // Toast
 // ============================================================
+// Parses numbers in both English (1,234.56) and Turkish/European (1.234,56 or 3,90) formats.
+export function parseLocaleNumber(str) {
+  if (str === undefined || str === null || str === '') return null;
+  const s = String(str).trim().replace(/\s/g, '');
+  if (s === '' || s === '-') return null;
+  const hasDot   = s.includes('.');
+  const hasComma = s.includes(',');
+  let normalized = s;
+  if (hasDot && hasComma) {
+    // Determine decimal separator by which appears last
+    if (s.lastIndexOf(',') > s.lastIndexOf('.')) {
+      // Turkish/European: "1.234,56" → 1234.56
+      normalized = s.replace(/\./g, '').replace(',', '.');
+    } else {
+      // English: "1,234.56" → 1234.56
+      normalized = s.replace(/,/g, '');
+    }
+  } else if (hasComma && !hasDot) {
+    const parts = s.split(',');
+    // If only two parts and last part has 1-3 digits, treat comma as decimal
+    if (parts.length === 2 && parts[1].length >= 1 && parts[1].length <= 3) {
+      normalized = s.replace(',', '.');
+    } else {
+      normalized = s.replace(/,/g, '');
+    }
+  }
+  const n = parseFloat(normalized);
+  return isNaN(n) ? null : n;
+}
+
 export function showToast(message, type = 'info', duration = 3000) {
   const container = document.getElementById('toast-container');
   const toast = document.createElement('div');

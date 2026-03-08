@@ -1,4 +1,5 @@
-import { upsertComponents, showToast, escHtml } from '../app.js';
+import { upsertComponents, showToast, escHtml, parseLocaleNumber } from '../app.js';
+import { invoke } from '@tauri-apps/api/core';
 
 // Normalize Turkish diacritics to ASCII for header matching
 function asciiNormalize(str) {
@@ -202,9 +203,18 @@ function getMappedHeaderNames(rows) {
 // ============================================================
 const URL_RE = /^https?:\/\/.+/i;
 
+const WARN_LABELS = {
+  quantity:     'Qty: not a valid number or out of range',
+  unit_price:   'Price: not a valid number',
+  voltage_max:  'Voltage Max: not a valid number',
+  current_max:  'Current Max: not a valid number',
+  datasheet_url:'Datasheet URL: not a valid http/https URL',
+};
+
 function validateRows(rows) {
   let warnCount = 0;
   let errorCount = 0;
+  const warnReasons = {};
 
   const validated = rows.map(row => {
     const warnings = [];
@@ -214,18 +224,19 @@ function validateRows(rows) {
       errors.push('part_code');
     }
 
-    const qty = Number(row.quantity);
-    if (row.quantity !== '' && (isNaN(qty) || qty < 0 || qty > 999999)) {
+    // Use locale-aware parser so Turkish "3,90" is treated as 3.90
+    const qty = parseLocaleNumber(row.quantity);
+    if (row.quantity && row.quantity !== '' && (qty === null || qty < 0 || qty > 999999)) {
       warnings.push('quantity');
     }
 
-    const vMax = Number(row.voltage_max);
-    if (row.voltage_max !== '' && (isNaN(vMax) || vMax < 0 || vMax > 100000)) {
+    const vMax = parseLocaleNumber(row.voltage_max);
+    if (row.voltage_max && row.voltage_max !== '' && (vMax === null || vMax < 0 || vMax > 100000)) {
       warnings.push('voltage_max');
     }
 
-    const iMax = Number(row.current_max);
-    if (row.current_max !== '' && (isNaN(iMax) || iMax < 0 || iMax > 10000)) {
+    const iMax = parseLocaleNumber(row.current_max);
+    if (row.current_max && row.current_max !== '' && (iMax === null || iMax < 0 || iMax > 10000)) {
       warnings.push('current_max');
     }
 
@@ -233,18 +244,19 @@ function validateRows(rows) {
       warnings.push('datasheet_url');
     }
 
-    const price = Number(row.unit_price);
-    if (row.unit_price !== '' && (isNaN(price) || price < 0)) {
+    const price = parseLocaleNumber(row.unit_price);
+    if (row.unit_price && row.unit_price !== '' && (price === null || price < 0)) {
       warnings.push('unit_price');
     }
 
+    warnings.forEach(k => { warnReasons[k] = (warnReasons[k] || 0) + 1; });
     warnCount  += warnings.length;
     errorCount += errors.length;
 
     return { ...row, _warnings: warnings, _errors: errors };
   });
 
-  return { rows: validated, warnCount, errorCount };
+  return { rows: validated, warnCount, errorCount, warnReasons };
 }
 
 // ============================================================
@@ -428,15 +440,20 @@ function parseCSVWithDelimiter(text, delimiter) {
 function buildPreviewHTML(rows) {
   if (!rows.length) return '<p style="color:var(--text-tertiary)">No recognizable rows found.</p>';
 
-  const { rows: validated, warnCount, errorCount } = validateRows(rows);
+  const { rows: validated, warnCount, errorCount, warnReasons } = validateRows(rows);
   const sample = validated.slice(0, 8);
   const keys   = Object.keys(sample[0]).filter(k => !k.startsWith('_'));
+
+  const warnDetailLines = Object.entries(warnReasons)
+    .map(([k, n]) => `${n}x ${WARN_LABELS[k] || k}`)
+    .join(' &nbsp;|&nbsp; ');
 
   const summaryHtml = (warnCount + errorCount) > 0 ? `
     <div class="import-validation-summary">
       <span class="val-ok">&#10003; ${rows.length} rows</span>
       ${warnCount  > 0 ? `<span class="val-warn">&#9888; ${warnCount} warnings</span>`  : ''}
       ${errorCount > 0 ? `<span class="val-err">&#10007; ${errorCount} errors</span>`   : ''}
+      ${warnDetailLines ? `<div style="margin-top:4px;font-size:11px;color:var(--text-tertiary)">${warnDetailLines}</div>` : ''}
     </div>` : `<div class="import-validation-summary"><span class="val-ok">&#10003; ${rows.length} rows — no issues</span></div>`;
 
   const tableHtml = `<table>
@@ -490,10 +507,29 @@ export function initImport() {
     const mode = document.querySelector('input[name="import-mode"]:checked').value;
     confirmBtn.disabled = true;
     try {
+      // Snapshot before writing so the user can undo
+      let preImportBackupPath = null;
+      try {
+        const backups = await invoke('list_backups_cmd');
+        if (backups && backups.length > 0) preImportBackupPath = backups[0].path;
+      } catch (_) {}
+
       await upsertComponents(_importRows, mode);
-      showToast(`Imported ${_importRows.length} components (${mode} mode)`, 'success');
+
+      const count = _importRows.length;
       document.getElementById('overlay-import').style.display = 'none';
       resetImportUI();
+
+      if (preImportBackupPath) {
+        showToast(
+          `Imported ${count} components. Warnings were number-format issues (auto-fixed). ` +
+          `To undo: open Backup panel and restore the latest snapshot.`,
+          'success',
+          7000
+        );
+      } else {
+        showToast(`Imported ${count} components (${mode} mode)`, 'success');
+      }
     } catch (err) {
       showToast('Import failed: ' + (err.message || err), 'error');
     } finally {
