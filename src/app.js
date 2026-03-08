@@ -526,8 +526,8 @@ function initSettings() {
     if (inp) inp.value = '';
   });
 
-  // ---- GitHub link ----
-  document.getElementById('btn-github-link')?.addEventListener('click', async e => {
+  // ---- GitHub links ----
+  const openGitHub = async (e) => {
     e.preventDefault();
     try {
       const { openUrl } = await import('@tauri-apps/plugin-opener');
@@ -535,7 +535,9 @@ function initSettings() {
     } catch {
       window.open('https://github.com/bugragungoz/component-inventory', '_blank');
     }
-  });
+  };
+  document.getElementById('btn-github-link')?.addEventListener('click', openGitHub);
+  document.getElementById('btn-github-sidebar')?.addEventListener('click', openGitHub);
 }
 
 function populateSettings() {

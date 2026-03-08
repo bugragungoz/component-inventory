@@ -2008,22 +2008,41 @@ tr.row-selected { background: var(--accent-dim) !important; }
   font-size: 0.85rem;
   color: var(--text-primary);
 }
-.btn-github-about {
+.settings-github-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--border);
+  gap: 8px;
+}
+.settings-github-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.btn-github-banner-open {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  font-size: 0.78rem;
-  color: var(--text-secondary);
-  text-decoration: none;
-  padding: 6px 10px;
-  border: 1px solid var(--border);
+  justify-content: center;
+  width: 26px;
+  height: 26px;
   border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
   background: transparent;
+  color: var(--text-tertiary);
+  text-decoration: none;
+  flex-shrink: 0;
   transition: color 0.15s, border-color 0.15s, background 0.15s;
-  cursor: pointer;
-  font-family: inherit;
 }
-.btn-github-about:hover {
+.btn-github-banner-open:hover {
   color: var(--accent-color);
   border-color: var(--accent-color);
   background: rgba(217, 119, 87, 0.07);
