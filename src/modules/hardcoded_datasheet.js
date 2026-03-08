@@ -198,7 +198,257 @@ const DB = {
   // ================================================================
   'SRD05VDC':  { category:'Relays', subcategory:'Relay', package:'SRD-05VDC-SL-C', manufacturer:'Songle', voltage_max:250, current_max:10, description:'5V Coil Electromagnetic Relay 250VAC/10A', datasheet_url:'https://www.electrodragon.com/w/images/d/de/EDS_SRD.pdf' },
   'G5LE14DC5': { category:'Relays', subcategory:'Relay', package:'PC mount', manufacturer:'Omron', voltage_max:250, current_max:10, description:'Relay 5V Coil SPDT 10A', datasheet_url:'https://omronfs.omron.com/en_US/ecb/products/pdf/en-g5le.pdf' },
+
+  // ================================================================
+  // Thyristors / SCR
+  // ================================================================
+  'BT151800R': { category:'Thyristors', subcategory:'SCR', package:'TO-220', manufacturer:'Various', voltage_max:800, current_max:12, description:'SCR Thyristor 800V 12A', datasheet_url:'https://www.nxp.com/docs/en/data-sheet/BT151.pdf' },
+  'BT151600R': { category:'Thyristors', subcategory:'SCR', package:'TO-220', manufacturer:'Various', voltage_max:600, current_max:12, description:'SCR Thyristor 600V 12A', datasheet_url:'https://www.nxp.com/docs/en/data-sheet/BT151.pdf' },
+  'BT151':     { category:'Thyristors', subcategory:'SCR', package:'TO-220', manufacturer:'Various', voltage_max:800, current_max:12, description:'SCR Thyristor', datasheet_url:'https://www.nxp.com/docs/en/data-sheet/BT151.pdf' },
+  'BT136600E': { category:'Thyristors', subcategory:'TRIAC', package:'TO-220', manufacturer:'Various', voltage_max:600, current_max:4, description:'TRIAC 600V 4A', datasheet_url:'https://www.nxp.com/docs/en/data-sheet/BT136.pdf' },
+  'BT136800E': { category:'Thyristors', subcategory:'TRIAC', package:'TO-220', manufacturer:'Various', voltage_max:800, current_max:4, description:'TRIAC 800V 4A', datasheet_url:'https://www.nxp.com/docs/en/data-sheet/BT136.pdf' },
+  'BT139600E': { category:'Thyristors', subcategory:'TRIAC', package:'TO-220', manufacturer:'Various', voltage_max:600, current_max:16, description:'TRIAC 600V 16A', datasheet_url:'https://www.nxp.com/docs/en/data-sheet/BT139.pdf' },
+  'BTA16600B': { category:'Thyristors', subcategory:'TRIAC', package:'TO-220AB', manufacturer:'STMicroelectronics', voltage_max:600, current_max:16, description:'TRIAC 600V 16A', datasheet_url:'https://www.st.com/resource/en/datasheet/bta16.pdf' },
+  'TIC226D':   { category:'Thyristors', subcategory:'TRIAC', package:'TO-220', manufacturer:'Texas Instruments', voltage_max:400, current_max:8, description:'TRIAC 400V 8A', datasheet_url:'https://www.ti.com/lit/ds/symlink/tic226.pdf' },
+  'TIC226M':   { category:'Thyristors', subcategory:'TRIAC', package:'TO-220', manufacturer:'Texas Instruments', voltage_max:600, current_max:8, description:'TRIAC 600V 8A', datasheet_url:'https://www.ti.com/lit/ds/symlink/tic226.pdf' },
+  'MAC97A6':   { category:'Thyristors', subcategory:'TRIAC', package:'TO-92', manufacturer:'ON Semi', voltage_max:400, current_max:0.6, description:'TRIAC 400V 600mA', datasheet_url:'https://www.onsemi.com/pdf/datasheet/mac97a-d.pdf' },
+  'BTX38600R': { category:'Thyristors', subcategory:'SCR', package:'TO-220', manufacturer:'Various', voltage_max:600, current_max:16, description:'SCR Thyristor 600V 16A', datasheet_url:'' },
+  'BTX38800R': { category:'Thyristors', subcategory:'SCR', package:'TO-220', manufacturer:'Various', voltage_max:800, current_max:16, description:'SCR Thyristor 800V 16A', datasheet_url:'' },
+  'MCR100':    { category:'Thyristors', subcategory:'SCR', package:'TO-92', manufacturer:'ON Semi', voltage_max:400, current_max:0.8, description:'Sensitive Gate SCR 400V 800mA', datasheet_url:'https://www.onsemi.com/pdf/datasheet/mcr100-d.pdf' },
+
+  // ================================================================
+  // TVS Diodes — P6KE Series (extended)
+  // ================================================================
+  'P6KE6V8A':  { category:'Diodes', subcategory:'TVS', package:'DO-15', manufacturer:'Various', voltage_max:6.8,  current_max:null, description:'TVS Diode 6.8V Bidirectional', datasheet_url:'https://www.vishay.com/docs/88367/p6ke6v8a.pdf' },
+  'P6KE10A':   { category:'Diodes', subcategory:'TVS', package:'DO-15', manufacturer:'Various', voltage_max:10,   current_max:null, description:'TVS Diode 10V Unidirectional', datasheet_url:'https://www.vishay.com/docs/88367/p6ke6v8a.pdf' },
+  'P6KE15A':   { category:'Diodes', subcategory:'TVS', package:'DO-15', manufacturer:'Various', voltage_max:15,   current_max:null, description:'TVS Diode 15V Unidirectional', datasheet_url:'https://www.vishay.com/docs/88367/p6ke6v8a.pdf' },
+  'P6KE15CA':  { category:'Diodes', subcategory:'TVS', package:'DO-15', manufacturer:'Various', voltage_max:15,   current_max:null, description:'TVS Diode 15V Bidirectional', datasheet_url:'https://www.vishay.com/docs/88367/p6ke6v8a.pdf' },
+  'P6KE18A':   { category:'Diodes', subcategory:'TVS', package:'DO-15', manufacturer:'Various', voltage_max:18,   current_max:null, description:'TVS Diode 18V Unidirectional', datasheet_url:'https://www.vishay.com/docs/88367/p6ke6v8a.pdf' },
+  'P6KE22A':   { category:'Diodes', subcategory:'TVS', package:'DO-15', manufacturer:'Various', voltage_max:22,   current_max:null, description:'TVS Diode 22V Unidirectional', datasheet_url:'https://www.vishay.com/docs/88367/p6ke6v8a.pdf' },
+  'P6KE27A':   { category:'Diodes', subcategory:'TVS', package:'DO-15', manufacturer:'Various', voltage_max:27,   current_max:null, description:'TVS Diode 27V Unidirectional', datasheet_url:'https://www.vishay.com/docs/88367/p6ke6v8a.pdf' },
+  'P6KE33A':   { category:'Diodes', subcategory:'TVS', package:'DO-15', manufacturer:'Various', voltage_max:33,   current_max:null, description:'TVS Diode 33V Unidirectional', datasheet_url:'https://www.vishay.com/docs/88367/p6ke6v8a.pdf' },
+  'P6KE40A':   { category:'Diodes', subcategory:'TVS', package:'DO-15', manufacturer:'Various', voltage_max:40,   current_max:null, description:'TVS Diode 40V Unidirectional', datasheet_url:'https://www.vishay.com/docs/88367/p6ke6v8a.pdf' },
+  'P6KE47A':   { category:'Diodes', subcategory:'TVS', package:'DO-15', manufacturer:'Various', voltage_max:47,   current_max:null, description:'TVS Diode 47V Unidirectional', datasheet_url:'https://www.vishay.com/docs/88367/p6ke6v8a.pdf' },
+  'P6KE51A':   { category:'Diodes', subcategory:'TVS', package:'DO-15', manufacturer:'Various', voltage_max:51,   current_max:null, description:'TVS Diode 51V Unidirectional', datasheet_url:'https://www.vishay.com/docs/88367/p6ke6v8a.pdf' },
+  'P6KE68A':   { category:'Diodes', subcategory:'TVS', package:'DO-15', manufacturer:'Various', voltage_max:68,   current_max:null, description:'TVS Diode 68V Unidirectional', datasheet_url:'https://www.vishay.com/docs/88367/p6ke6v8a.pdf' },
+  'P6KE100A':  { category:'Diodes', subcategory:'TVS', package:'DO-15', manufacturer:'Various', voltage_max:100,  current_max:null, description:'TVS Diode 100V Unidirectional', datasheet_url:'https://www.vishay.com/docs/88367/p6ke6v8a.pdf' },
+  'SMBJ5V0A':  { category:'Diodes', subcategory:'TVS', package:'SMB', manufacturer:'Various', voltage_max:5,    current_max:null, description:'SMB TVS Diode 5V', datasheet_url:'https://www.vishay.com/docs/88375/smbj5v0a.pdf' },
+  'SMBJ15A':   { category:'Diodes', subcategory:'TVS', package:'SMB', manufacturer:'Various', voltage_max:15,   current_max:null, description:'SMB TVS Diode 15V', datasheet_url:'https://www.vishay.com/docs/88375/smbj5v0a.pdf' },
+  'SMBJ24A':   { category:'Diodes', subcategory:'TVS', package:'SMB', manufacturer:'Various', voltage_max:24,   current_max:null, description:'SMB TVS Diode 24V', datasheet_url:'https://www.vishay.com/docs/88375/smbj5v0a.pdf' },
+  'SMBJ36A':   { category:'Diodes', subcategory:'TVS', package:'SMB', manufacturer:'Various', voltage_max:36,   current_max:null, description:'SMB TVS Diode 36V', datasheet_url:'https://www.vishay.com/docs/88375/smbj5v0a.pdf' },
+  'BZW06P15':  { category:'Diodes', subcategory:'TVS', package:'DO-15', manufacturer:'Various', voltage_max:15,   current_max:null, description:'TVS Diode 6W 15V', datasheet_url:'' },
+
+  // ================================================================
+  // Gate Drivers (extended)
+  // ================================================================
+  'IR2110':    { category:'ICs', subcategory:'Gate Driver', package:'DIP-14', manufacturer:'Infineon/IR', voltage_max:600, current_max:2,   description:'High/Low Side Gate Driver 600V 2A', datasheet_url:'https://www.infineon.com/dgdl/Infineon-IR2110-DataSheet-v01_00-EN.pdf?fileId=5546d462533600a4015355c7c1c31671' },
+  'IR2110S':   { category:'ICs', subcategory:'Gate Driver', package:'SOIC-16', manufacturer:'Infineon/IR', voltage_max:600, current_max:2,   description:'High/Low Side Gate Driver 600V 2A SMD', datasheet_url:'https://www.infineon.com/dgdl/Infineon-IR2110-DataSheet-v01_00-EN.pdf?fileId=5546d462533600a4015355c7c1c31671' },
+  'IR2112':    { category:'ICs', subcategory:'Gate Driver', package:'DIP-14', manufacturer:'Infineon/IR', voltage_max:600, current_max:1.9, description:'High/Low Side Gate Driver 600V with Shutdown', datasheet_url:'https://www.infineon.com/dgdl/Infineon-IR2112-DataSheet-v01_00-EN.pdf?fileId=5546d462533600a4015355c7c1c31672' },
+  'IR2112S':   { category:'ICs', subcategory:'Gate Driver', package:'SOIC-16', manufacturer:'Infineon/IR', voltage_max:600, current_max:1.9, description:'High/Low Side Gate Driver 600V with Shutdown SMD', datasheet_url:'https://www.infineon.com/dgdl/Infineon-IR2112-DataSheet-v01_00-EN.pdf?fileId=5546d462533600a4015355c7c1c31672' },
+  'IR2113':    { category:'ICs', subcategory:'Gate Driver', package:'DIP-14', manufacturer:'Infineon/IR', voltage_max:600, current_max:2,   description:'High/Low Side Gate Driver 600V 2A', datasheet_url:'https://www.infineon.com/dgdl/Infineon-IR2113-DataSheet-v01_00-EN.pdf' },
+  'IR2104':    { category:'ICs', subcategory:'Gate Driver', package:'DIP-8', manufacturer:'Infineon/IR', voltage_max:600, current_max:1.9, description:'Half-Bridge Gate Driver 600V', datasheet_url:'https://www.infineon.com/dgdl/Infineon-IR2104-DataSheet-v01_00-EN.pdf' },
+  'TC4420':    { category:'ICs', subcategory:'Gate Driver', package:'TO-220-5', manufacturer:'Microchip', voltage_max:18, current_max:6,   description:'Single MOSFET Driver 6A Inverting', datasheet_url:'https://ww1.microchip.com/downloads/en/DeviceDoc/21419e.pdf' },
+  'TC4429':    { category:'ICs', subcategory:'Gate Driver', package:'TO-220-5', manufacturer:'Microchip', voltage_max:18, current_max:6,   description:'Single MOSFET Driver 6A Non-Inverting', datasheet_url:'https://ww1.microchip.com/downloads/en/DeviceDoc/21419e.pdf' },
+  'MCP14E4':   { category:'ICs', subcategory:'Gate Driver', package:'DIP-8', manufacturer:'Microchip', voltage_max:18, current_max:4,   description:'Dual 4A High-Speed Gate Driver', datasheet_url:'https://ww1.microchip.com/downloads/en/DeviceDoc/20005320A.pdf' },
+  'FAN7842':   { category:'ICs', subcategory:'Gate Driver', package:'SOP-8', manufacturer:'Fairchild/ON', voltage_max:600, current_max:1.5, description:'High/Low Side Gate Driver 600V', datasheet_url:'' },
+
+  // ================================================================
+  // Op-Amps (extended)
+  // ================================================================
+  'MCP6002':   { category:'ICs', subcategory:'Op-Amp', package:'DIP-8', manufacturer:'Microchip', voltage_max:6, current_max:null, description:'Dual 1 MHz Low Power Op-Amp', datasheet_url:'https://ww1.microchip.com/downloads/en/DeviceDoc/21733j.pdf' },
+  'MCP6002T':  { category:'ICs', subcategory:'Op-Amp', package:'SOT-23-8', manufacturer:'Microchip', voltage_max:6, current_max:null, description:'Dual 1 MHz Low Power Op-Amp SMD', datasheet_url:'https://ww1.microchip.com/downloads/en/DeviceDoc/21733j.pdf' },
+  'MCP6004':   { category:'ICs', subcategory:'Op-Amp', package:'DIP-14', manufacturer:'Microchip', voltage_max:6, current_max:null, description:'Quad 1 MHz Low Power Op-Amp', datasheet_url:'https://ww1.microchip.com/downloads/en/DeviceDoc/21733j.pdf' },
+  'TL081':     { category:'ICs', subcategory:'Op-Amp', package:'DIP-8', manufacturer:'Texas Instruments', voltage_max:36, current_max:null, description:'JFET Input Op-Amp', datasheet_url:'https://www.ti.com/lit/ds/symlink/tl081.pdf' },
+  'TL082':     { category:'ICs', subcategory:'Op-Amp', package:'DIP-8', manufacturer:'Texas Instruments', voltage_max:36, current_max:null, description:'Dual JFET Input Op-Amp', datasheet_url:'https://www.ti.com/lit/ds/symlink/tl082.pdf' },
+  'OP07':      { category:'ICs', subcategory:'Op-Amp', package:'DIP-8', manufacturer:'Various', voltage_max:36, current_max:null, description:'Low Offset Precision Op-Amp', datasheet_url:'https://www.ti.com/lit/ds/symlink/op07d.pdf' },
+  'OPA2134':   { category:'ICs', subcategory:'Op-Amp', package:'DIP-8', manufacturer:'Texas Instruments', voltage_max:36, current_max:null, description:'High Performance Audio Op-Amp', datasheet_url:'https://www.ti.com/lit/ds/symlink/opa2134.pdf' },
+  'LMV358':    { category:'ICs', subcategory:'Op-Amp', package:'SOT-23-8', manufacturer:'Texas Instruments', voltage_max:5.5, current_max:null, description:'Dual Low Voltage Op-Amp', datasheet_url:'https://www.ti.com/lit/ds/symlink/lmv358.pdf' },
+
+  // ================================================================
+  // Touch / Capacitive Sensing ICs
+  // ================================================================
+  'TTP223':    { category:'ICs', subcategory:'Touch Sensor', package:'SOT-23-6', manufacturer:'TONTEK', voltage_max:5.5, current_max:null, description:'1-Key Capacitive Touch Sensor IC', datasheet_url:'https://www.sunrom.com/get/835300' },
+  'TTP223BA6': { category:'ICs', subcategory:'Touch Sensor', package:'SOT-23-6', manufacturer:'TONTEK', voltage_max:5.5, current_max:null, description:'1-Key Capacitive Touch Sensor IC (Active High)', datasheet_url:'https://www.sunrom.com/get/835300' },
+  'TTP224':    { category:'ICs', subcategory:'Touch Sensor', package:'SOP-16', manufacturer:'TONTEK', voltage_max:5.5, current_max:null, description:'4-Key Capacitive Touch Sensor IC', datasheet_url:'' },
+  'AT42QT1010':{ category:'ICs', subcategory:'Touch Sensor', package:'SOT-23', manufacturer:'Microchip', voltage_max:5.5, current_max:null, description:'1-Channel Capacitive Touch Sensor', datasheet_url:'https://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-9179-AT42-QTouch-BSW-AT42QT1010_Datasheet.pdf' },
+
+  // ================================================================
+  // LED Driver ICs
+  // ================================================================
+  'QX5253':    { category:'ICs', subcategory:'LED Driver', package:'SOT-23-5', manufacturer:'QX', voltage_max:30, current_max:1.5, description:'Inductorless LED Driver IC', datasheet_url:'' },
+  'PT4115':    { category:'ICs', subcategory:'LED Driver', package:'SOT-89-5', manufacturer:'PowTech', voltage_max:30, current_max:1.2, description:'Constant Current LED Driver', datasheet_url:'' },
+  'WS2811':    { category:'ICs', subcategory:'LED Driver', package:'SOP-8', manufacturer:'WorldSemi', voltage_max:6, current_max:0.018, description:'3-Channel LED Driver with Programmable Interface', datasheet_url:'https://cdn-shop.adafruit.com/datasheets/WS2811.pdf' },
+  'WS2812B':   { category:'ICs', subcategory:'LED Driver', package:'LED-5050', manufacturer:'WorldSemi', voltage_max:5.3, current_max:0.06, description:'Intelligent Control LED Integrated Light Source', datasheet_url:'https://cdn-shop.adafruit.com/datasheets/WS2812B.pdf' },
+  'HY2213':    { category:'ICs', subcategory:'LED Driver', package:'SOT-23-5', manufacturer:'Hynetek', voltage_max:24, current_max:0.35, description:'Boost LED Constant Current Driver', datasheet_url:'' },
+
+  // ================================================================
+  // Resistors — Common Series (for pattern matching, explicit entries)
+  // ================================================================
+  'CFR25':     { category:'Resistors', subcategory:'Carbon Film', package:'0207', manufacturer:'Various', voltage_max:350, current_max:null, description:'Carbon Film Resistor 1/4W', datasheet_url:'' },
+  'CFR50':     { category:'Resistors', subcategory:'Carbon Film', package:'0207', manufacturer:'Various', voltage_max:350, current_max:null, description:'Carbon Film Resistor 1/2W', datasheet_url:'' },
+  'MF25':      { category:'Resistors', subcategory:'Metal Film', package:'0207', manufacturer:'Various', voltage_max:200, current_max:null, description:'Metal Film Resistor 1/4W 1%', datasheet_url:'' },
+  'MF50':      { category:'Resistors', subcategory:'Metal Film', package:'0207', manufacturer:'Various', voltage_max:200, current_max:null, description:'Metal Film Resistor 1/2W 1%', datasheet_url:'' },
+  'RS1W':      { category:'Resistors', subcategory:'Wirewound', package:'Axial', manufacturer:'Various', voltage_max:500, current_max:null, description:'Wirewound Resistor 1W', datasheet_url:'' },
+  'RS2W':      { category:'Resistors', subcategory:'Wirewound', package:'Axial', manufacturer:'Various', voltage_max:500, current_max:null, description:'Wirewound Resistor 2W', datasheet_url:'' },
+  'SQP10':     { category:'Resistors', subcategory:'Wirewound', package:'SQP', manufacturer:'Various', voltage_max:500, current_max:null, description:'Wirewound Resistor 10W', datasheet_url:'' },
+
+  // ================================================================
+  // Capacitors — Common Types (for pattern matching)
+  // ================================================================
+  'ECAP':      { category:'Capacitors', subcategory:'Electrolytic', package:'Radial', manufacturer:'Various', voltage_max:null, current_max:null, description:'Aluminium Electrolytic Capacitor', datasheet_url:'' },
+  'MMK':       { category:'Capacitors', subcategory:'Film', package:'Radial', manufacturer:'Various', voltage_max:null, current_max:null, description:'Metallized Polyester Film Capacitor', datasheet_url:'' },
+  'MKT':       { category:'Capacitors', subcategory:'Film', package:'Radial', manufacturer:'Various', voltage_max:null, current_max:null, description:'Metallized Polyester Film Capacitor', datasheet_url:'' },
+  'MKP':       { category:'Capacitors', subcategory:'Film', package:'Radial', manufacturer:'Various', voltage_max:null, current_max:null, description:'Metallized Polypropylene Film Capacitor', datasheet_url:'' },
+
+  // ================================================================
+  // Additional MOSFETs (SMD)
+  // ================================================================
+  'IRFR024N':  { category:'Transistors', subcategory:'Power MOSFET', package:'D-PAK', manufacturer:'Vishay/IR', voltage_max:55,  current_max:17,  description:'N-Ch Power MOSFET 55V 17A D-PAK', datasheet_url:'https://www.vishay.com/docs/91263/sihfr024n.pdf' },
+  'IRF7317':   { category:'Transistors', subcategory:'Power MOSFET', package:'SOIC-8', manufacturer:'Vishay/IR', voltage_max:30,  current_max:6.5,  description:'Dual N+P-Ch MOSFET 30V 6.5A SOIC-8', datasheet_url:'https://www.vishay.com/docs/91275/irf7317.pdf' },
+  'AO3400':    { category:'Transistors', subcategory:'Power MOSFET', package:'SOT-23', manufacturer:'Alpha & Omega', voltage_max:30, current_max:5.7, description:'N-Ch MOSFET 30V 5.7A SOT-23', datasheet_url:'https://www.aosmd.com/pdfs/datasheet/AO3400A.pdf' },
+  'AO3401':    { category:'Transistors', subcategory:'Power MOSFET', package:'SOT-23', manufacturer:'Alpha & Omega', voltage_max:30, current_max:4,   description:'P-Ch MOSFET 30V 4A SOT-23', datasheet_url:'https://www.aosmd.com/pdfs/datasheet/AO3401A.pdf' },
+  'SI2302':    { category:'Transistors', subcategory:'Power MOSFET', package:'SOT-23', manufacturer:'Vishay/Siliconix', voltage_max:20, current_max:2.7, description:'N-Ch MOSFET 20V 2.7A SOT-23', datasheet_url:'https://www.vishay.com/docs/70611/si2302ds.pdf' },
+  'STN3NF06L': { category:'Transistors', subcategory:'Power MOSFET', package:'SOT-223', manufacturer:'STMicroelectronics', voltage_max:60, current_max:3.5, description:'N-Ch MOSFET 60V 3.5A SOT-223', datasheet_url:'https://www.st.com/resource/en/datasheet/stn3nf06l.pdf' },
+
+  // ================================================================
+  // Additional BJTs (SMD)
+  // ================================================================
+  'MMBT3904':  { category:'Transistors', subcategory:'BJT NPN', package:'SOT-23', manufacturer:'Various', voltage_max:40, current_max:0.2, description:'NPN Transistor 40V 200mA SOT-23', datasheet_url:'https://www.onsemi.com/pdf/datasheet/mmbt3904-d.pdf' },
+  'MMBT3906':  { category:'Transistors', subcategory:'BJT PNP', package:'SOT-23', manufacturer:'Various', voltage_max:40, current_max:0.2, description:'PNP Transistor 40V 200mA SOT-23', datasheet_url:'https://www.onsemi.com/pdf/datasheet/mmbt3906-d.pdf' },
+  'MMBT2222A': { category:'Transistors', subcategory:'BJT NPN', package:'SOT-23', manufacturer:'Various', voltage_max:40, current_max:0.6, description:'NPN Switching Transistor 40V 600mA SOT-23', datasheet_url:'' },
+  'S8050':     { category:'Transistors', subcategory:'BJT NPN', package:'TO-92', manufacturer:'Various', voltage_max:25, current_max:0.5, description:'NPN Transistor 25V 500mA', datasheet_url:'' },
+  'S8550':     { category:'Transistors', subcategory:'BJT PNP', package:'TO-92', manufacturer:'Various', voltage_max:25, current_max:0.5, description:'PNP Transistor 25V 500mA', datasheet_url:'' },
+  'SS8050':    { category:'Transistors', subcategory:'BJT NPN', package:'SOT-23', manufacturer:'Various', voltage_max:25, current_max:0.5, description:'NPN Transistor 25V 500mA SOT-23', datasheet_url:'' },
+
+  // ================================================================
+  // Additional SMD Diodes
+  // ================================================================
+  'M7':        { category:'Diodes', subcategory:'Rectifier', package:'SMA', manufacturer:'Various', voltage_max:1000,current_max:1, description:'General Purpose Rectifier 1000V 1A SMA (1N4007 equiv)', datasheet_url:'https://www.diodes.com/assets/Datasheets/ds28001.pdf' },
+  'SS34':      { category:'Diodes', subcategory:'Schottky', package:'SMA', manufacturer:'Various', voltage_max:40,  current_max:3, description:'Schottky Rectifier 40V 3A SMA', datasheet_url:'' },
+  'SS54':      { category:'Diodes', subcategory:'Schottky', package:'SMA', manufacturer:'Various', voltage_max:40,  current_max:5, description:'Schottky Rectifier 40V 5A SMA', datasheet_url:'' },
+  'B5819W':    { category:'Diodes', subcategory:'Schottky', package:'SOD-123', manufacturer:'Various', voltage_max:40,  current_max:1, description:'Schottky Rectifier 40V 1A SOD-123', datasheet_url:'' },
+  'BAV99':     { category:'Diodes', subcategory:'Small Signal', package:'SOT-23', manufacturer:'Various', voltage_max:70,  current_max:0.2, description:'Dual Series Small Signal Diode 70V 200mA', datasheet_url:'https://www.vishay.com/docs/85661/bav99.pdf' },
+  'MBRS140T3': { category:'Diodes', subcategory:'Schottky', package:'SMB', manufacturer:'ON Semi', voltage_max:40,  current_max:1, description:'Schottky Power Rectifier 40V 1A', datasheet_url:'https://www.onsemi.com/pdf/datasheet/mbrs1100t3-d.pdf' },
+  'STPS1H100A':{ category:'Diodes', subcategory:'Schottky', package:'SMA', manufacturer:'STMicroelectronics', voltage_max:100, current_max:1, description:'Schottky Rectifier 100V 1A', datasheet_url:'https://www.st.com/resource/en/datasheet/stps1h100a.pdf' },
+
+  // ================================================================
+  // Connectors & Headers
+  // ================================================================
+  'KF301':     { category:'Connectors', subcategory:'Terminal Block', package:'PCB-THT', manufacturer:'Dinkle/Various', voltage_max:300, current_max:15, description:'PCB Terminal Block 5mm Pitch', datasheet_url:'' },
+  'KF2EDGK':   { category:'Connectors', subcategory:'Terminal Block', package:'PCB-THT', manufacturer:'Dinkle/Various', voltage_max:300, current_max:10, description:'Pluggable Terminal Block 5.08mm Pitch', datasheet_url:'' },
+  'PH2S':      { category:'Connectors', subcategory:'Wire-to-Board', package:'JST', manufacturer:'JST', voltage_max:250, current_max:2, description:'JST-PH 2.0mm Pitch Connector', datasheet_url:'' },
+  'XH2P':      { category:'Connectors', subcategory:'Wire-to-Board', package:'JST', manufacturer:'JST', voltage_max:250, current_max:3, description:'JST-XH 2.5mm Pitch Connector', datasheet_url:'' },
+  'DS1136':    { category:'Connectors', subcategory:'IC Socket', package:'DIP', manufacturer:'Various', voltage_max:null, current_max:null, description:'DIP IC Socket', datasheet_url:'' },
+
+  // ================================================================
+  // Sensors
+  // ================================================================
+  'LM35':      { category:'Sensors', subcategory:'Temperature', package:'TO-92', manufacturer:'Texas Instruments', voltage_max:35, current_max:null, description:'Precision Centigrade Temperature Sensor', datasheet_url:'https://www.ti.com/lit/ds/symlink/lm35.pdf' },
+  'LM35DZ':    { category:'Sensors', subcategory:'Temperature', package:'TO-92', manufacturer:'Texas Instruments', voltage_max:35, current_max:null, description:'Precision Centigrade Temperature Sensor (0-100°C)', datasheet_url:'https://www.ti.com/lit/ds/symlink/lm35.pdf' },
+  'DS18B20':   { category:'Sensors', subcategory:'Temperature', package:'TO-92', manufacturer:'Maxim/DS', voltage_max:5.5, current_max:null, description:'1-Wire Digital Thermometer -55 to +125°C', datasheet_url:'https://datasheets.maximintegrated.com/en/ds/DS18B20.pdf' },
+  'DHT11':     { category:'Sensors', subcategory:'Humidity / Temp', package:'SIP-4', manufacturer:'AOSONG', voltage_max:5.5, current_max:null, description:'Digital Relative Humidity and Temperature Sensor', datasheet_url:'https://www.mouser.com/datasheet/2/758/DHT11-Technical-Data-Sheet-Translated-Version-1143054.pdf' },
+  'DHT22':     { category:'Sensors', subcategory:'Humidity / Temp', package:'SIP-4', manufacturer:'AOSONG', voltage_max:5.5, current_max:null, description:'Digital Humidity and Temperature Sensor ±0.5°C', datasheet_url:'https://cdn-shop.adafruit.com/datasheets/DHT22.pdf' },
+  'NTC10K':    { category:'Sensors', subcategory:'NTC Thermistor', package:'Radial', manufacturer:'Various', voltage_max:null, current_max:null, description:'NTC Thermistor 10kΩ at 25°C', datasheet_url:'' },
+  'PTC250':    { category:'Sensors', subcategory:'PTC Thermistor', package:'Radial', manufacturer:'Various', voltage_max:null, current_max:null, description:'PTC Thermistor Self-Resetting Fuse', datasheet_url:'' },
+  'ACS712':    { category:'Sensors', subcategory:'Current Sensor', package:'SOIC-8', manufacturer:'Allegro', voltage_max:5.5, current_max:5, description:'Hall Effect Current Sensor IC ±5/20/30A', datasheet_url:'https://www.allegromicro.com/~/media/Files/Datasheets/ACS712-Datasheet.ashx' },
+  'INA219':    { category:'Sensors', subcategory:'Current/Power', package:'SOIC-8', manufacturer:'Texas Instruments', voltage_max:26, current_max:null, description:'I2C Current/Power Monitor', datasheet_url:'https://www.ti.com/lit/ds/symlink/ina219.pdf' },
+
+  // ================================================================
+  // Additional Voltage Regulators
+  // ================================================================
+  'XL4016':    { category:'ICs', subcategory:'Buck Converter', package:'TO-263-5', manufacturer:'XLSEMI', voltage_max:40, current_max:8, description:'High Efficiency PWM Buck DC/DC Converter 8A', datasheet_url:'' },
+  'LM2596':    { category:'ICs', subcategory:'Buck Converter', package:'TO-263-5', manufacturer:'Texas Instruments', voltage_max:40, current_max:3, description:'Simple Switcher Buck Converter 3A', datasheet_url:'https://www.ti.com/lit/ds/symlink/lm2596.pdf' },
+  'LM2576':    { category:'ICs', subcategory:'Buck Converter', package:'TO-220-5', manufacturer:'Texas Instruments', voltage_max:40, current_max:3, description:'Simple Switcher Buck Converter 3A', datasheet_url:'https://www.ti.com/lit/ds/symlink/lm2576.pdf' },
+  'MC34063':   { category:'ICs', subcategory:'DC-DC Converter', package:'DIP-8', manufacturer:'Various', voltage_max:40, current_max:1.5, description:'Step Up/Down/Inverting Switching Regulator', datasheet_url:'https://www.onsemi.com/pdf/datasheet/mc34063a-d.pdf' },
+  'XL6009':    { category:'ICs', subcategory:'Boost Converter', package:'SOP-8', manufacturer:'XLSEMI', voltage_max:40, current_max:4, description:'Boost/SEPIC/Flyback DC/DC Converter 4A', datasheet_url:'' },
+  'MT3608':    { category:'ICs', subcategory:'Boost Converter', package:'SOT-23-6', manufacturer:'Aerosemi', voltage_max:28, current_max:2, description:'2A High Efficiency Boost Converter', datasheet_url:'' },
+  'LTC3780':   { category:'ICs', subcategory:'Buck-Boost Converter', package:'SSOP-20', manufacturer:'Linear/Analog Devices', voltage_max:30, current_max:20, description:'High Efficiency Buck-Boost Converter', datasheet_url:'https://www.analog.com/media/en/technical-documentation/data-sheets/3780fc.pdf' },
+  'AS1117':    { category:'ICs', subcategory:'LDO Regulator', package:'SOT-223', manufacturer:'Various', voltage_max:15, current_max:0.8, description:'Low Dropout Regulator (AMS1117 equivalent)', datasheet_url:'' },
+  'LD1117':    { category:'ICs', subcategory:'LDO Regulator', package:'SOT-223', manufacturer:'STMicroelectronics', voltage_max:15, current_max:0.8, description:'Low Dropout Regulator (LM1117 equivalent)', datasheet_url:'https://www.st.com/resource/en/datasheet/ld1117.pdf' },
+
+  // ================================================================
+  // Additional Logic / MCU
+  // ================================================================
+  'ESP8266':   { category:'ICs', subcategory:'WiFi SoC', package:'Module', manufacturer:'Espressif', voltage_max:3.6, current_max:0.35, description:'Wi-Fi SoC 802.11 b/g/n', datasheet_url:'https://www.espressif.com/sites/default/files/documentation/esp8266-technical_reference_en.pdf' },
+  'ESP32':     { category:'ICs', subcategory:'WiFi+BT SoC', package:'Module', manufacturer:'Espressif', voltage_max:3.6, current_max:0.5, description:'Wi-Fi + Bluetooth SoC Dual Core', datasheet_url:'https://www.espressif.com/sites/default/files/documentation/esp32_datasheet_en.pdf' },
+  'SN74HC04':  { category:'ICs', subcategory:'Logic / Inverter', package:'DIP-14', manufacturer:'Texas Instruments', voltage_max:7, current_max:null, description:'Hex Inverter', datasheet_url:'https://www.ti.com/lit/ds/symlink/sn74hc04.pdf' },
+  'SN74HC14':  { category:'ICs', subcategory:'Logic / Inverter', package:'DIP-14', manufacturer:'Texas Instruments', voltage_max:7, current_max:null, description:'Hex Inverter Schmitt Trigger', datasheet_url:'https://www.ti.com/lit/ds/symlink/sn74hc14.pdf' },
+  'SN74HC08':  { category:'ICs', subcategory:'Logic / AND', package:'DIP-14', manufacturer:'Texas Instruments', voltage_max:7, current_max:null, description:'Quad 2-Input AND Gate', datasheet_url:'https://www.ti.com/lit/ds/symlink/sn74hc08.pdf' },
+  'SN74HC32':  { category:'ICs', subcategory:'Logic / OR', package:'DIP-14', manufacturer:'Texas Instruments', voltage_max:7, current_max:null, description:'Quad 2-Input OR Gate', datasheet_url:'https://www.ti.com/lit/ds/symlink/sn74hc32.pdf' },
+  'CD4053':    { category:'ICs', subcategory:'Logic / Mux', package:'DIP-16', manufacturer:'Various', voltage_max:15, current_max:null, description:'Triple 2-Channel Analog Mux/Demux', datasheet_url:'https://www.ti.com/lit/ds/symlink/cd4053b.pdf' },
+  'ATTINY13':  { category:'ICs', subcategory:'Microcontroller', package:'DIP-8', manufacturer:'Microchip/Atmel', voltage_max:5.5, current_max:0.2, description:'8-bit AVR MCU 1KB Flash', datasheet_url:'https://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-2535-8-bit-AVR-Microcontroller-ATtiny13A_Datasheet.pdf' },
+  'PIC12F675': { category:'ICs', subcategory:'Microcontroller', package:'DIP-8', manufacturer:'Microchip', voltage_max:5.5, current_max:null, description:'PIC MCU 1.75KB Flash, 64B SRAM', datasheet_url:'https://ww1.microchip.com/downloads/en/DeviceDoc/41190G.pdf' },
+
+  // ================================================================
+  // Communication ICs
+  // ================================================================
+  'MAX232':    { category:'ICs', subcategory:'RS-232 Driver', package:'DIP-16', manufacturer:'Maxim/TI', voltage_max:6, current_max:null, description:'RS-232 Driver/Receiver (±10V from +5V)', datasheet_url:'https://www.ti.com/lit/ds/symlink/max232.pdf' },
+  'MAX485':    { category:'ICs', subcategory:'RS-485 Transceiver', package:'DIP-8', manufacturer:'Maxim', voltage_max:5.25, current_max:null, description:'Low-Power RS-485/RS-422 Transceiver', datasheet_url:'https://datasheets.maximintegrated.com/en/ds/MAX1487-MAX491.pdf' },
+  'SI4463':    { category:'ICs', subcategory:'RF Transceiver', package:'QFN-20', manufacturer:'Silicon Labs', voltage_max:3.6, current_max:0.1, description:'High-Performance RF Transceiver 119-1050MHz', datasheet_url:'https://www.silabs.com/documents/public/data-sheets/Si4464-63-61-60.pdf' },
+  'NRF24L01':  { category:'ICs', subcategory:'RF Transceiver', package:'QFN-20', manufacturer:'Nordic Semi', voltage_max:3.6, current_max:0.013, description:'2.4GHz RF Transceiver', datasheet_url:'https://infocenter.nordicsemi.com/pdf/nRF24L01P_PS_v1.0.pdf' },
 };
+
+// ================================================================
+// Pattern-based lookup — catches entire component families
+// Each entry: { pattern: RegExp, result: {...fields} }
+// ================================================================
+const PATTERNS = [
+  // Resistors — Carbon Film (CFRxxSJT-xxx, CFRxxJ-xxx)
+  { pattern: /^CFR\d/,        result: { category:'Resistors',   subcategory:'Carbon Film',     package:'0207',    description:'Carbon Film Resistor' } },
+  // Resistors — Metal Film (MFxx)
+  { pattern: /^MF\d/,         result: { category:'Resistors',   subcategory:'Metal Film',      package:'0207',    description:'Metal Film Resistor 1%' } },
+  // Resistors — Wirewound (SQP, AKA RX)
+  { pattern: /^SQP\d/,        result: { category:'Resistors',   subcategory:'Wirewound',       package:'SQP',     description:'Wirewound Resistor' } },
+  // TVS Diodes — P6KE family
+  { pattern: /^P6KE/,         result: { category:'Diodes',      subcategory:'TVS',             package:'DO-15',   description:'TVS Transient Voltage Suppressor' } },
+  // TVS Diodes — SMBJ family
+  { pattern: /^SMBJ/,         result: { category:'Diodes',      subcategory:'TVS',             package:'SMB',     description:'SMB TVS Diode' } },
+  // TVS Diodes — BZW family
+  { pattern: /^BZW/,          result: { category:'Diodes',      subcategory:'TVS',             package:'DO-15',   description:'Transient Voltage Suppressor' } },
+  // Zener BZX55 / BZX85 family
+  { pattern: /^BZX\d+C/,      result: { category:'Diodes',      subcategory:'Zener',           package:'DO-35',   description:'Zener Diode' } },
+  // Zener 1N47xx family
+  { pattern: /^1N47\d{2}/,    result: { category:'Diodes',      subcategory:'Zener',           package:'DO-41',   description:'Zener Diode 1W' } },
+  // Rectifier 1N40xx family
+  { pattern: /^1N40\d{2}/,    result: { category:'Diodes',      subcategory:'Rectifier',       package:'DO-41',   description:'General Purpose Rectifier Diode' } },
+  // Thyristors BT1xx (SCR)
+  { pattern: /^BT1[3-9]\d/,   result: { category:'Thyristors',  subcategory:'SCR',             package:'TO-220',  description:'SCR Thyristor' } },
+  // Thyristors BT1xx (TRIAC — BT136/139)
+  { pattern: /^BT13[69]/,     result: { category:'Thyristors',  subcategory:'TRIAC',           package:'TO-220',  description:'TRIAC' } },
+  // TRIACs BTA family
+  { pattern: /^BTA\d/,        result: { category:'Thyristors',  subcategory:'TRIAC',           package:'TO-220',  description:'TRIAC' } },
+  // MOSFET — IRF family
+  { pattern: /^IRF\d/,        result: { category:'Transistors', subcategory:'Power MOSFET',    package:'TO-220',  description:'N-Ch Power MOSFET' } },
+  // MOSFET — IRFZ family
+  { pattern: /^IRFZ\d/,       result: { category:'Transistors', subcategory:'Power MOSFET',    package:'TO-220',  description:'N-Ch Power MOSFET' } },
+  // MOSFET — STP family
+  { pattern: /^STP\d/,        result: { category:'Transistors', subcategory:'Power MOSFET',    package:'TO-220',  description:'N-Ch Power MOSFET' } },
+  // Gate Drivers — IR21xx
+  { pattern: /^IR21\d{2}/,    result: { category:'ICs',         subcategory:'Gate Driver',     package:'DIP-14',  manufacturer:'Infineon/IR', description:'High/Low Side Gate Driver' } },
+  // PWM Controllers — UC38xx / UC39xx
+  { pattern: /^UC3[89]\d{2}/, result: { category:'ICs',         subcategory:'PWM Controller',  package:'DIP-8',   description:'Current Mode PWM Controller' } },
+  // Touch ICs — TTP family
+  { pattern: /^TTP2\d{2}/,    result: { category:'ICs',         subcategory:'Touch Sensor',    package:'SOT-23-6',manufacturer:'TONTEK', description:'Capacitive Touch Sensor IC' } },
+  // Op-Amps — MCP6xxx
+  { pattern: /^MCP6\d{3}/,    result: { category:'ICs',         subcategory:'Op-Amp',          package:'DIP-8',   manufacturer:'Microchip', description:'Low Power CMOS Op-Amp' } },
+  // LDO Regulators — LM78xx / LM79xx
+  { pattern: /^LM78\d{2}/,    result: { category:'ICs',         subcategory:'Linear Regulator',package:'TO-220',  description:'Fixed Positive Voltage Regulator' } },
+  { pattern: /^LM79\d{2}/,    result: { category:'ICs',         subcategory:'Linear Regulator',package:'TO-220',  description:'Fixed Negative Voltage Regulator' } },
+  // Optocouplers — MOC30xx
+  { pattern: /^MOC30\d{2}/,   result: { category:'ICs',         subcategory:'Optocoupler',     package:'DIP-6',   description:'Optoisolator Triac Driver Output' } },
+  // VIPER family — offline switcher ICs
+  { pattern: /^VIPER/,        result: { category:'ICs',         subcategory:'Power Switch',    package:'DIP-8',   manufacturer:'STMicroelectronics', description:'Off-Line SMPS Primary Switch' } },
+  // Schottky SMD M7 / SxYY pattern
+  { pattern: /^SS\d{2}$/,     result: { category:'Diodes',      subcategory:'Schottky',        package:'SMA',     description:'Schottky Barrier Rectifier' } },
+  // Crystals — numeric MHz
+  { pattern: /^\d{1,3}MHZ$/,  result: { category:'Crystals',    subcategory:'HC-49/S',         package:'HC-49/S', description:'Crystal Resonator' } },
+  // Relay SRD family
+  { pattern: /^SRD\d{2}/,     result: { category:'Relays',      subcategory:'Relay',           package:'PC mount',description:'Electromagnetic Relay' } },
+  // Electrolytic capacitors — common prefix patterns
+  { pattern: /^(UVR|UVZ|UCC|EEU|EEUFR)/,  result: { category:'Capacitors', subcategory:'Electrolytic', package:'Radial', description:'Aluminium Electrolytic Capacitor' } },
+  // IC socket DS1136 / DS1009 family
+  { pattern: /^DS113[0-9]/,   result: { category:'Connectors',  subcategory:'IC Socket',       package:'DIP',     description:'DIP IC Socket' } },
+];
 
 // ================================================================
 // Lookup function — normalises part code before searching
@@ -209,8 +459,7 @@ function normaliseKey(partCode) {
 
 /**
  * Lookup a component by part code.
- * Returns the matching record or null.
- * Tries exact match, then prefix/suffix match for code families (e.g. 1N4007 → 1N4007).
+ * Priority: exact DB match → prefix/suffix DB match → pattern match.
  */
 export function lookupComponent(partCode) {
   if (!partCode) return null;
@@ -220,11 +469,15 @@ export function lookupComponent(partCode) {
   // 1. Exact match
   if (DB[key]) return DB[key];
 
-  // 2. Partial key match — the DB key starts with or equals the query key,
-  //    or the query key starts with the DB key (handles suffix variants like "A" / "C").
+  // 2. Prefix/suffix DB key match — handles suffix variants like "A", "C", "T", package codes
   for (const [dbKey, val] of Object.entries(DB)) {
     if (key === dbKey) return val;
     if (key.startsWith(dbKey) || dbKey.startsWith(key)) return val;
+  }
+
+  // 3. Pattern-based family match
+  for (const { pattern, result } of PATTERNS) {
+    if (pattern.test(key)) return result;
   }
 
   return null;

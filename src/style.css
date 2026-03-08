@@ -1794,3 +1794,35 @@ textarea { resize: vertical; min-height: 52px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--mid-gray); }
+
+/* ================================================================
+   Bulk Categorize Modal
+   ================================================================ */
+.bulk-cat-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+.bulk-cat-table thead th {
+  position: sticky;
+  top: 0;
+  background: var(--surface-2);
+  padding: 10px 14px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+  z-index: 1;
+}
+.bulk-cat-table tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background 0.1s;
+}
+.bulk-cat-table tbody tr:hover { background: var(--surface-2); }
+.bulk-cat-table tbody td { padding: 9px 14px; vertical-align: middle; }
+.bulk-cat-table input[type="checkbox"] {
+  width: 15px; height: 15px; cursor: pointer; accent-color: var(--accent);
+}

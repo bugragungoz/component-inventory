@@ -5,7 +5,8 @@ import { initModals } from './modules/modals.js';
 import { initImport } from './modules/import.js';
 import { initExport } from './modules/export.js';
 import { initBackupUI } from './modules/backup.js';
-import { initLabels } from './modules/labels.js';
+import { initLabels }            from './modules/labels.js';
+import { initBulkCategorize }    from './modules/bulk_categorize.js';
 
 // ============================================================
 // State singleton
@@ -548,6 +549,7 @@ async function main() {
     initImport();
     initExport();
     initBackupUI();
+    initBulkCategorize();
 
     // Hide boot loader
     if (bootLoader) {

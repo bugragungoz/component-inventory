@@ -106,7 +106,8 @@ function initEditForm() {
       showToast(`"${partCode}" not found in built-in database`, 'info');
       return;
     }
-    if (data.category    && !document.getElementById('edit-category').value)    setField('edit-category',     data.category);
+    const curCat = document.getElementById('edit-category').value;
+    if (data.category    && (!curCat || curCat === 'Uncategorized'))            setField('edit-category',     data.category);
     if (data.subcategory && !document.getElementById('edit-subcategory').value) setField('edit-subcategory',  data.subcategory);
     if (data.package     && !document.getElementById('edit-package').value)     setField('edit-package',      data.package);
     if (data.manufacturer&& !document.getElementById('edit-manufacturer').value)setField('edit-manufacturer', data.manufacturer);
