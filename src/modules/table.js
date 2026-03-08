@@ -64,6 +64,17 @@ function openBulkDeleteConfirm(n) {
 }
 
 // ============================================================
+// Helpers
+// ============================================================
+function lowStockThreshold() {
+  return parseInt(localStorage.getItem('lowStockThreshold') || '1', 10);
+}
+
+function qtyBadge(q) {
+  return `<span class="${q <= lowStockThreshold() ? 'qty-badge low' : 'qty-badge'}">${q}</span>`;
+}
+
+// ============================================================
 // Category-specific column configuration
 // ============================================================
 // Columns: { key, label, numeric, width, render(c) }
@@ -74,7 +85,7 @@ const DEFAULT_COLS = [
   { key:'part_code',   label:'Part Code',    sort:'part_code',   width:'col-pc',  render: c => `<span class="td-truncate mono" style="font-size:12px;font-weight:500" title="${escHtml(c.part_code)}">${escHtml(c.part_code)}</span>` },
   { key:'category',    label:'Category',     sort:'category',    width:'col-cat', render: c => c.category ? `<span class="badge badge-cat">${escHtml(c.category)}</span>` : '' },
   { key:'subcategory', label:'Subcategory',  sort:'subcategory', width:'col-sub', render: c => c.subcategory ? `<span class="badge badge-sub">${escHtml(c.subcategory)}</span>` : '' },
-  { key:'quantity',    label:'Qty',          sort:'quantity',    width:'num col-qty', render: c => { const q=Number(c.quantity)||0; return `<span class="${q<=1?'qty-badge low':'qty-badge'}">${q}</span>`; } },
+  { key:'quantity',    label:'Qty',          sort:'quantity',    width:'num col-qty', render: c => { const q=Number(c.quantity)||0; return qtyBadge(q); } },
   { key:'voltage_max', label:'V Max',        sort:'voltage_max', width:'num col-vmax', render: c => c.voltage_max != null ? `<span class="mono" style="font-size:11px">${c.voltage_max}V</span>` : '' },
   { key:'current_max', label:'I Max',        sort:'current_max', width:'num col-imax', render: c => c.current_max != null ? `<span class="mono" style="font-size:11px">${c.current_max}A</span>` : '' },
   { key:'description', label:'Description',  sort:'description', width:'col-desc', render: c => `<span class="td-truncate" style="font-size:12px;color:var(--text-secondary)" title="${escHtml(c.description)}">${escHtml(c.description)}</span>` },
@@ -84,7 +95,7 @@ const CATEGORY_COL_OVERRIDES = {
   'Transistors': [
     { key:'part_code',   label:'Part Code',  sort:'part_code',   width:'col-pc',   render: c => `<span class="td-truncate mono" style="font-size:12px;font-weight:500" title="${escHtml(c.part_code)}">${escHtml(c.part_code)}</span>` },
     { key:'subcategory', label:'Type',       sort:'subcategory', width:'col-sub',   render: c => c.subcategory ? `<span class="badge badge-sub">${escHtml(c.subcategory)}</span>` : '' },
-    { key:'quantity',    label:'Qty',        sort:'quantity',    width:'num col-qty', render: c => { const q=Number(c.quantity)||0; return `<span class="${q<=1?'qty-badge low':'qty-badge'}">${q}</span>`; } },
+    { key:'quantity',    label:'Qty',        sort:'quantity',    width:'num col-qty', render: c => { const q=Number(c.quantity)||0; return qtyBadge(q); } },
     { key:'voltage_max', label:'VGS / VCE',  sort:'voltage_max', width:'num col-vmax', render: c => c.voltage_max != null ? `<span class="mono" style="font-size:11px">${c.voltage_max}V</span>` : '' },
     { key:'current_max', label:'ID / IC',    sort:'current_max', width:'num col-imax', render: c => c.current_max != null ? `<span class="mono" style="font-size:11px">${c.current_max}A</span>` : '' },
     { key:'package',     label:'Package',    sort:'package',     width:'col-pkg',   render: c => `<span class="td-truncate mono" style="font-size:11px">${escHtml(c.package)}</span>` },
@@ -94,7 +105,7 @@ const CATEGORY_COL_OVERRIDES = {
   'Diodes': [
     { key:'part_code',   label:'Part Code',  sort:'part_code',   width:'col-pc',   render: c => `<span class="td-truncate mono" style="font-size:12px;font-weight:500" title="${escHtml(c.part_code)}">${escHtml(c.part_code)}</span>` },
     { key:'subcategory', label:'Type',       sort:'subcategory', width:'col-sub',   render: c => c.subcategory ? `<span class="badge badge-sub">${escHtml(c.subcategory)}</span>` : '' },
-    { key:'quantity',    label:'Qty',        sort:'quantity',    width:'num col-qty', render: c => { const q=Number(c.quantity)||0; return `<span class="${q<=1?'qty-badge low':'qty-badge'}">${q}</span>`; } },
+    { key:'quantity',    label:'Qty',        sort:'quantity',    width:'num col-qty', render: c => { const q=Number(c.quantity)||0; return qtyBadge(q); } },
     { key:'voltage_max', label:'VR (V)',     sort:'voltage_max', width:'num col-vmax', render: c => c.voltage_max != null ? `<span class="mono" style="font-size:11px">${c.voltage_max}V</span>` : '' },
     { key:'current_max', label:'IF (A)',     sort:'current_max', width:'num col-imax', render: c => c.current_max != null ? `<span class="mono" style="font-size:11px">${c.current_max}A</span>` : '' },
     { key:'package',     label:'Package',    sort:'package',     width:'col-pkg',   render: c => `<span class="td-truncate mono" style="font-size:11px">${escHtml(c.package)}</span>` },
@@ -103,7 +114,7 @@ const CATEGORY_COL_OVERRIDES = {
   'Resistors': [
     { key:'part_code',   label:'Part Code',  sort:'part_code',   width:'col-pc',   render: c => `<span class="td-truncate mono" style="font-size:12px;font-weight:500" title="${escHtml(c.part_code)}">${escHtml(c.part_code)}</span>` },
     { key:'subcategory', label:'Type',       sort:'subcategory', width:'col-sub',   render: c => c.subcategory ? `<span class="badge badge-sub">${escHtml(c.subcategory)}</span>` : '' },
-    { key:'quantity',    label:'Qty',        sort:'quantity',    width:'num col-qty', render: c => { const q=Number(c.quantity)||0; return `<span class="${q<=1?'qty-badge low':'qty-badge'}">${q}</span>`; } },
+    { key:'quantity',    label:'Qty',        sort:'quantity',    width:'num col-qty', render: c => { const q=Number(c.quantity)||0; return qtyBadge(q); } },
     { key:'resistance',  label:'Resistance', sort:'resistance',  width:'col-pkg',   render: c => c.resistance ? `<span class="mono" style="font-size:11px">${escHtml(c.resistance)}</span>` : '' },
     { key:'tolerance',   label:'Tolerance',  sort:'tolerance',   width:'col-pkg',   render: c => c.tolerance  ? `<span class="mono" style="font-size:11px">${escHtml(c.tolerance)}</span>` : '' },
     { key:'power_rating',label:'Power (W)',  sort:'power_rating',width:'num col-vmax', render: c => c.power_rating != null ? `<span class="mono" style="font-size:11px">${c.power_rating}W</span>` : '' },
@@ -113,7 +124,7 @@ const CATEGORY_COL_OVERRIDES = {
   'Capacitors': [
     { key:'part_code',   label:'Part Code',  sort:'part_code',   width:'col-pc',   render: c => `<span class="td-truncate mono" style="font-size:12px;font-weight:500" title="${escHtml(c.part_code)}">${escHtml(c.part_code)}</span>` },
     { key:'subcategory', label:'Type',       sort:'subcategory', width:'col-sub',   render: c => c.subcategory ? `<span class="badge badge-sub">${escHtml(c.subcategory)}</span>` : '' },
-    { key:'quantity',    label:'Qty',        sort:'quantity',    width:'num col-qty', render: c => { const q=Number(c.quantity)||0; return `<span class="${q<=1?'qty-badge low':'qty-badge'}">${q}</span>`; } },
+    { key:'quantity',    label:'Qty',        sort:'quantity',    width:'num col-qty', render: c => { const q=Number(c.quantity)||0; return qtyBadge(q); } },
     { key:'resistance',  label:'Capacitance',sort:'resistance',  width:'col-pkg',   render: c => c.resistance ? `<span class="mono" style="font-size:11px">${escHtml(c.resistance)}</span>` : '' },
     { key:'tolerance',   label:'Tolerance',  sort:'tolerance',   width:'col-pkg',   render: c => c.tolerance  ? `<span class="mono" style="font-size:11px">${escHtml(c.tolerance)}</span>` : '' },
     { key:'voltage_max', label:'Rated V',    sort:'voltage_max', width:'num col-vmax', render: c => c.voltage_max != null ? `<span class="mono" style="font-size:11px">${c.voltage_max}V</span>` : '' },
@@ -123,7 +134,7 @@ const CATEGORY_COL_OVERRIDES = {
   'Thyristors': [
     { key:'part_code',   label:'Part Code',  sort:'part_code',   width:'col-pc',   render: c => `<span class="td-truncate mono" style="font-size:12px;font-weight:500" title="${escHtml(c.part_code)}">${escHtml(c.part_code)}</span>` },
     { key:'subcategory', label:'Type',       sort:'subcategory', width:'col-sub',   render: c => c.subcategory ? `<span class="badge badge-sub">${escHtml(c.subcategory)}</span>` : '' },
-    { key:'quantity',    label:'Qty',        sort:'quantity',    width:'num col-qty', render: c => { const q=Number(c.quantity)||0; return `<span class="${q<=1?'qty-badge low':'qty-badge'}">${q}</span>`; } },
+    { key:'quantity',    label:'Qty',        sort:'quantity',    width:'num col-qty', render: c => { const q=Number(c.quantity)||0; return qtyBadge(q); } },
     { key:'voltage_max', label:'VR (V)',     sort:'voltage_max', width:'num col-vmax', render: c => c.voltage_max != null ? `<span class="mono" style="font-size:11px">${c.voltage_max}V</span>` : '' },
     { key:'current_max', label:'IT (A)',     sort:'current_max', width:'num col-imax', render: c => c.current_max != null ? `<span class="mono" style="font-size:11px">${c.current_max}A</span>` : '' },
     { key:'package',     label:'Package',    sort:'package',     width:'col-pkg',   render: c => `<span class="td-truncate mono" style="font-size:11px">${escHtml(c.package)}</span>` },

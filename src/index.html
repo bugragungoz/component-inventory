@@ -119,8 +119,8 @@
     </nav>
 
     <!-- Location tree -->
-    <div class="sidebar-divider"></div>
-    <div class="sidebar-section-label">
+    <div class="sidebar-divider" id="locations-divider"></div>
+    <div class="sidebar-section-label" id="locations-label">
       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
       Locations
     </div>
@@ -624,6 +624,8 @@
         </button>
       </div>
       <div class="modal-body" style="padding:0">
+
+        <!-- Appearance -->
         <div class="settings-section">
           <div class="settings-label">Appearance</div>
           <div class="settings-row">
@@ -633,16 +635,33 @@
               <button class="btn btn-ghost btn-sm" id="s-theme-light">Light</button>
             </div>
           </div>
+        </div>
+
+        <!-- Inventory -->
+        <div class="settings-section">
+          <div class="settings-label">Inventory</div>
           <div class="settings-row">
-            <span>Default View</span>
-            <div class="settings-theme-btns">
-              <button class="btn btn-ghost btn-sm" id="s-view-compact">Compact</button>
-              <button class="btn btn-ghost btn-sm" id="s-view-detailed">Detailed</button>
+            <div>
+              <div>Show Locations</div>
+              <div class="settings-hint">Display the Locations panel in the sidebar</div>
             </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="s-locations-enabled">
+              <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            </label>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div>Low Stock Threshold</div>
+              <div class="settings-hint">Highlight quantity at or below this value</div>
+            </div>
+            <input type="number" id="s-low-stock" class="settings-input-sm" min="0" max="99" value="1">
           </div>
         </div>
+
+        <!-- Backup -->
         <div class="settings-section">
-          <div class="settings-label">Data</div>
+          <div class="settings-label">Backup</div>
           <div class="settings-row">
             <span>Auto-backup interval</span>
             <select id="s-backup-interval" class="settings-select">
@@ -652,24 +671,38 @@
               <option value="60">1 hour</option>
             </select>
           </div>
-          <div class="settings-row">
-            <span>Export format default</span>
-            <select id="s-export-default" class="settings-select">
-              <option value="csv">CSV</option>
-              <option value="json">JSON</option>
-              <option value="excel">Excel</option>
-            </select>
+        </div>
+
+        <!-- Export -->
+        <div class="settings-section">
+          <div class="settings-label">Export</div>
+          <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:6px">
+            <span>Default Export Folder</span>
+            <div style="display:flex;gap:8px;width:100%">
+              <input type="text" id="s-export-folder" class="settings-input-path" placeholder="System Downloads folder" readonly>
+              <button class="btn btn-ghost btn-sm" id="s-export-browse">Browse</button>
+              <button class="btn btn-ghost btn-sm" id="s-export-clear" title="Reset to default">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+            <div class="settings-hint">When set, CSV/JSON exports save directly to this folder without a dialog.</div>
           </div>
         </div>
+
+        <!-- About -->
         <div class="settings-section">
           <div class="settings-label">About</div>
           <div class="settings-row settings-about">
             <span class="settings-about-name">Component Inventory</span>
-            <span class="settings-about-ver">v0.1.3</span>
+            <span class="settings-about-ver">v0.1.5</span>
           </div>
-          <div class="settings-row" style="font-size:0.78rem;color:var(--text-secondary)">
-            Local-first electronic component inventory manager.<br>
-            Data stored in SQLite on your device.
+          <div class="settings-row" style="font-size:0.78rem;color:var(--text-secondary);display:block">
+            Local-first electronic component inventory manager.
+            Data stored in SQLite on your device. No telemetry, no cloud.
+          </div>
+          <div class="settings-row" id="s-db-path-row" style="flex-direction:column;align-items:flex-start;gap:4px">
+            <span style="font-size:0.75rem;color:var(--text-tertiary)">Database path</span>
+            <span id="s-db-path" class="mono" style="font-size:0.68rem;color:var(--text-tertiary);word-break:break-all">—</span>
           </div>
         </div>
       </div>

@@ -476,22 +476,81 @@ function initTheme() {
   });
 }
 
+// ============================================================
+// Locations visibility
+// ============================================================
+export function applyLocationsVisibility() {
+  const enabled = localStorage.getItem('locationsEnabled') === 'true';
+  ['locations-divider', 'locations-label', 'location-tree'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = enabled ? '' : 'none';
+  });
+}
+
 function initSettings() {
+  // ---- Open settings ----
   document.getElementById('btn-settings')?.addEventListener('click', () => {
+    populateSettings();
     document.getElementById('overlay-settings').style.display = '';
   });
-  document.getElementById('s-theme-dark')?.addEventListener('click', () => applyTheme('dark'));
+
+  // ---- Theme ----
+  document.getElementById('s-theme-dark')?.addEventListener('click',  () => applyTheme('dark'));
   document.getElementById('s-theme-light')?.addEventListener('click', () => applyTheme('light'));
 
-  // Default view buttons in settings
-  document.getElementById('s-view-compact')?.addEventListener('click', () => {
-    const btn = document.getElementById('btn-view-toggle');
-    if (btn) { localStorage.setItem('viewMode', 'compact'); btn.click(); }
+  // ---- Locations toggle ----
+  document.getElementById('s-locations-enabled')?.addEventListener('change', e => {
+    localStorage.setItem('locationsEnabled', e.target.checked ? 'true' : 'false');
+    applyLocationsVisibility();
   });
-  document.getElementById('s-view-detailed')?.addEventListener('click', () => {
-    const btn = document.getElementById('btn-view-toggle');
-    if (btn) { localStorage.setItem('viewMode', 'detailed'); btn.click(); }
+
+  // ---- Low stock threshold ----
+  document.getElementById('s-low-stock')?.addEventListener('change', e => {
+    const val = parseInt(e.target.value);
+    if (!isNaN(val) && val >= 0) localStorage.setItem('lowStockThreshold', String(val));
   });
+
+  // ---- Export folder ----
+  document.getElementById('s-export-browse')?.addEventListener('click', async () => {
+    try {
+      const { open: openDir } = await import('@tauri-apps/plugin-dialog');
+      const selected = await openDir({ directory: true, title: 'Select Export Folder' });
+      if (selected) {
+        localStorage.setItem('exportFolder', selected);
+        const inp = document.getElementById('s-export-folder');
+        if (inp) inp.value = selected;
+      }
+    } catch (err) {
+      showToast('Could not open folder picker: ' + (err.message || err), 'error');
+    }
+  });
+  document.getElementById('s-export-clear')?.addEventListener('click', () => {
+    localStorage.removeItem('exportFolder');
+    const inp = document.getElementById('s-export-folder');
+    if (inp) inp.value = '';
+  });
+}
+
+function populateSettings() {
+  // Locations toggle
+  const locCb = document.getElementById('s-locations-enabled');
+  if (locCb) locCb.checked = localStorage.getItem('locationsEnabled') === 'true';
+
+  // Low stock threshold
+  const ls = document.getElementById('s-low-stock');
+  if (ls) ls.value = localStorage.getItem('lowStockThreshold') || '1';
+
+  // Export folder
+  const ef = document.getElementById('s-export-folder');
+  if (ef) ef.value = localStorage.getItem('exportFolder') || '';
+
+  // DB path (async)
+  try {
+    import('@tauri-apps/api/path').then(({ appDataDir }) => appDataDir()).then(dir => {
+      const el = document.getElementById('s-db-path');
+      if (el) el.textContent = dir + 'component_inventory.db';
+    }).catch(() => {});
+  } catch (_) {}
 }
 
 function applyTheme(theme) {
@@ -684,6 +743,7 @@ async function main() {
   try {
     initTheme();
     initSettings();
+    applyLocationsVisibility();
     initModalCloseHandlers();
     await initDB();
     await loadComponents();

@@ -1,4 +1,6 @@
 import { state, showToast } from '../app.js';
+import { save as saveDialog }  from '@tauri-apps/plugin-dialog';
+import { writeFile }            from '@tauri-apps/plugin-fs';
 
 const EXPORT_COLUMNS = [
   { key: 'part_code',    label: 'Part Code' },
@@ -26,22 +28,31 @@ function timestampedName(ext) {
   return `ComponentInventory_${ts}.${ext}`;
 }
 
-function downloadBlob(blob, filename) {
-  const url = URL.createObjectURL(blob);
-  const a   = document.createElement('a');
-  a.href     = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+/**
+ * Save bytes to a user-chosen path via Tauri save dialog.
+ * If a default export folder is set in localStorage, the dialog opens there.
+ * Returns true on success, false when the user cancelled.
+ */
+async function saveViaDialog(bytes, filename, extLabel) {
+  const folder       = localStorage.getItem('exportFolder') || null;
+  const defaultPath  = folder ? `${folder}\\${filename}` : filename;
+  const ext          = filename.split('.').pop();
+
+  const chosenPath = await saveDialog({
+    defaultPath,
+    filters: [{ name: extLabel, extensions: [ext] }],
+  });
+  if (!chosenPath) return false;
+
+  await writeFile(chosenPath, bytes);
+  return true;
 }
 
 // ============================================================
 // CSV export
 // ============================================================
-function exportCSV() {
-  const rows = state.components;
+async function exportCSV() {
+  const rows   = state.components;
   const header = EXPORT_COLUMNS.map(c => c.label).join(',');
   const lines  = rows.map(row =>
     EXPORT_COLUMNS.map(col => {
@@ -52,28 +63,32 @@ function exportCSV() {
         : str;
     }).join(',')
   );
-  const csv = [header, ...lines].join('\r\n');
-  // UTF-8 BOM ensures Excel opens the file with correct encoding (critical for non-ASCII chars)
-  downloadBlob(new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' }), timestampedName('csv'));
+  const csv   = [header, ...lines].join('\r\n');
+  // UTF-8 BOM for Excel compatibility
+  const bom   = new Uint8Array([0xEF, 0xBB, 0xBF]);
+  const body  = new TextEncoder().encode(csv);
+  const bytes = new Uint8Array(bom.length + body.length);
+  bytes.set(bom); bytes.set(body, bom.length);
+  return saveViaDialog(bytes, timestampedName('csv'), 'CSV File');
 }
 
 // ============================================================
 // JSON export
 // ============================================================
-function exportJSON() {
-  const rows = state.components.map(row => {
+async function exportJSON() {
+  const rows  = state.components.map(row => {
     const obj = {};
     EXPORT_COLUMNS.forEach(col => { obj[col.key] = row[col.key] ?? null; });
     return obj;
   });
-  const json = JSON.stringify(rows, null, 2);
-  downloadBlob(new Blob([json], { type: 'application/json' }), timestampedName('json'));
+  const bytes = new TextEncoder().encode(JSON.stringify(rows, null, 2));
+  return saveViaDialog(bytes, timestampedName('json'), 'JSON File');
 }
 
 // ============================================================
 // Excel export (SheetJS)
 // ============================================================
-function exportExcel() {
+async function exportExcel() {
   const rows = state.components.map(row => {
     const obj = {};
     EXPORT_COLUMNS.forEach(col => { obj[col.label] = row[col.key] ?? ''; });
@@ -82,12 +97,12 @@ function exportExcel() {
   const ws = XLSX.utils.json_to_sheet(rows);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Inventory');
-
-  // Column widths
   const colWidths = EXPORT_COLUMNS.map(col => ({ wch: Math.max(col.label.length + 2, 14) }));
   ws['!cols'] = colWidths;
 
-  XLSX.writeFile(wb, timestampedName('xlsx'));
+  const buf   = XLSX.write(wb, { type: 'array', bookType: 'xlsx' });
+  const bytes = new Uint8Array(buf);
+  return saveViaDialog(bytes, timestampedName('xlsx'), 'Excel File');
 }
 
 // ============================================================
@@ -152,7 +167,9 @@ function exportPDF() {
     tableWidth: 'auto',
   });
 
-  doc.save(timestampedName('pdf'));
+  const buf   = doc.output('arraybuffer');
+  const bytes = new Uint8Array(buf);
+  return saveViaDialog(bytes, timestampedName('pdf'), 'PDF File');
 }
 
 // ============================================================
@@ -160,7 +177,7 @@ function exportPDF() {
 // ============================================================
 export function initExport() {
   document.querySelectorAll('.format-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', async () => {
       const format = btn.dataset.format;
       document.getElementById('overlay-export').style.display = 'none';
 
@@ -170,11 +187,12 @@ export function initExport() {
       }
 
       try {
-        if (format === 'csv')   exportCSV();
-        if (format === 'json')  exportJSON();
-        if (format === 'excel') exportExcel();
-        if (format === 'pdf')   exportPDF();
-        showToast(`Exported as ${format.toUpperCase()}`, 'success');
+        let saved;
+        if (format === 'csv')   saved = await exportCSV();
+        if (format === 'json')  saved = await exportJSON();
+        if (format === 'excel') saved = await exportExcel();
+        if (format === 'pdf')   saved = await exportPDF();
+        if (saved !== false) showToast(`Exported as ${format.toUpperCase()}`, 'success');
       } catch (err) {
         showToast('Export failed: ' + (err.message || err), 'error');
       }
