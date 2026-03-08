@@ -187,7 +187,14 @@ function normalizeRows(rows) {
 
       return out;
     })
-    .filter(r => r.part_code && r.part_code.length > 0);
+    .filter(r => {
+      if (!r.part_code || r.part_code.length === 0) return false;
+      // Skip summary/footer rows (e.g. "Toplam:", "KDV:", blank rows with auto-generated ID)
+      // A valid component row must have at least 2 meaningful fields beyond part_code
+      const MEANINGFUL = ['description', 'quantity', 'category', 'mpn', 'manufacturer', 'package', 'location', 'unit_price', 'datasheet_url', 'notes'];
+      const filledCount = MEANINGFUL.filter(k => r[k] && String(r[k]).trim() !== '').length;
+      return filledCount >= 1;
+    });
 }
 
 // Returns recognized headers for debug feedback

@@ -226,7 +226,7 @@ function updateCategoryTree() {
     const catTotal = Object.values(map[cat]).reduce((a, b) => a + b, 0);
     const isActiveCat = state.filterCat === cat && !state.filterSub;
     html += `<div class="tree-group">
-      <div class="tree-cat${isActiveCat ? ' active' : ''}" data-cat="${cat}" data-sub="">
+      <div class="tree-cat${isActiveCat ? ' active' : ''}" data-cat="${escHtml(cat)}" data-sub="">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
         ${escHtml(cat)}
         <span class="tree-count">${catTotal}</span>
@@ -236,7 +236,7 @@ function updateCategoryTree() {
     for (const sub of sortedSubs) {
       if (!sub) continue;
       const isActiveSub = state.filterCat === cat && state.filterSub === sub;
-      html += `<div class="tree-sub${isActiveSub ? ' active' : ''}" data-cat="${cat}" data-sub="${sub}">
+      html += `<div class="tree-sub${isActiveSub ? ' active' : ''}" data-cat="${escHtml(cat)}" data-sub="${escHtml(sub)}">
         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/></svg>
         ${escHtml(sub)}
         <span class="tree-count">${map[cat][sub]}</span>
@@ -295,7 +295,7 @@ function updateLocationTree() {
   const sortedLocs = Object.keys(locationMap).sort();
   for (const loc of sortedLocs) {
     const isActive = state.filterLoc === loc && !state.filterLocSub;
-    html += `<div class="tree-cat${isActive ? ' active' : ''}" data-loc="${loc}" data-loc-sub="">
+    html += `<div class="tree-cat${isActive ? ' active' : ''}" data-loc="${escHtml(loc)}" data-loc-sub="">
       <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
       ${escHtml(loc)}
       <span class="tree-count">${locationMap[loc].count}</span>
@@ -303,7 +303,7 @@ function updateLocationTree() {
     const subs = Object.keys(locationMap[loc].children).sort();
     for (const sub of subs) {
       const isActiveSub = state.filterLoc === loc && state.filterLocSub === sub;
-      html += `<div class="tree-sub${isActiveSub ? ' active' : ''}" data-loc="${loc}" data-loc-sub="${sub}">
+      html += `<div class="tree-sub${isActiveSub ? ' active' : ''}" data-loc="${escHtml(loc)}" data-loc-sub="${escHtml(sub)}">
         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="12" x2="20" y2="12"/><polyline points="14 6 20 12 14 18"/></svg>
         ${escHtml(sub)}
         <span class="tree-count">${locationMap[loc].children[sub]}</span>
@@ -318,15 +318,20 @@ function updateLocationTree() {
       const loc    = el.dataset.loc;
       const locSub = el.dataset.locSub;
       if (state.filterLoc === loc && state.filterLocSub === locSub) {
-        state.filterLoc = '';
+        // Toggle off — clear both filters
+        state.filterLoc    = '';
         state.filterLocSub = '';
       } else {
+        // Reset category filter when switching to location filter (M-6)
+        state.filterCat = '';
+        state.filterSub = '';
         state.filterLoc    = loc;
         state.filterLocSub = locSub;
       }
       applyFilters();
       renderTable();
       updateLocationTree();
+      updateCategoryTree();
     });
   });
 }

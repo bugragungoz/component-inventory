@@ -100,7 +100,7 @@ html.light {
    RESET
    ================================================================ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: 100%; overflow: hidden; }
+html, body { height: 100%; overflow: hidden; min-width: 900px; }
 body {
   background: var(--bg);
   color: var(--text-primary);

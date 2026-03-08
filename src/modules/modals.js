@@ -120,6 +120,14 @@ function initEditForm() {
   });
 }
 
+// Safely parse a numeric input — returns null when empty, preserves 0
+function parseOptFloat(id) {
+  const v = document.getElementById(id).value.trim();
+  if (v === '') return null;
+  const n = parseFloat(v);
+  return isNaN(n) ? null : n;
+}
+
 async function handleSave() {
   const idVal     = document.getElementById('edit-id').value;
   const partCode  = document.getElementById('edit-part-code').value.trim();
@@ -138,11 +146,11 @@ async function handleSave() {
     manufacturer: document.getElementById('edit-manufacturer').value.trim(),
     mpn:          document.getElementById('edit-mpn').value.trim(),
     location:     document.getElementById('edit-location').value.trim(),
-    voltage_max:  parseFloat(document.getElementById('edit-voltage-max').value) || null,
-    current_max:  parseFloat(document.getElementById('edit-current-max').value) || null,
+    voltage_max:  parseOptFloat('edit-voltage-max'),
+    current_max:  parseOptFloat('edit-current-max'),
     description:  document.getElementById('edit-description').value.trim(),
     datasheet_url:document.getElementById('edit-datasheet-url').value.trim(),
-    unit_price:   parseFloat(document.getElementById('edit-unit-price').value) || null,
+    unit_price:   parseOptFloat('edit-unit-price'),
     notes:        document.getElementById('edit-notes').value.trim(),
     image_path:   document.getElementById('edit-image-path').value.trim(),
   };
@@ -169,11 +177,19 @@ async function handleSave() {
 // ============================================================
 // Image attachment helpers
 // ============================================================
+let _previewObjectUrl = null;
+
 async function setImagePreview(imagePath) {
   const pathInput  = document.getElementById('edit-image-path');
   const preview    = document.getElementById('image-preview');
   const clearBtn   = document.getElementById('btn-clear-image');
   const placeholder = document.getElementById('image-preview-wrap').querySelector('svg');
+
+  // Revoke previous object URL before creating a new one
+  if (_previewObjectUrl) {
+    URL.revokeObjectURL(_previewObjectUrl);
+    _previewObjectUrl = null;
+  }
 
   pathInput.value = imagePath;
 
@@ -183,8 +199,8 @@ async function setImagePreview(imagePath) {
       const ext   = imagePath.split('.').pop().toLowerCase();
       const mime  = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', gif: 'image/gif', webp: 'image/webp' }[ext] || 'image/png';
       const blob  = new Blob([bytes], { type: mime });
-      const url   = URL.createObjectURL(blob);
-      preview.src           = url;
+      _previewObjectUrl = URL.createObjectURL(blob);
+      preview.src           = _previewObjectUrl;
       preview.style.display = '';
       if (placeholder) placeholder.style.display = 'none';
       clearBtn.style.display = '';

@@ -453,6 +453,7 @@ export function initSortHeaders() {
 // Detail modal — enhanced
 // ============================================================
 let _detailComp = null;
+let _detailObjectUrl = null;
 
 async function showDetail(comp) {
   _detailComp = comp;
@@ -527,6 +528,12 @@ async function showDetail(comp) {
       Open <em>Edit</em> → <em>Lookup DB</em> to persist full data.
     </div>` : '';
 
+  // Revoke previous object URL to prevent memory leak
+  if (_detailObjectUrl) {
+    URL.revokeObjectURL(_detailObjectUrl);
+    _detailObjectUrl = null;
+  }
+
   // Component image (if stored)
   let imageHtml = '';
   if (comp.image_path) {
@@ -535,8 +542,8 @@ async function showDetail(comp) {
       const ext     = comp.image_path.split('.').pop().toLowerCase();
       const mime    = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', gif: 'image/gif', webp: 'image/webp' }[ext] || 'image/png';
       const blob    = new Blob([bytes], { type: mime });
-      const dataUrl = URL.createObjectURL(blob);
-      imageHtml = `<div class="detail-image-wrap"><img src="${dataUrl}" alt="${escHtml(comp.part_code)}" /></div>`;
+      _detailObjectUrl = URL.createObjectURL(blob);
+      imageHtml = `<div class="detail-image-wrap"><img src="${_detailObjectUrl}" alt="${escHtml(comp.part_code)}" /></div>`;
     } catch (_) { /* image not accessible */ }
   }
 

@@ -1,5 +1,5 @@
 import { invoke } from '@tauri-apps/api/core';
-import { showToast } from '../app.js';
+import { showToast, escHtml } from '../app.js';
 
 function formatBytes(bytes) {
   if (bytes < 1024) return `${bytes} B`;
@@ -20,12 +20,12 @@ async function loadBackupList() {
     }
 
     list.innerHTML = backups.map(b => `
-      <div class="backup-row" data-path="${b.path}">
+      <div class="backup-row" data-path="${escHtml(b.path)}">
         <div class="backup-row-info">
-          <span class="backup-name">${b.filename}</span>
-          <span class="backup-meta">${b.created_at} &mdash; ${formatBytes(b.size_bytes)}</span>
+          <span class="backup-name">${escHtml(b.filename)}</span>
+          <span class="backup-meta">${escHtml(b.created_at)} &mdash; ${formatBytes(b.size_bytes)}</span>
         </div>
-        <button class="btn btn-ghost btn-sm btn-restore" data-path="${b.path}" title="Restore this backup">
+        <button type="button" class="btn btn-ghost btn-sm btn-restore" data-path="${escHtml(b.path)}" title="Restore this backup">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.36"/></svg>
           Restore
         </button>
@@ -36,7 +36,7 @@ async function loadBackupList() {
     });
 
   } catch (err) {
-    list.innerHTML = `<div class="loading-row" style="color:var(--danger)">Failed to load: ${err}</div>`;
+    list.innerHTML = `<div class="loading-row" style="color:var(--danger)">Failed to load: ${escHtml(err.message || String(err))}</div>`;
   }
 }
 
@@ -51,7 +51,7 @@ async function restoreBackup(path) {
     showToast('Backup restored. Restarting application...', 'success', 2000);
     setTimeout(() => location.reload(), 2000);
   } catch (err) {
-    showToast('Restore failed: ' + err, 'error');
+    showToast('Restore failed: ' + (err.message || String(err)), 'error');
   }
 }
 
@@ -63,7 +63,7 @@ async function createManualBackup() {
     showToast(`Backup created: ${result.filename}`, 'success');
     await loadBackupList();
   } catch (err) {
-    showToast('Backup failed: ' + err, 'error');
+    showToast('Backup failed: ' + (err.message || String(err)), 'error');
   } finally {
     btn.disabled = false;
   }
