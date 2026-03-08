@@ -494,10 +494,6 @@ function initSettings() {
     document.getElementById('overlay-settings').style.display = '';
   });
 
-  // ---- Theme ----
-  document.getElementById('s-theme-dark')?.addEventListener('click',  () => applyTheme('dark'));
-  document.getElementById('s-theme-light')?.addEventListener('click', () => applyTheme('light'));
-
   // ---- Locations toggle ----
   document.getElementById('s-locations-enabled')?.addEventListener('change', e => {
     localStorage.setItem('locationsEnabled', e.target.checked ? 'true' : 'false');
@@ -528,6 +524,17 @@ function initSettings() {
     localStorage.removeItem('exportFolder');
     const inp = document.getElementById('s-export-folder');
     if (inp) inp.value = '';
+  });
+
+  // ---- GitHub link ----
+  document.getElementById('btn-github-link')?.addEventListener('click', async e => {
+    e.preventDefault();
+    try {
+      const { openUrl } = await import('@tauri-apps/plugin-opener');
+      await openUrl('https://github.com/bugragungoz/component-inventory');
+    } catch {
+      window.open('https://github.com/bugragungoz/component-inventory', '_blank');
+    }
   });
 }
 

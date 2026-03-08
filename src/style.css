@@ -2008,7 +2008,26 @@ tr.row-selected { background: var(--accent-dim) !important; }
   font-size: 0.85rem;
   color: var(--text-primary);
 }
-.settings-theme-btns { display: flex; gap: 6px; }
+.btn-github-about {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  text-decoration: none;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+  cursor: pointer;
+  font-family: inherit;
+}
+.btn-github-about:hover {
+  color: var(--accent-color);
+  border-color: var(--accent-color);
+  background: rgba(217, 119, 87, 0.07);
+}
 .settings-select {
   background: var(--bg-overlay);
   border: 1px solid var(--border);

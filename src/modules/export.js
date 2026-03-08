@@ -111,16 +111,38 @@ async function exportExcel() {
 function exportPDF() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a3' });
+  const pageWidth = doc.internal.pageSize.getWidth();
+
+  // ---- Header banner ----
+  doc.setFillColor(30, 27, 16);
+  doc.rect(0, 0, pageWidth, 28, 'F');
+
+  // accent stripe
+  doc.setFillColor(217, 119, 87);
+  doc.rect(0, 27.2, pageWidth, 0.8, 'F');
 
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(16);
-  doc.text('Component Inventory', 14, 16);
+  doc.setFontSize(14);
+  doc.setTextColor(217, 119, 87);
+  doc.text('CI', 14, 12);
+
+  doc.setFontSize(13);
+  doc.setTextColor(240, 235, 215);
+  doc.text('Component Inventory', 24, 12);
 
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
-  doc.setTextColor(130, 130, 130);
-  doc.text(`Exported: ${new Date().toLocaleString('en-US')} | Total: ${state.components.length} components`, 14, 22);
-  doc.setTextColor(0, 0, 0);
+  doc.setFontSize(7.5);
+  doc.setTextColor(160, 155, 130);
+  doc.text(`Exported: ${new Date().toLocaleString('en-US')}  |  ${state.components.length} components`, 14, 20);
+
+  // GitHub URL right-aligned
+  doc.setFontSize(7);
+  doc.setTextColor(140, 135, 110);
+  const ghText = 'github.com/bugragungoz/component-inventory';
+  const ghWidth = doc.getTextWidth(ghText);
+  doc.text(ghText, pageWidth - ghWidth - 12, 20);
+
+  doc.setTextColor(20, 20, 19);
 
   const visibleCols = [
     { key: 'part_code',    label: 'Part Code' },
@@ -149,7 +171,7 @@ function exportPDF() {
   doc.autoTable({
     head,
     body,
-    startY: 26,
+    startY: 32,
     styles: {
       fontSize: 7,
       cellPadding: 2,
