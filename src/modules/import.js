@@ -103,6 +103,11 @@ const HEADER_MAP = {
   'detay': 'description', 'urun adi': 'description', 'urun_adi': 'description',
   'mal adi': 'description', 'malzeme adi': 'description', 'komponent adi': 'description',
   'komponent': 'description',
+  'malzeme tanimi': 'description', 'malzeme_tanimi': 'description',
+  'urun tanimi': 'description', 'urun_tanimi': 'description',
+  'stok tanimi': 'description', 'stok_tanimi': 'description',
+  'parcaaciklamasi': 'description', 'parca aciklamasi': 'description',
+  'urun aciklamasi': 'description', 'malzeme aciklamasi': 'description',
 
   // ---- Notes ----
   'notes': 'notes', 'note': 'notes', 'comment': 'notes', 'comments': 'notes',
@@ -121,7 +126,9 @@ const HEADER_MAP = {
   'cost': 'unit_price', 'unit cost': 'unit_price', 'each': 'unit_price',
   'birim fiyat': 'unit_price', 'fiyat': 'unit_price', 'birim maliyet': 'unit_price',
   'tl fiyat': 'unit_price', 'usd fiyat': 'unit_price', 'kdv haric fiyat': 'unit_price',
+  'kdv haric birim fiyat': 'unit_price', 'kdvsiz fiyat': 'unit_price',
   'liste fiyati': 'unit_price', 'satis fiyati': 'unit_price',
+  'net fiyat': 'unit_price', 'net birim fiyat': 'unit_price',
 };
 
 function normalizeHeader(h) {
@@ -284,9 +291,30 @@ function parseCSV(text) {
 
 // ============================================================
 // Excel parser (SheetJS)
-// Scans up to the first 20 rows to find the actual header row,
-// allowing files that have title/logo/company rows above the data table.
+// Scans the first 20 rows to locate the actual header row.
+// Uses a two-tier scoring system:
+//   tier-1: direct HEADER_MAP match (score +3 per cell)
+//   tier-2: text-like cell that isn't a number/date (score +1 per cell)
+// The row with the highest composite score is treated as the header row.
+// This handles supplier files (Özdisan, Mouser, Digi-Key, etc.) that have
+// company/order metadata rows before the actual table headers.
 // ============================================================
+function excelRowScore(row) {
+  let score = 0;
+  for (const cell of row) {
+    const v = String(cell ?? '').trim();
+    if (!v || v.length > 80) continue;
+    const norm = asciiNormalize(v.toLowerCase());
+    if (HEADER_MAP[norm] !== undefined) {
+      score += 3;
+    } else if (isNaN(Number(v)) && !/^\d{1,2}[.\/\-]\d{1,2}[.\/\-]\d{2,4}$/.test(v)) {
+      // Looks like a text label (not a number or a date pattern)
+      score += 1;
+    }
+  }
+  return score;
+}
+
 function parseExcel(arrayBuffer) {
   if (typeof XLSX === 'undefined') {
     throw new Error('SheetJS library not loaded.');
@@ -295,38 +323,23 @@ function parseExcel(arrayBuffer) {
   const sheetName = workbook.SheetNames[0];
   const sheet     = workbook.Sheets[sheetName];
 
-  // Read entire sheet as raw 2D array (no header assumption)
+  // Read entire sheet as raw 2D array — no header row assumption
   const raw = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
   if (!raw || raw.length === 0) return [];
 
-  // Find the row index that has the most cells matching known headers.
-  // Only scan the first 20 rows.
+  const scanLimit  = Math.min(raw.length, 20);
   let bestRowIdx   = 0;
-  let bestScore    = 0;
+  let bestScore    = -1;
 
-  const scanLimit = Math.min(raw.length, 20);
   for (let i = 0; i < scanLimit; i++) {
     const row = raw[i];
     if (!row || row.length === 0) continue;
-    const score = row.filter(cell => {
-      const v = String(cell ?? '').toLowerCase().trim();
-      return v && normalizeHeader(v) !== null;
-    }).length;
+    const nonEmpty = row.filter(c => String(c ?? '').trim()).length;
+    if (nonEmpty < 2) continue;  // skip nearly-empty rows
+    const score = excelRowScore(row);
     if (score > bestScore) {
       bestScore  = score;
       bestRowIdx = i;
-    }
-  }
-
-  // No row matched any known header — fall back to first non-empty row
-  if (bestScore === 0) {
-    // Try to find first row with at least 2 non-empty cells as a last resort
-    for (let i = 0; i < scanLimit; i++) {
-      const row = raw[i];
-      if (row && row.filter(c => String(c ?? '').trim()).length >= 2) {
-        bestRowIdx = i;
-        break;
-      }
     }
   }
 
@@ -334,7 +347,7 @@ function parseExcel(arrayBuffer) {
   const dataRows  = raw.slice(bestRowIdx + 1);
 
   return dataRows
-    .filter(row => row.some(c => String(c ?? '').trim()))  // skip blank rows
+    .filter(row => row.some(c => String(c ?? '').trim()))
     .map(row => {
       const obj = {};
       headerRow.forEach((h, idx) => {
@@ -523,11 +536,12 @@ async function handleFile(file) {
       rawRows    = parseExcel(buf);
       normalized = normalizeRows(rawRows);
       if (normalized.length === 0 && rawRows.length > 0) {
-        const { found } = getMappedHeaderNames(rawRows);
+        const foundCols = Object.keys(rawRows[0] || {}).slice(0, 6).join(', ');
         showToast(
-          `No recognized columns in Excel. Found headers: ${found.slice(0, 6).join(', ')}`,
+          `Column headers not recognized. Detected columns: ${foundCols || '(empty)'}. ` +
+          `Try renaming headers to: Stok Kodu, Urun Adi, Adet, Birim Fiyat.`,
           'warning',
-          10000
+          12000
         );
         return;
       }
