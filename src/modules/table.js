@@ -32,20 +32,35 @@ function initSelectionBar() {
   const btnDel = document.getElementById('btn-sel-delete');
   const btnClr = document.getElementById('btn-sel-clear');
   if (btnDel) {
-    btnDel.addEventListener('click', async () => {
+    btnDel.addEventListener('click', () => {
       if (selectedIds.size === 0) return;
-      const n = selectedIds.size;
-      if (!confirm(`Delete ${n} selected component${n !== 1 ? 's' : ''}? This cannot be undone.`)) return;
-      try {
-        await deleteComponents(Array.from(selectedIds));
-        clearSelection();
-        showToast(`Deleted ${n} component${n !== 1 ? 's' : ''}`, 'success');
-      } catch (err) {
-        showToast('Delete failed: ' + (err.message || err), 'error');
-      }
+      openBulkDeleteConfirm(selectedIds.size);
     });
   }
   if (btnClr) btnClr.addEventListener('click', clearSelection);
+
+  // Bulk delete confirm modal
+  document.getElementById('btn-bulk-del-confirm')?.addEventListener('click', async () => {
+    const n = selectedIds.size;
+    const overlay = document.getElementById('overlay-bulk-confirm');
+    if (overlay) overlay.style.display = 'none';
+    try {
+      await deleteComponents(Array.from(selectedIds));
+      clearSelection();
+      showToast(`Deleted ${n} component${n !== 1 ? 's' : ''}`, 'success');
+    } catch (err) {
+      showToast('Delete failed: ' + (err.message || err), 'error');
+    }
+  });
+  const closeBulk = () => { document.getElementById('overlay-bulk-confirm').style.display = 'none'; };
+  document.getElementById('btn-bulk-del-cancel')?.addEventListener('click', closeBulk);
+  document.getElementById('btn-bulk-del-cancel-footer')?.addEventListener('click', closeBulk);
+}
+
+function openBulkDeleteConfirm(n) {
+  const label = document.getElementById('bulk-confirm-label');
+  if (label) label.textContent = `Delete ${n} selected component${n !== 1 ? 's' : ''}? This cannot be undone. A backup will be created automatically.`;
+  document.getElementById('overlay-bulk-confirm').style.display = '';
 }
 
 // ============================================================
@@ -70,8 +85,8 @@ const CATEGORY_COL_OVERRIDES = {
     { key:'part_code',   label:'Part Code',  sort:'part_code',   width:'col-pc',   render: c => `<span class="td-truncate mono" style="font-size:12px;font-weight:500" title="${escHtml(c.part_code)}">${escHtml(c.part_code)}</span>` },
     { key:'subcategory', label:'Type',       sort:'subcategory', width:'col-sub',   render: c => c.subcategory ? `<span class="badge badge-sub">${escHtml(c.subcategory)}</span>` : '' },
     { key:'quantity',    label:'Qty',        sort:'quantity',    width:'num col-qty', render: c => { const q=Number(c.quantity)||0; return `<span class="${q<=1?'qty-badge low':'qty-badge'}">${q}</span>`; } },
-    { key:'voltage_max', label:'V\u2090\u209B / V\u2090\u2091', sort:'voltage_max', width:'num col-vmax', render: c => c.voltage_max != null ? `<span class="mono" style="font-size:11px">${c.voltage_max}V</span>` : '' },
-    { key:'current_max', label:'I\u2089 / I\u2090', sort:'current_max', width:'num col-imax', render: c => c.current_max != null ? `<span class="mono" style="font-size:11px">${c.current_max}A</span>` : '' },
+    { key:'voltage_max', label:'VGS / VCE',  sort:'voltage_max', width:'num col-vmax', render: c => c.voltage_max != null ? `<span class="mono" style="font-size:11px">${c.voltage_max}V</span>` : '' },
+    { key:'current_max', label:'ID / IC',    sort:'current_max', width:'num col-imax', render: c => c.current_max != null ? `<span class="mono" style="font-size:11px">${c.current_max}A</span>` : '' },
     { key:'package',     label:'Package',    sort:'package',     width:'col-pkg',   render: c => `<span class="td-truncate mono" style="font-size:11px">${escHtml(c.package)}</span>` },
     { key:'manufacturer',label:'Mfr',        sort:'manufacturer',width:'col-mfr',   render: c => `<span class="td-truncate" style="font-size:12px">${escHtml(c.manufacturer)}</span>` },
     { key:'description', label:'Description',sort:'description', width:'col-desc',  render: c => `<span class="td-truncate" style="font-size:12px;color:var(--text-secondary)" title="${escHtml(c.description)}">${escHtml(c.description)}</span>` },
@@ -80,8 +95,8 @@ const CATEGORY_COL_OVERRIDES = {
     { key:'part_code',   label:'Part Code',  sort:'part_code',   width:'col-pc',   render: c => `<span class="td-truncate mono" style="font-size:12px;font-weight:500" title="${escHtml(c.part_code)}">${escHtml(c.part_code)}</span>` },
     { key:'subcategory', label:'Type',       sort:'subcategory', width:'col-sub',   render: c => c.subcategory ? `<span class="badge badge-sub">${escHtml(c.subcategory)}</span>` : '' },
     { key:'quantity',    label:'Qty',        sort:'quantity',    width:'num col-qty', render: c => { const q=Number(c.quantity)||0; return `<span class="${q<=1?'qty-badge low':'qty-badge'}">${q}</span>`; } },
-    { key:'voltage_max', label:'V\u1D3F (V)', sort:'voltage_max', width:'num col-vmax', render: c => c.voltage_max != null ? `<span class="mono" style="font-size:11px">${c.voltage_max}V</span>` : '' },
-    { key:'current_max', label:'I\u1DA0 (A)', sort:'current_max', width:'num col-imax', render: c => c.current_max != null ? `<span class="mono" style="font-size:11px">${c.current_max}A</span>` : '' },
+    { key:'voltage_max', label:'VR (V)',     sort:'voltage_max', width:'num col-vmax', render: c => c.voltage_max != null ? `<span class="mono" style="font-size:11px">${c.voltage_max}V</span>` : '' },
+    { key:'current_max', label:'IF (A)',     sort:'current_max', width:'num col-imax', render: c => c.current_max != null ? `<span class="mono" style="font-size:11px">${c.current_max}A</span>` : '' },
     { key:'package',     label:'Package',    sort:'package',     width:'col-pkg',   render: c => `<span class="td-truncate mono" style="font-size:11px">${escHtml(c.package)}</span>` },
     { key:'description', label:'Description',sort:'description', width:'col-desc',  render: c => `<span class="td-truncate" style="font-size:12px;color:var(--text-secondary)" title="${escHtml(c.description)}">${escHtml(c.description)}</span>` },
   ],
@@ -109,8 +124,8 @@ const CATEGORY_COL_OVERRIDES = {
     { key:'part_code',   label:'Part Code',  sort:'part_code',   width:'col-pc',   render: c => `<span class="td-truncate mono" style="font-size:12px;font-weight:500" title="${escHtml(c.part_code)}">${escHtml(c.part_code)}</span>` },
     { key:'subcategory', label:'Type',       sort:'subcategory', width:'col-sub',   render: c => c.subcategory ? `<span class="badge badge-sub">${escHtml(c.subcategory)}</span>` : '' },
     { key:'quantity',    label:'Qty',        sort:'quantity',    width:'num col-qty', render: c => { const q=Number(c.quantity)||0; return `<span class="${q<=1?'qty-badge low':'qty-badge'}">${q}</span>`; } },
-    { key:'voltage_max', label:'V\u1D3F (V)', sort:'voltage_max', width:'num col-vmax', render: c => c.voltage_max != null ? `<span class="mono" style="font-size:11px">${c.voltage_max}V</span>` : '' },
-    { key:'current_max', label:'I\u1DA0 (A)', sort:'current_max', width:'num col-imax', render: c => c.current_max != null ? `<span class="mono" style="font-size:11px">${c.current_max}A</span>` : '' },
+    { key:'voltage_max', label:'VR (V)',     sort:'voltage_max', width:'num col-vmax', render: c => c.voltage_max != null ? `<span class="mono" style="font-size:11px">${c.voltage_max}V</span>` : '' },
+    { key:'current_max', label:'IT (A)',     sort:'current_max', width:'num col-imax', render: c => c.current_max != null ? `<span class="mono" style="font-size:11px">${c.current_max}A</span>` : '' },
     { key:'package',     label:'Package',    sort:'package',     width:'col-pkg',   render: c => `<span class="td-truncate mono" style="font-size:11px">${escHtml(c.package)}</span>` },
     { key:'description', label:'Description',sort:'description', width:'col-desc',  render: c => `<span class="td-truncate" style="font-size:12px;color:var(--text-secondary)" title="${escHtml(c.description)}">${escHtml(c.description)}</span>` },
   ],

@@ -410,10 +410,13 @@ function updateLocationTree() {
     }
   }
 
+  const hint = document.getElementById('location-empty-hint');
   if (Object.keys(locationMap).length === 0) {
-    tree.innerHTML = `<div class="tree-sub" style="cursor:default;opacity:0.5">No locations set</div>`;
+    tree.querySelectorAll(':not(#location-empty-hint)').forEach(el => el.remove());
+    if (hint) hint.style.display = '';
     return;
   }
+  if (hint) hint.style.display = 'none';
 
   let html = '';
   const sortedLocs = Object.keys(locationMap).sort();
@@ -470,6 +473,24 @@ function initTheme() {
   document.getElementById('btn-theme').addEventListener('click', () => {
     const current = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
     applyTheme(current === 'dark' ? 'light' : 'dark');
+  });
+}
+
+function initSettings() {
+  document.getElementById('btn-settings')?.addEventListener('click', () => {
+    document.getElementById('overlay-settings').style.display = '';
+  });
+  document.getElementById('s-theme-dark')?.addEventListener('click', () => applyTheme('dark'));
+  document.getElementById('s-theme-light')?.addEventListener('click', () => applyTheme('light'));
+
+  // Default view buttons in settings
+  document.getElementById('s-view-compact')?.addEventListener('click', () => {
+    const btn = document.getElementById('btn-view-toggle');
+    if (btn) { localStorage.setItem('viewMode', 'compact'); btn.click(); }
+  });
+  document.getElementById('s-view-detailed')?.addEventListener('click', () => {
+    const btn = document.getElementById('btn-view-toggle');
+    if (btn) { localStorage.setItem('viewMode', 'detailed'); btn.click(); }
   });
 }
 
@@ -662,6 +683,7 @@ async function main() {
 
   try {
     initTheme();
+    initSettings();
     initModalCloseHandlers();
     await initDB();
     await loadComponents();

@@ -39,45 +39,47 @@
       <div class="logo">
         <!-- CI chip logo -->
         <svg width="34" height="34" viewBox="0 0 64 64" fill="none">
-          <!-- Background rounded square -->
-          <rect width="64" height="64" rx="12" fill="#1c1a17"/>
-          <!-- Chip body -->
-          <rect x="17" y="17" width="30" height="30" rx="5" fill="url(#chip-grad)"/>
-          <!-- Chip inner border -->
-          <rect x="19" y="19" width="26" height="26" rx="3.5" fill="none" stroke="#e8956040" stroke-width="1"/>
-          <!-- Gradient definition -->
           <defs>
-            <linearGradient id="chip-grad" x1="17" y1="17" x2="47" y2="47" gradientUnits="userSpaceOnUse">
+            <linearGradient id="chip-grad" x1="18" y1="18" x2="46" y2="46" gradientUnits="userSpaceOnUse">
               <stop offset="0%" stop-color="#e8955f"/>
-              <stop offset="100%" stop-color="#c4683a"/>
+              <stop offset="100%" stop-color="#b85e2e"/>
             </linearGradient>
           </defs>
+          <rect width="64" height="64" rx="13" fill="#1c1a17"/>
+          <!-- Chip body -->
+          <rect x="18" y="18" width="28" height="28" rx="5" fill="url(#chip-grad)"/>
+          <!-- Pin-1 notch -->
+          <circle cx="21.5" cy="21.5" r="1.8" fill="#1c1a17" opacity="0.5"/>
           <!-- Pins left -->
-          <rect x="8"  y="23" width="9" height="3" rx="1.5" fill="#7a7570"/>
-          <rect x="8"  y="31" width="9" height="3" rx="1.5" fill="#7a7570"/>
-          <rect x="8"  y="39" width="9" height="3" rx="1.5" fill="#7a7570"/>
+          <rect x="8" y="24" width="10" height="4" rx="2" fill="#8a8480"/>
+          <rect x="8" y="30" width="10" height="4" rx="2" fill="#8a8480"/>
+          <rect x="8" y="36" width="10" height="4" rx="2" fill="#8a8480"/>
           <!-- Pins right -->
-          <rect x="47" y="23" width="9" height="3" rx="1.5" fill="#7a7570"/>
-          <rect x="47" y="31" width="9" height="3" rx="1.5" fill="#7a7570"/>
-          <rect x="47" y="39" width="9" height="3" rx="1.5" fill="#7a7570"/>
+          <rect x="46" y="24" width="10" height="4" rx="2" fill="#8a8480"/>
+          <rect x="46" y="30" width="10" height="4" rx="2" fill="#8a8480"/>
+          <rect x="46" y="36" width="10" height="4" rx="2" fill="#8a8480"/>
           <!-- Pins top -->
-          <rect x="23" y="8"  width="3" height="9" rx="1.5" fill="#7a7570"/>
-          <rect x="31" y="8"  width="3" height="9" rx="1.5" fill="#7a7570"/>
-          <rect x="39" y="8"  width="3" height="9" rx="1.5" fill="#7a7570"/>
+          <rect x="24" y="8" width="4" height="10" rx="2" fill="#8a8480"/>
+          <rect x="30" y="8" width="4" height="10" rx="2" fill="#8a8480"/>
+          <rect x="36" y="8" width="4" height="10" rx="2" fill="#8a8480"/>
           <!-- Pins bottom -->
-          <rect x="23" y="47" width="3" height="9" rx="1.5" fill="#7a7570"/>
-          <rect x="31" y="47" width="3" height="9" rx="1.5" fill="#7a7570"/>
-          <rect x="39" y="47" width="3" height="9" rx="1.5" fill="#7a7570"/>
+          <rect x="24" y="46" width="4" height="10" rx="2" fill="#8a8480"/>
+          <rect x="30" y="46" width="4" height="10" rx="2" fill="#8a8480"/>
+          <rect x="36" y="46" width="4" height="10" rx="2" fill="#8a8480"/>
           <!-- CI text -->
-          <text x="32" y="37" text-anchor="middle" font-family="Arial,sans-serif" font-weight="800" font-size="13" fill="#1c1a17" letter-spacing="-0.5">CI</text>
-          <!-- Top-left notch indicator -->
-          <circle cx="21" cy="21" r="1.5" fill="#1c1a17" opacity="0.6"/>
+          <text x="32" y="37" text-anchor="middle" font-family="Arial,sans-serif" font-weight="900" font-size="14" fill="#fff" letter-spacing="-1" opacity="0.92">CI</text>
         </svg>
         <div class="logo-text-wrap">
           <span class="logo-title">CompInv</span>
           <span class="logo-sub">Inventory Manager</span>
         </div>
       </div>
+      <button id="btn-settings" class="icon-btn" title="Settings">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </button>
       <button id="btn-theme" class="icon-btn" title="Toggle dark / light theme">
         <svg id="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/>
@@ -127,7 +129,12 @@
       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
       Locations
     </div>
-    <nav class="category-tree" id="location-tree"></nav>
+    <nav class="category-tree" id="location-tree">
+      <div id="location-empty-hint" class="location-empty-hint" style="display:none">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        Add a Location field when editing components to group inventory by physical location (e.g. Drawer A1, Box-3).
+      </div>
+    </nav>
 
   </aside>
 
@@ -583,6 +590,96 @@
       <div class="modal-footer">
         <button class="btn btn-ghost" data-close="overlay-confirm">Cancel</button>
         <button class="btn btn-danger" id="btn-confirm-delete">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== MODAL: Bulk Delete Confirm ========== -->
+  <div class="modal-overlay" id="overlay-bulk-confirm" style="display:none">
+    <div class="modal modal-sm" id="modal-bulk-confirm">
+      <div class="modal-header">
+        <h2>Delete Selected</h2>
+        <button class="modal-close" id="btn-bulk-del-cancel">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="confirm-body">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <div>
+            <p id="bulk-confirm-label">Delete selected components?</p>
+            <p class="confirm-hint">This action cannot be undone.</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" id="btn-bulk-del-cancel-footer">Cancel</button>
+        <button class="btn btn-danger" id="btn-bulk-del-confirm">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== MODAL: Settings ========== -->
+  <div class="modal-overlay" id="overlay-settings" style="display:none">
+    <div class="modal modal-sm" id="modal-settings">
+      <div class="modal-header">
+        <h2>Settings</h2>
+        <button class="modal-close" data-close="overlay-settings">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body" style="padding:0">
+        <div class="settings-section">
+          <div class="settings-label">Appearance</div>
+          <div class="settings-row">
+            <span>Theme</span>
+            <div class="settings-theme-btns">
+              <button class="btn btn-ghost btn-sm" id="s-theme-dark">Dark</button>
+              <button class="btn btn-ghost btn-sm" id="s-theme-light">Light</button>
+            </div>
+          </div>
+          <div class="settings-row">
+            <span>Default View</span>
+            <div class="settings-theme-btns">
+              <button class="btn btn-ghost btn-sm" id="s-view-compact">Compact</button>
+              <button class="btn btn-ghost btn-sm" id="s-view-detailed">Detailed</button>
+            </div>
+          </div>
+        </div>
+        <div class="settings-section">
+          <div class="settings-label">Data</div>
+          <div class="settings-row">
+            <span>Auto-backup interval</span>
+            <select id="s-backup-interval" class="settings-select">
+              <option value="5">5 minutes</option>
+              <option value="15" selected>15 minutes</option>
+              <option value="30">30 minutes</option>
+              <option value="60">1 hour</option>
+            </select>
+          </div>
+          <div class="settings-row">
+            <span>Export format default</span>
+            <select id="s-export-default" class="settings-select">
+              <option value="csv">CSV</option>
+              <option value="json">JSON</option>
+              <option value="excel">Excel</option>
+            </select>
+          </div>
+        </div>
+        <div class="settings-section">
+          <div class="settings-label">About</div>
+          <div class="settings-row settings-about">
+            <span class="settings-about-name">Component Inventory</span>
+            <span class="settings-about-ver">v0.1.3</span>
+          </div>
+          <div class="settings-row" style="font-size:0.78rem;color:var(--text-secondary)">
+            Local-first electronic component inventory manager.<br>
+            Data stored in SQLite on your device.
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" data-close="overlay-settings">Close</button>
       </div>
     </div>
   </div>

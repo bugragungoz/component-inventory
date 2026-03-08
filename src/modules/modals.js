@@ -3,7 +3,7 @@ import {
   showToast, refreshDatalistsGlobal
 } from '../app.js';
 import { initSortHeaders } from './table.js';
-import { lookupComponent } from './hardcoded_datasheet.js';
+import { lookupComponent, categorizeByDescription } from './hardcoded_datasheet.js';
 import { readFile, copyFile, mkdir } from '@tauri-apps/plugin-fs';
 import { open as openDialog } from '@tauri-apps/plugin-dialog';
 import { invoke } from '@tauri-apps/api/core';
@@ -210,12 +210,23 @@ function initEditForm() {
     updateTypeFields(this.value);
   });
 
-  // Auto-fill description button
+  // Auto-fill: use Description text to suggest Category + Subcategory
   document.getElementById('btn-auto-desc')?.addEventListener('click', () => {
-    const desc = buildAutoDescription();
-    if (desc) {
-      document.getElementById('edit-description').value = desc;
+    const desc = document.getElementById('edit-description').value.trim();
+    if (!desc) {
+      showToast('Enter a description first', 'warning');
+      return;
     }
+    const result = categorizeByDescription(desc);
+    if (!result) {
+      showToast('No category match found for this description', 'info');
+      return;
+    }
+    const catEl = document.getElementById('edit-category');
+    const subEl = document.getElementById('edit-subcategory');
+    if (result.category)    { catEl.value = result.category;    updateTypeFields(result.category); }
+    if (result.subcategory) { subEl.value = result.subcategory; }
+    showToast(`Category set from description: ${result.category}`, 'success');
   });
 
   // Hardcoded DB lookup button

@@ -476,29 +476,29 @@ a:hover { text-decoration: underline; }
 .btn:disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
 .btn:not(:disabled):active { transform: translateY(1px); }
 
-/* Import — app blue (#5a8fc4, same as badge-sub) */
+/* Import — ghost with blue accent */
 .btn-import {
-  background: var(--blue);
-  color: #fff;
-  border-color: var(--blue);
+  background: transparent;
+  color: var(--accent-blue);
+  border-color: var(--accent-blue);
 }
-.btn-import:hover { background: #4a7fbb; border-color: #4a7fbb; box-shadow: 0 2px 8px rgba(90,143,196,0.3); }
+.btn-import:hover { background: var(--accent-blue-dim); box-shadow: 0 2px 8px rgba(90,143,196,0.15); }
 
-/* Export — app green (#6a9e5e, same as accent-green) */
+/* Export — ghost with green accent */
 .btn-export {
-  background: var(--green);
-  color: #fff;
-  border-color: var(--green);
+  background: transparent;
+  color: var(--accent-green);
+  border-color: var(--accent-green);
 }
-.btn-export:hover { background: #5a8a4e; border-color: #5a8a4e; box-shadow: 0 2px 8px rgba(106,158,94,0.3); }
+.btn-export:hover { background: var(--accent-green-dim); box-shadow: 0 2px 8px rgba(106,158,94,0.15); }
 
-/* Add — app orange (#d97757, same as main accent) */
+/* Add — ghost with orange accent */
 .btn-add {
-  background: var(--accent);
-  color: #fff;
+  background: transparent;
+  color: var(--accent);
   border-color: var(--accent);
 }
-.btn-add:hover { background: var(--accent-hover); border-color: var(--accent-hover); box-shadow: 0 2px 8px rgba(217,119,87,0.3); }
+.btn-add:hover { background: var(--accent-dim); box-shadow: 0 2px 8px rgba(217,119,87,0.15); }
 
 .btn-primary {
   background: var(--accent);
@@ -533,11 +533,14 @@ a:hover { text-decoration: underline; }
 }
 
 .btn-danger {
-  background: var(--danger);
-  color: #fff;
+  background: transparent;
+  color: var(--danger);
   border-color: var(--danger);
 }
-.btn-danger:hover { background: var(--danger-hover); }
+.btn-danger:hover {
+  background: var(--danger-dim);
+  box-shadow: 0 2px 8px rgba(248,113,113,0.18);
+}
 
 .btn-sm { padding: 4px 9px; font-size: 11.5px; }
 
@@ -1430,7 +1433,7 @@ textarea { resize: vertical; min-height: 52px; }
   padding: 6px 14px;
   background: transparent;
   color: var(--danger);
-  border: 1px solid var(--danger);
+  border: 1px solid rgba(248,113,113,0.45);
   border-radius: var(--radius);
   text-decoration: none;
   font-family: var(--font-heading);
@@ -1438,12 +1441,13 @@ textarea { resize: vertical; min-height: 52px; }
   font-weight: 600;
   cursor: pointer;
   letter-spacing: 0.2px;
-  transition: background var(--t), color var(--t), box-shadow var(--t);
+  transition: background var(--t), border-color var(--t), box-shadow var(--t);
 }
 .btn-pdf:hover {
-  background: var(--danger);
-  color: #fff;
-  box-shadow: 0 2px 8px rgba(248,113,113,0.3);
+  background: var(--danger-dim);
+  border-color: var(--danger);
+  box-shadow: 0 2px 8px rgba(248,113,113,0.18);
+  text-decoration: none;
 }
 .btn-pdf:active { opacity: 0.85; }
 
@@ -1977,4 +1981,53 @@ tr.row-selected { background: var(--accent-dim) !important; }
 .bulk-cat-table tbody td { padding: 9px 14px; vertical-align: middle; }
 .bulk-cat-table input[type="checkbox"] {
   width: 15px; height: 15px; cursor: pointer; accent-color: var(--accent);
+}
+
+/* ================================================================
+   Settings Modal
+   ================================================================ */
+.settings-section {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.settings-section:last-child { border-bottom: none; }
+.settings-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  margin-bottom: 12px;
+}
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 5px 0;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+}
+.settings-theme-btns { display: flex; gap: 6px; }
+.settings-select {
+  background: var(--bg-overlay);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  padding: 4px 8px;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+.settings-about-name { font-weight: 600; font-family: var(--font-heading); }
+.settings-about-ver  { font-size: 0.75rem; color: var(--text-tertiary); font-family: var(--font-mono); }
+
+/* Location empty hint */
+.location-empty-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  padding: 10px 14px;
+  font-size: 0.76rem;
+  color: var(--text-tertiary);
+  line-height: 1.5;
 }
