@@ -308,9 +308,12 @@ export function collectAttributeValues(container) {
     const key = el.dataset.attrKey;
     const val = el.value.trim();
     if (val !== '') {
-      attrs[key] = el.type === 'number' && val !== ''
-        ? (isNaN(parseFloat(val)) ? val : parseFloat(val))
-        : val;
+      if (el.type === 'number') {
+        const n = parseFloat(val);
+        attrs[key] = isNaN(n) ? val : n;
+      } else {
+        attrs[key] = val;
+      }
     }
   });
   return attrs;
