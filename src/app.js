@@ -8,6 +8,9 @@ import { initBackupUI } from './modules/backup.js';
 import { initLabels }            from './modules/labels.js';
 import { initBulkCategorize }    from './modules/bulk_categorize.js';
 
+// Rename pencil SVG (inline, reused in tree rendering)
+const RENAME_SVG = `<svg class="rename-icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`;
+
 // ============================================================
 // State singleton
 // ============================================================
@@ -55,11 +58,16 @@ async function initDB() {
     );
   `);
 
-  // Migration: add image_path to existing tables that predate this column
-  try {
-    await db.execute(`ALTER TABLE components ADD COLUMN image_path TEXT DEFAULT ''`);
-  } catch (_) { /* column already exists */ }
-
+  // Migrations — each wrapped in try/catch so they are idempotent
+  const migrations = [
+    `ALTER TABLE components ADD COLUMN image_path   TEXT DEFAULT ''`,
+    `ALTER TABLE components ADD COLUMN resistance   TEXT DEFAULT ''`,
+    `ALTER TABLE components ADD COLUMN tolerance    TEXT DEFAULT ''`,
+    `ALTER TABLE components ADD COLUMN power_rating REAL`,
+  ];
+  for (const sql of migrations) {
+    try { await db.execute(sql); } catch (_) { /* column already exists */ }
+  }
 }
 
 // ============================================================
@@ -78,18 +86,20 @@ export async function loadComponents() {
 export async function addComponent(data) {
   const { part_code, category, subcategory, quantity, package: pkg,
     manufacturer, mpn, location, voltage_max, current_max,
-    description, datasheet_url, unit_price, notes, image_path } = data;
+    description, datasheet_url, unit_price, notes, image_path,
+    resistance, tolerance, power_rating } = data;
 
   await state.db.execute(
     `INSERT INTO components
       (part_code, category, subcategory, quantity, package, manufacturer, mpn, location,
-       voltage_max, current_max, description, datasheet_url, unit_price, notes, image_path)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       voltage_max, current_max, description, datasheet_url, unit_price, notes, image_path,
+       resistance, tolerance, power_rating)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [part_code, category || '', subcategory || '', quantity || 0, pkg || '',
      manufacturer || '', mpn || '', location || '',
-     voltage_max || null, current_max || null,
-     description || '', datasheet_url || '', unit_price || null, notes || '',
-     image_path || '']
+     voltage_max ?? null, current_max ?? null,
+     description || '', datasheet_url || '', unit_price ?? null, notes || '',
+     image_path || '', resistance || '', tolerance || '', power_rating ?? null]
   );
   await triggerBackup();
   await loadComponents();
@@ -98,21 +108,47 @@ export async function addComponent(data) {
 export async function updateComponent(id, data) {
   const { part_code, category, subcategory, quantity, package: pkg,
     manufacturer, mpn, location, voltage_max, current_max,
-    description, datasheet_url, unit_price, notes, image_path } = data;
+    description, datasheet_url, unit_price, notes, image_path,
+    resistance, tolerance, power_rating } = data;
 
   await state.db.execute(
     `UPDATE components SET
       part_code=?, category=?, subcategory=?, quantity=?, package=?,
       manufacturer=?, mpn=?, location=?, voltage_max=?, current_max=?,
       description=?, datasheet_url=?, unit_price=?, notes=?, image_path=?,
+      resistance=?, tolerance=?, power_rating=?,
       updated_at=datetime('now')
      WHERE id=?`,
     [part_code, category || '', subcategory || '', quantity || 0, pkg || '',
      manufacturer || '', mpn || '', location || '',
-     voltage_max || null, current_max || null,
-     description || '', datasheet_url || '', unit_price || null, notes || '',
-     image_path || '', id]
+     voltage_max ?? null, current_max ?? null,
+     description || '', datasheet_url || '', unit_price ?? null, notes || '',
+     image_path || '', resistance || '', tolerance || '', power_rating ?? null, id]
   );
+  await triggerBackup();
+  await loadComponents();
+}
+
+/**
+ * Rename a category or subcategory across all components in the DB.
+ * If isSubcategory is true, only renames the subcategory within the given parentCat.
+ */
+export async function renameCategory(oldName, newName, isSubcategory = false, parentCat = '') {
+  if (!newName.trim() || oldName === newName.trim()) return;
+  const trimmed = newName.trim();
+  if (isSubcategory) {
+    await state.db.execute(
+      `UPDATE components SET subcategory = ?, updated_at = datetime('now')
+       WHERE subcategory = ? AND category = ?`,
+      [trimmed, oldName, parentCat]
+    );
+  } else {
+    await state.db.execute(
+      `UPDATE components SET category = ?, updated_at = datetime('now')
+       WHERE category = ?`,
+      [trimmed, oldName]
+    );
+  }
   await triggerBackup();
   await loadComponents();
 }
@@ -229,8 +265,9 @@ function updateCategoryTree() {
     html += `<div class="tree-group">
       <div class="tree-cat${isActiveCat ? ' active' : ''}" data-cat="${escHtml(cat)}" data-sub="">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-        ${escHtml(cat)}
+        <span class="tree-label">${escHtml(cat)}</span>
         <span class="tree-count">${catTotal}</span>
+        <button class="btn-rename-tree" data-rename-cat="${escHtml(cat)}" data-rename-sub="" title="Rename category">${RENAME_SVG}</button>
       </div>`;
 
     const sortedSubs = Object.keys(map[cat]).sort();
@@ -239,8 +276,9 @@ function updateCategoryTree() {
       const isActiveSub = state.filterCat === cat && state.filterSub === sub;
       html += `<div class="tree-sub${isActiveSub ? ' active' : ''}" data-cat="${escHtml(cat)}" data-sub="${escHtml(sub)}">
         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/></svg>
-        ${escHtml(sub)}
+        <span class="tree-label">${escHtml(sub)}</span>
         <span class="tree-count">${map[cat][sub]}</span>
+        <button class="btn-rename-tree" data-rename-cat="${escHtml(cat)}" data-rename-sub="${escHtml(sub)}" title="Rename subcategory">${RENAME_SVG}</button>
       </div>`;
     }
 
@@ -250,7 +288,9 @@ function updateCategoryTree() {
   tree.innerHTML = html;
 
   tree.querySelectorAll('[data-cat]').forEach(el => {
-    el.addEventListener('click', () => {
+    el.addEventListener('click', e => {
+      // Rename button click must not trigger filter selection
+      if (e.target.closest('.btn-rename-tree')) return;
       state.filterCat = el.dataset.cat;
       state.filterSub = el.dataset.sub;
       // Reset location filter when switching category selection
@@ -261,6 +301,81 @@ function updateCategoryTree() {
       updateCategoryTree();
       updateLocationTree();
     });
+  });
+
+  // Rename button handlers
+  tree.querySelectorAll('.btn-rename-tree').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      openRenameModal(
+        btn.dataset.renameCat,
+        btn.dataset.renameSub
+      );
+    });
+  });
+}
+
+// ============================================================
+// Category / Subcategory rename modal
+// ============================================================
+function openRenameModal(cat, sub) {
+  const overlay = document.getElementById('overlay-rename-cat');
+  const input   = document.getElementById('rename-cat-input');
+  const label   = document.getElementById('rename-cat-label');
+  if (!overlay || !input) return;
+
+  const isSub = sub !== '';
+  label.textContent = isSub
+    ? `Rename subcategory "${sub}" (in ${cat})`
+    : `Rename category "${cat}"`;
+  input.value = isSub ? sub : cat;
+  overlay.dataset.renameCat = cat;
+  overlay.dataset.renameSub = sub;
+  overlay.style.display = 'flex';
+  input.focus();
+  input.select();
+}
+
+async function applyRename() {
+  const overlay  = document.getElementById('overlay-rename-cat');
+  const input    = document.getElementById('rename-cat-input');
+  if (!overlay || !input) return;
+
+  const newName  = input.value.trim();
+  const oldCat   = overlay.dataset.renameCat;
+  const oldSub   = overlay.dataset.renameSub;
+  const isSub    = oldSub !== '';
+
+  if (!newName) { showToast('Name cannot be empty', 'warning'); return; }
+  if (newName === (isSub ? oldSub : oldCat)) {
+    overlay.style.display = 'none';
+    return;
+  }
+
+  try {
+    await renameCategory(isSub ? oldSub : oldCat, newName, isSub, oldCat);
+    overlay.style.display = 'none';
+    showToast(`Renamed to "${newName}"`, 'success');
+  } catch (err) {
+    showToast('Rename failed: ' + (err.message || err), 'error');
+  }
+}
+
+function initRenameModal() {
+  const overlay  = document.getElementById('overlay-rename-cat');
+  const btnOk    = document.getElementById('btn-rename-cat-ok');
+  const input    = document.getElementById('rename-cat-input');
+  if (!overlay) return;
+
+  const closeRename = () => { overlay.style.display = 'none'; };
+
+  btnOk?.addEventListener('click', applyRename);
+  document.getElementById('btn-rename-cat-cancel')?.addEventListener('click', closeRename);
+  document.getElementById('btn-rename-cat-cancel-footer')?.addEventListener('click', closeRename);
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeRename(); });
+  input?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') applyRename();
+    if (e.key === 'Escape') closeRename();
   });
 }
 
@@ -550,6 +665,7 @@ async function main() {
     initExport();
     initBackupUI();
     initBulkCategorize();
+    initRenameModal();
 
     // Hide boot loader
     if (bootLoader) {

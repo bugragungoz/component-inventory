@@ -277,16 +277,31 @@
                 <label for="edit-mpn">MPN</label>
                 <input type="text" id="edit-mpn" placeholder="Manufacturer Part Number" />
               </div>
-              <div class="form-group">
-                <label for="edit-voltage-max">Voltage Max (V)</label>
+              <!-- Type-specific fields (shown/hidden by JS based on category) -->
+              <div class="form-group type-field-resistance" style="display:none">
+                <label for="edit-resistance" id="lbl-resistance">Resistance</label>
+                <input type="text" id="edit-resistance" placeholder="e.g. 10k, 4.7k, 100R, 1M" />
+              </div>
+              <div class="form-group type-field-tolerance" style="display:none">
+                <label for="edit-tolerance">Tolerance</label>
+                <input type="text" id="edit-tolerance" placeholder="e.g. 1%, 5%, 10%" />
+              </div>
+              <div class="form-group type-field-power" style="display:none">
+                <label for="edit-power-rating">Power Rating (W)</label>
+                <input type="number" id="edit-power-rating" step="any" min="0" placeholder="e.g. 0.25, 0.5, 1" />
+              </div>
+              <div class="form-group type-field-voltage">
+                <label for="edit-voltage-max" id="lbl-voltage-max">Voltage Max (V)</label>
                 <input type="number" id="edit-voltage-max" step="any" min="0" placeholder="e.g. 50" />
               </div>
-              <div class="form-group">
-                <label for="edit-current-max">Current Max (A)</label>
+              <div class="form-group type-field-current">
+                <label for="edit-current-max" id="lbl-current-max">Current Max (A)</label>
                 <input type="number" id="edit-current-max" step="any" min="0" placeholder="e.g. 1.5" />
               </div>
               <div class="form-group col-span-2">
-                <label for="edit-description">Description</label>
+                <label for="edit-description">Description
+                  <button type="button" id="btn-auto-desc" class="btn-inline-action" title="Auto-generate description from filled fields">Auto-fill</button>
+                </label>
                 <input type="text" id="edit-description" placeholder="Brief description of the component" />
               </div>
               <div class="form-group col-span-2">
@@ -542,6 +557,26 @@
 
   <!-- Toast container -->
   <div id="toast-container"></div>
+
+  <!-- Category Rename Modal -->
+  <div class="modal-overlay" id="overlay-rename-cat" style="display:none">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h2>Rename</h2>
+        <button class="modal-close" id="btn-rename-cat-cancel">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p id="rename-cat-label" style="font-size:0.82rem;color:var(--text-muted);margin-bottom:10px"></p>
+        <input type="text" id="rename-cat-input" class="input-full" placeholder="New name" autocomplete="off" />
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" id="btn-rename-cat-cancel-footer">Cancel</button>
+        <button class="btn btn-add" id="btn-rename-cat-ok">Apply</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Bulk Categorize Modal -->
   <div class="modal-overlay" id="overlay-bulk-cat" style="display:none">

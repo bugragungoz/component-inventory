@@ -476,6 +476,18 @@ async function showDetail(comp) {
 
   // Spec cards — pulled from effective (component OR hardcoded DB)
   const specCards = [
+    comp.resistance ? `<div class="spec-card">
+      <span class="spec-label">Resistance</span>
+      <span class="spec-value" style="font-size:13px">${escHtml(comp.resistance)}</span>
+    </div>` : '',
+    comp.tolerance ? `<div class="spec-card">
+      <span class="spec-label">Tolerance</span>
+      <span class="spec-value" style="font-size:13px">${escHtml(comp.tolerance)}</span>
+    </div>` : '',
+    comp.power_rating != null ? `<div class="spec-card">
+      <span class="spec-label">Power Rating</span>
+      <span class="spec-value">${comp.power_rating}<span class="spec-unit"> W</span></span>
+    </div>` : '',
     effective.voltage_max != null ? `<div class="spec-card">
       <span class="spec-label">Voltage Max</span>
       <span class="spec-value">${effective.voltage_max}<span class="spec-unit"> V</span></span>

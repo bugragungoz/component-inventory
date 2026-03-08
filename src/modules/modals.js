@@ -61,6 +61,9 @@ function openEditModal(comp) {
     setField('edit-description', comp.description);
     setField('edit-datasheet-url', comp.datasheet_url);
     setField('edit-notes',       comp.notes);
+    setField('edit-resistance',  comp.resistance  || '');
+    setField('edit-tolerance',   comp.tolerance   || '');
+    setField('edit-power-rating',comp.power_rating ?? '');
     setImagePreview(comp.image_path || '');
   } else {
     title.textContent = 'Add Component';
@@ -69,6 +72,7 @@ function openEditModal(comp) {
     setImagePreview('');
   }
 
+  updateTypeFields(document.getElementById('edit-category').value);
   document.getElementById('overlay-edit').style.display = '';
   setTimeout(() => document.getElementById('edit-part-code').focus(), 60);
 }
@@ -76,6 +80,104 @@ function openEditModal(comp) {
 function setField(id, value) {
   const el = document.getElementById(id);
   if (el) el.value = value ?? '';
+}
+
+// ============================================================
+// Type-specific field visibility + smart description
+// ============================================================
+const CAT_TYPE = {
+  resistor:   ['Resistors', 'Potentiometers', 'Thermistors', 'Varistors'],
+  capacitor:  ['Capacitors'],
+  inductor:   ['Inductors', 'Transformers', 'Coils'],
+  transistor: ['Transistors', 'MOSFETs', 'IGBTs', 'Thyristors'],
+  diode:      ['Diodes'],
+  ic:         ['ICs', 'Microcontrollers', 'Sensors', 'Relays', 'Optocouplers'],
+};
+
+function detectType(category) {
+  const cat = (category || '').toLowerCase();
+  if (['resistors','potentiometers','thermistors','varistors'].some(k => cat.includes(k.slice(0,6)))) return 'resistor';
+  if (cat.includes('capacitor')) return 'capacitor';
+  if (cat.includes('inductor') || cat.includes('transformer') || cat.includes('coil')) return 'inductor';
+  if (cat.includes('transistor') || cat.includes('mosfet') || cat.includes('igbt') || cat.includes('thyristor')) return 'transistor';
+  if (cat.includes('diode')) return 'diode';
+  return 'generic';
+}
+
+function updateTypeFields(category) {
+  const type = detectType(category);
+
+  const showR = type === 'resistor';
+  const showT = showR || type === 'capacitor' || type === 'inductor';
+  const showP = showR;
+  const showV = !showR;
+  const showI = !showR && type !== 'capacitor';
+
+  const setVis = (sel, show) =>
+    document.querySelectorAll(sel).forEach(el => { el.style.display = show ? '' : 'none'; });
+
+  setVis('.type-field-resistance', showR);
+  setVis('.type-field-tolerance',  showT);
+  setVis('.type-field-power',      showP);
+  setVis('.type-field-voltage',    showV);
+  setVis('.type-field-current',    showI);
+
+  // Update contextual labels
+  const lblV = document.getElementById('lbl-voltage-max');
+  const lblI = document.getElementById('lbl-current-max');
+  if (lblV) lblV.textContent = type === 'capacitor' ? 'Voltage Rating (V)' : 'Voltage Max (V)';
+  if (lblI) lblI.textContent = type === 'transistor' ? 'Current Max / I_D (A)' : 'Current Max (A)';
+}
+
+/** Builds a description string from the form fields based on component type. */
+function buildAutoDescription() {
+  const cat  = document.getElementById('edit-category').value.trim();
+  const sub  = document.getElementById('edit-subcategory').value.trim();
+  const type = detectType(cat);
+
+  const res   = document.getElementById('edit-resistance')?.value.trim();
+  const tol   = document.getElementById('edit-tolerance')?.value.trim();
+  const pwr   = document.getElementById('edit-power-rating')?.value.trim();
+  const vmax  = document.getElementById('edit-voltage-max')?.value.trim();
+  const imax  = document.getElementById('edit-current-max')?.value.trim();
+
+  const parts = [];
+
+  if (type === 'resistor') {
+    if (res)  parts.push(res.match(/[a-zA-Z]/) ? res : res + '\u03A9');  // add Ω if no unit
+    if (tol)  parts.push(tol.endsWith('%') ? tol : tol + '%');
+    if (pwr)  parts.push(pwr + 'W');
+    parts.push(sub || 'Resistor');
+  } else if (type === 'capacitor') {
+    if (res)  parts.push(res);  // capacitance can be stored in resistance field for caps
+    if (vmax) parts.push(vmax + 'V');
+    if (tol)  parts.push(tol);
+    parts.push(sub || 'Capacitor');
+  } else if (type === 'inductor') {
+    if (res)  parts.push(res);
+    if (imax) parts.push(imax + 'A');
+    if (tol)  parts.push(tol);
+    parts.push(sub || 'Inductor');
+  } else if (type === 'transistor') {
+    if (sub && (sub.toLowerCase().includes('npn') || sub.toLowerCase().includes('pnp'))) {
+      parts.push(sub);
+    } else {
+      const chan = sub.toLowerCase().includes('p-ch') ? 'P-Ch' : 'N-Ch';
+      parts.push(chan, sub || 'MOSFET');
+    }
+    if (vmax) parts.push(vmax + 'V');
+    if (imax) parts.push(imax + 'A');
+  } else if (type === 'diode') {
+    parts.push(sub || 'Diode');
+    if (vmax) parts.push(vmax + 'V');
+    if (imax) parts.push(imax + 'A');
+  } else {
+    parts.push(sub || cat);
+    if (vmax) parts.push(vmax + 'V');
+    if (imax) parts.push(imax + 'A');
+  }
+
+  return parts.filter(Boolean).join(' ');
 }
 
 function initEditForm() {
@@ -91,6 +193,28 @@ function initEditForm() {
     if (e.key === 'Enter' && !e.shiftKey && e.target.tagName !== 'TEXTAREA') {
       e.preventDefault();
       handleSave();
+    }
+  });
+
+  // Auto-clear 'Uncategorized' on focus; restore on blur if empty
+  const catInput = document.getElementById('edit-category');
+  catInput?.addEventListener('focus', function() {
+    if (this.value === 'Uncategorized') this.value = '';
+  });
+  catInput?.addEventListener('blur', function() {
+    if (!this.value.trim()) this.value = 'Uncategorized';
+  });
+
+  // Dynamic type fields when category changes
+  catInput?.addEventListener('input', function() {
+    updateTypeFields(this.value);
+  });
+
+  // Auto-fill description button
+  document.getElementById('btn-auto-desc')?.addEventListener('click', () => {
+    const desc = buildAutoDescription();
+    if (desc) {
+      document.getElementById('edit-description').value = desc;
     }
   });
 
@@ -154,6 +278,9 @@ async function handleSave() {
     unit_price:   parseOptFloat('edit-unit-price'),
     notes:        document.getElementById('edit-notes').value.trim(),
     image_path:   document.getElementById('edit-image-path').value.trim(),
+    resistance:   document.getElementById('edit-resistance')?.value.trim() || '',
+    tolerance:    document.getElementById('edit-tolerance')?.value.trim()  || '',
+    power_rating: parseOptFloat('edit-power-rating'),
   };
 
   const saveBtn = document.getElementById('btn-save-component');
