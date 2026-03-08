@@ -1,4 +1,4 @@
-import { lookupComponent }                                      from './hardcoded_datasheet.js';
+import { lookupComponent, categorizeByDescription }            from './hardcoded_datasheet.js';
 import { state, updateComponent, showToast, escHtml }           from '../app.js';
 
 /** Returns components that are in the Uncategorized bucket. */
@@ -12,9 +12,14 @@ function getUncategorized() {
 function buildSuggestions(components) {
   const suggestions = [];
   for (const comp of components) {
-    const hit = lookupComponent(comp.part_code);
+    const hitByCode = lookupComponent(comp.part_code);
+    const hitByDesc = !hitByCode ? categorizeByDescription(comp.description) : null;
+    const hit       = hitByCode || hitByDesc;
     if (hit && hit.category && hit.category !== 'Uncategorized') {
-      suggestions.push({ comp, hit });
+      suggestions.push({
+        comp, hit,
+        source: hitByCode ? 'part-code' : 'description',
+      });
     }
   }
   return suggestions;
@@ -40,6 +45,7 @@ function renderList(suggestions) {
       <td>
         <span class="badge" style="background:var(--accent-dim);color:var(--accent)">${escHtml(s.hit.category)}</span>
         ${s.hit.subcategory ? `<span style="color:var(--text-muted);font-size:0.78rem"> / ${escHtml(s.hit.subcategory)}</span>` : ''}
+        <span style="font-size:0.68rem;color:var(--text-muted);margin-left:4px">(${s.source})</span>
       </td>
     </tr>
   `).join('');

@@ -1,7 +1,129 @@
-import { state, escHtml } from '../app.js';
-import { lookupComponent, applyDbData } from './hardcoded_datasheet.js';
-import { setLabelComponent } from './labels.js';
-import { readFile } from '@tauri-apps/plugin-fs';
+import { state, escHtml, deleteComponents, showToast } from '../app.js';
+import { lookupComponent, applyDbData }                 from './hardcoded_datasheet.js';
+import { setLabelComponent }                             from './labels.js';
+import { readFile }                                      from '@tauri-apps/plugin-fs';
+
+// ============================================================
+// Multi-select state
+// ============================================================
+const selectedIds = new Set();
+
+function clearSelection() {
+  selectedIds.clear();
+  updateSelectionBar();
+}
+
+function updateSelectionBar() {
+  const bar    = document.getElementById('selection-bar');
+  const label  = document.getElementById('selection-count');
+  const n      = selectedIds.size;
+  if (!bar) return;
+  bar.style.display = n > 0 ? 'flex' : 'none';
+  if (label) label.textContent = `${n} component${n !== 1 ? 's' : ''} selected`;
+  // Keep header checkbox in sync
+  const headerCb = document.getElementById('cb-select-all');
+  if (headerCb) {
+    headerCb.checked = n > 0 && n === state.filtered.length;
+    headerCb.indeterminate = n > 0 && n < state.filtered.length;
+  }
+}
+
+function initSelectionBar() {
+  const btnDel = document.getElementById('btn-sel-delete');
+  const btnClr = document.getElementById('btn-sel-clear');
+  if (btnDel) {
+    btnDel.addEventListener('click', async () => {
+      if (selectedIds.size === 0) return;
+      const n = selectedIds.size;
+      if (!confirm(`Delete ${n} selected component${n !== 1 ? 's' : ''}? This cannot be undone.`)) return;
+      try {
+        await deleteComponents(Array.from(selectedIds));
+        clearSelection();
+        showToast(`Deleted ${n} component${n !== 1 ? 's' : ''}`, 'success');
+      } catch (err) {
+        showToast('Delete failed: ' + (err.message || err), 'error');
+      }
+    });
+  }
+  if (btnClr) btnClr.addEventListener('click', clearSelection);
+}
+
+// ============================================================
+// Category-specific column configuration
+// ============================================================
+// Columns: { key, label, numeric, width, render(c) }
+const COL_ACTIONS = { key:'_actions', label:'Actions', width:'col-actions', render: () => '' };
+const COL_CB      = { key:'_cb',      label:'',        width:'col-cb',      render: () => '' };
+
+const DEFAULT_COLS = [
+  { key:'part_code',   label:'Part Code',    sort:'part_code',   width:'col-pc',  render: c => `<span class="td-truncate mono" style="font-size:12px;font-weight:500" title="${escHtml(c.part_code)}">${escHtml(c.part_code)}</span>` },
+  { key:'category',    label:'Category',     sort:'category',    width:'col-cat', render: c => c.category ? `<span class="badge badge-cat">${escHtml(c.category)}</span>` : '' },
+  { key:'subcategory', label:'Subcategory',  sort:'subcategory', width:'col-sub', render: c => c.subcategory ? `<span class="badge badge-sub">${escHtml(c.subcategory)}</span>` : '' },
+  { key:'quantity',    label:'Qty',          sort:'quantity',    width:'num col-qty', render: c => { const q=Number(c.quantity)||0; return `<span class="${q<=1?'qty-badge low':'qty-badge'}">${q}</span>`; } },
+  { key:'voltage_max', label:'V Max',        sort:'voltage_max', width:'num col-vmax', render: c => c.voltage_max != null ? `<span class="mono" style="font-size:11px">${c.voltage_max}V</span>` : '' },
+  { key:'current_max', label:'I Max',        sort:'current_max', width:'num col-imax', render: c => c.current_max != null ? `<span class="mono" style="font-size:11px">${c.current_max}A</span>` : '' },
+  { key:'description', label:'Description',  sort:'description', width:'col-desc', render: c => `<span class="td-truncate" style="font-size:12px;color:var(--text-secondary)" title="${escHtml(c.description)}">${escHtml(c.description)}</span>` },
+];
+
+const CATEGORY_COL_OVERRIDES = {
+  'Transistors': [
+    { key:'part_code',   label:'Part Code',  sort:'part_code',   width:'col-pc',   render: c => `<span class="td-truncate mono" style="font-size:12px;font-weight:500" title="${escHtml(c.part_code)}">${escHtml(c.part_code)}</span>` },
+    { key:'subcategory', label:'Type',       sort:'subcategory', width:'col-sub',   render: c => c.subcategory ? `<span class="badge badge-sub">${escHtml(c.subcategory)}</span>` : '' },
+    { key:'quantity',    label:'Qty',        sort:'quantity',    width:'num col-qty', render: c => { const q=Number(c.quantity)||0; return `<span class="${q<=1?'qty-badge low':'qty-badge'}">${q}</span>`; } },
+    { key:'voltage_max', label:'V\u2090\u209B / V\u2090\u2091', sort:'voltage_max', width:'num col-vmax', render: c => c.voltage_max != null ? `<span class="mono" style="font-size:11px">${c.voltage_max}V</span>` : '' },
+    { key:'current_max', label:'I\u2089 / I\u2090', sort:'current_max', width:'num col-imax', render: c => c.current_max != null ? `<span class="mono" style="font-size:11px">${c.current_max}A</span>` : '' },
+    { key:'package',     label:'Package',    sort:'package',     width:'col-pkg',   render: c => `<span class="td-truncate mono" style="font-size:11px">${escHtml(c.package)}</span>` },
+    { key:'manufacturer',label:'Mfr',        sort:'manufacturer',width:'col-mfr',   render: c => `<span class="td-truncate" style="font-size:12px">${escHtml(c.manufacturer)}</span>` },
+    { key:'description', label:'Description',sort:'description', width:'col-desc',  render: c => `<span class="td-truncate" style="font-size:12px;color:var(--text-secondary)" title="${escHtml(c.description)}">${escHtml(c.description)}</span>` },
+  ],
+  'Diodes': [
+    { key:'part_code',   label:'Part Code',  sort:'part_code',   width:'col-pc',   render: c => `<span class="td-truncate mono" style="font-size:12px;font-weight:500" title="${escHtml(c.part_code)}">${escHtml(c.part_code)}</span>` },
+    { key:'subcategory', label:'Type',       sort:'subcategory', width:'col-sub',   render: c => c.subcategory ? `<span class="badge badge-sub">${escHtml(c.subcategory)}</span>` : '' },
+    { key:'quantity',    label:'Qty',        sort:'quantity',    width:'num col-qty', render: c => { const q=Number(c.quantity)||0; return `<span class="${q<=1?'qty-badge low':'qty-badge'}">${q}</span>`; } },
+    { key:'voltage_max', label:'V\u1D3F (V)', sort:'voltage_max', width:'num col-vmax', render: c => c.voltage_max != null ? `<span class="mono" style="font-size:11px">${c.voltage_max}V</span>` : '' },
+    { key:'current_max', label:'I\u1DA0 (A)', sort:'current_max', width:'num col-imax', render: c => c.current_max != null ? `<span class="mono" style="font-size:11px">${c.current_max}A</span>` : '' },
+    { key:'package',     label:'Package',    sort:'package',     width:'col-pkg',   render: c => `<span class="td-truncate mono" style="font-size:11px">${escHtml(c.package)}</span>` },
+    { key:'description', label:'Description',sort:'description', width:'col-desc',  render: c => `<span class="td-truncate" style="font-size:12px;color:var(--text-secondary)" title="${escHtml(c.description)}">${escHtml(c.description)}</span>` },
+  ],
+  'Resistors': [
+    { key:'part_code',   label:'Part Code',  sort:'part_code',   width:'col-pc',   render: c => `<span class="td-truncate mono" style="font-size:12px;font-weight:500" title="${escHtml(c.part_code)}">${escHtml(c.part_code)}</span>` },
+    { key:'subcategory', label:'Type',       sort:'subcategory', width:'col-sub',   render: c => c.subcategory ? `<span class="badge badge-sub">${escHtml(c.subcategory)}</span>` : '' },
+    { key:'quantity',    label:'Qty',        sort:'quantity',    width:'num col-qty', render: c => { const q=Number(c.quantity)||0; return `<span class="${q<=1?'qty-badge low':'qty-badge'}">${q}</span>`; } },
+    { key:'resistance',  label:'Resistance', sort:'resistance',  width:'col-pkg',   render: c => c.resistance ? `<span class="mono" style="font-size:11px">${escHtml(c.resistance)}</span>` : '' },
+    { key:'tolerance',   label:'Tolerance',  sort:'tolerance',   width:'col-pkg',   render: c => c.tolerance  ? `<span class="mono" style="font-size:11px">${escHtml(c.tolerance)}</span>` : '' },
+    { key:'power_rating',label:'Power (W)',  sort:'power_rating',width:'num col-vmax', render: c => c.power_rating != null ? `<span class="mono" style="font-size:11px">${c.power_rating}W</span>` : '' },
+    { key:'package',     label:'Package',    sort:'package',     width:'col-pkg',   render: c => `<span class="td-truncate mono" style="font-size:11px">${escHtml(c.package)}</span>` },
+    { key:'description', label:'Description',sort:'description', width:'col-desc',  render: c => `<span class="td-truncate" style="font-size:12px;color:var(--text-secondary)" title="${escHtml(c.description)}">${escHtml(c.description)}</span>` },
+  ],
+  'Capacitors': [
+    { key:'part_code',   label:'Part Code',  sort:'part_code',   width:'col-pc',   render: c => `<span class="td-truncate mono" style="font-size:12px;font-weight:500" title="${escHtml(c.part_code)}">${escHtml(c.part_code)}</span>` },
+    { key:'subcategory', label:'Type',       sort:'subcategory', width:'col-sub',   render: c => c.subcategory ? `<span class="badge badge-sub">${escHtml(c.subcategory)}</span>` : '' },
+    { key:'quantity',    label:'Qty',        sort:'quantity',    width:'num col-qty', render: c => { const q=Number(c.quantity)||0; return `<span class="${q<=1?'qty-badge low':'qty-badge'}">${q}</span>`; } },
+    { key:'resistance',  label:'Capacitance',sort:'resistance',  width:'col-pkg',   render: c => c.resistance ? `<span class="mono" style="font-size:11px">${escHtml(c.resistance)}</span>` : '' },
+    { key:'tolerance',   label:'Tolerance',  sort:'tolerance',   width:'col-pkg',   render: c => c.tolerance  ? `<span class="mono" style="font-size:11px">${escHtml(c.tolerance)}</span>` : '' },
+    { key:'voltage_max', label:'Rated V',    sort:'voltage_max', width:'num col-vmax', render: c => c.voltage_max != null ? `<span class="mono" style="font-size:11px">${c.voltage_max}V</span>` : '' },
+    { key:'package',     label:'Package',    sort:'package',     width:'col-pkg',   render: c => `<span class="td-truncate mono" style="font-size:11px">${escHtml(c.package)}</span>` },
+    { key:'description', label:'Description',sort:'description', width:'col-desc',  render: c => `<span class="td-truncate" style="font-size:12px;color:var(--text-secondary)" title="${escHtml(c.description)}">${escHtml(c.description)}</span>` },
+  ],
+  'Thyristors': [
+    { key:'part_code',   label:'Part Code',  sort:'part_code',   width:'col-pc',   render: c => `<span class="td-truncate mono" style="font-size:12px;font-weight:500" title="${escHtml(c.part_code)}">${escHtml(c.part_code)}</span>` },
+    { key:'subcategory', label:'Type',       sort:'subcategory', width:'col-sub',   render: c => c.subcategory ? `<span class="badge badge-sub">${escHtml(c.subcategory)}</span>` : '' },
+    { key:'quantity',    label:'Qty',        sort:'quantity',    width:'num col-qty', render: c => { const q=Number(c.quantity)||0; return `<span class="${q<=1?'qty-badge low':'qty-badge'}">${q}</span>`; } },
+    { key:'voltage_max', label:'V\u1D3F (V)', sort:'voltage_max', width:'num col-vmax', render: c => c.voltage_max != null ? `<span class="mono" style="font-size:11px">${c.voltage_max}V</span>` : '' },
+    { key:'current_max', label:'I\u1DA0 (A)', sort:'current_max', width:'num col-imax', render: c => c.current_max != null ? `<span class="mono" style="font-size:11px">${c.current_max}A</span>` : '' },
+    { key:'package',     label:'Package',    sort:'package',     width:'col-pkg',   render: c => `<span class="td-truncate mono" style="font-size:11px">${escHtml(c.package)}</span>` },
+    { key:'description', label:'Description',sort:'description', width:'col-desc',  render: c => `<span class="td-truncate" style="font-size:12px;color:var(--text-secondary)" title="${escHtml(c.description)}">${escHtml(c.description)}</span>` },
+  ],
+};
+
+function getActiveCols() {
+  const cat   = state.filterCat || '';
+  // Match against category name (case-insensitive prefix match against CATEGORY_COL_OVERRIDES)
+  for (const [key, cols] of Object.entries(CATEGORY_COL_OVERRIDES)) {
+    if (cat.toLowerCase().includes(key.toLowerCase())) return cols;
+  }
+  return DEFAULT_COLS;
+}
 
 // ============================================================
 // Component type icon + color resolution
@@ -342,27 +464,71 @@ export function applyFilters() {
 // Render table body
 // ============================================================
 export function renderTable() {
-  const tbody      = document.getElementById('table-body');
-  const empty      = document.getElementById('empty-state');
+  const tbody       = document.getElementById('table-body');
+  const thead       = document.querySelector('#inventory-table thead tr');
+  const empty       = document.getElementById('empty-state');
   const tableScroll = document.getElementById('table-scroll');
 
   updateSortHeaders();
+  updateBreadcrumb();
 
   if (state.filtered.length === 0) {
     tbody.innerHTML = '';
     empty.style.display = 'flex';
     empty.style.flexDirection = 'column';
     tableScroll.style.display = 'none';
+    clearSelection();
     return;
+  }
+
+  // Dynamic thead — rebuild columns based on active category filter
+  const cols = getActiveCols();
+  if (thead) {
+    thead.innerHTML =
+      `<th class="col-cb"><input type="checkbox" id="cb-select-all" title="Select all"></th>` +
+      cols.map(col =>
+        `<th data-col="${col.sort || ''}" class="${col.sort ? 'sortable ' : ''}${col.width}">${col.label} ${col.sort ? '<span class="sort-icon"></span>' : ''}</th>`
+      ).join('') +
+      `<th class="col-actions">Actions</th>`;
+
+    // Re-attach sort listeners after thead rebuild
+    initSortHeaders();
+
+    // Header checkbox
+    document.getElementById('cb-select-all')?.addEventListener('change', e => {
+      if (e.target.checked) {
+        state.filtered.forEach(c => selectedIds.add(c.id));
+      } else {
+        selectedIds.clear();
+      }
+      // Re-check all row checkboxes
+      tbody.querySelectorAll('.row-cb').forEach(cb => {
+        cb.checked = e.target.checked;
+      });
+      updateSelectionBar();
+    });
   }
 
   empty.style.display = 'none';
   tableScroll.style.display = '';
-  tbody.innerHTML = state.filtered.map(c => buildRow(c)).join('');
+  tbody.innerHTML = state.filtered.map(c => buildRow(c, cols)).join('');
 
+  // Sync checkboxes with current selection
+  tbody.querySelectorAll('.row-cb').forEach(cb => {
+    const id = Number(cb.dataset.id);
+    cb.checked = selectedIds.has(id);
+    cb.addEventListener('change', e => {
+      e.stopPropagation();
+      if (e.target.checked) selectedIds.add(id);
+      else selectedIds.delete(id);
+      updateSelectionBar();
+    });
+  });
+
+  // Delegated click — open detail (skip checkbox, actions)
   tbody.querySelectorAll('tr[data-id]').forEach(row => {
     row.addEventListener('click', e => {
-      if (e.target.closest('.row-actions')) return;
+      if (e.target.closest('.row-actions') || e.target.closest('.row-cb-cell')) return;
       const id   = Number(row.dataset.id);
       const comp = state.components.find(c => c.id === id);
       if (comp) showDetail(comp);
@@ -388,26 +554,15 @@ export function renderTable() {
   });
 }
 
-function buildRow(c) {
-  const qty      = Number(c.quantity) || 0;
-  const qtyClass = qty <= 1 ? 'qty-badge low' : 'qty-badge';
-  const vMax     = c.voltage_max != null ? `${c.voltage_max}V` : '';
-  const iMax     = c.current_max != null ? `${c.current_max}A` : '';
-  const price    = c.unit_price  != null ? `$${Number(c.unit_price).toFixed(2)}` : '';
+function buildRow(c, cols) {
+  const isSelected = selectedIds.has(c.id);
+  const cells = cols.map(col =>
+    `<td class="${col.width}">${col.render(c)}</td>`
+  ).join('');
 
-  return `<tr data-id="${c.id}">
-    <td class="col-pc"><span class="td-truncate mono" style="font-size:12px;font-weight:500" title="${escHtml(c.part_code)}">${escHtml(c.part_code)}</span></td>
-    <td class="col-cat">${c.category    ? `<span class="badge badge-cat">${escHtml(c.category)}</span>` : ''}</td>
-    <td class="col-sub">${c.subcategory ? `<span class="badge badge-sub">${escHtml(c.subcategory)}</span>` : ''}</td>
-    <td class="num col-qty"><span class="${qtyClass}">${qty}</span></td>
-    <td class="col-pkg"><span class="td-truncate mono" style="font-size:11px" title="${escHtml(c.package)}">${escHtml(c.package)}</span></td>
-    <td class="col-mfr"><span class="td-truncate" style="font-size:12px" title="${escHtml(c.manufacturer)}">${escHtml(c.manufacturer)}</span></td>
-    <td class="col-mpn"><span class="td-truncate mono" style="font-size:11px" title="${escHtml(c.mpn)}">${escHtml(c.mpn)}</span></td>
-    <td class="col-loc"><span class="td-truncate" style="font-size:12px" title="${escHtml(c.location)}">${escHtml(c.location)}</span></td>
-    <td class="num col-vmax">${vMax ? `<span class="mono" style="font-size:11px">${escHtml(vMax)}</span>` : ''}</td>
-    <td class="num col-imax">${iMax ? `<span class="mono" style="font-size:11px">${escHtml(iMax)}</span>` : ''}</td>
-    <td class="col-desc"><span class="td-truncate" style="font-size:12px;color:var(--text-secondary)" title="${escHtml(c.description)}">${escHtml(c.description)}</span></td>
-    <td class="num col-price">${price ? `<span class="mono" style="font-size:11px">${escHtml(price)}</span>` : ''}</td>
+  return `<tr data-id="${c.id}"${isSelected ? ' class="row-selected"' : ''}>
+    <td class="row-cb-cell col-cb"><input type="checkbox" class="row-cb" data-id="${c.id}"${isSelected ? ' checked' : ''}></td>
+    ${cells}
     <td class="col-actions">
       <div class="row-actions">
         <button class="row-action-btn btn-row-edit" title="Edit">
@@ -419,6 +574,45 @@ function buildRow(c) {
       </div>
     </td>
   </tr>`;
+}
+
+// ============================================================
+// Breadcrumb display
+// ============================================================
+function updateBreadcrumb() {
+  const bar = document.getElementById('breadcrumb-bar');
+  if (!bar) return;
+
+  const cat  = state.filterCat;
+  const sub  = state.filterSub;
+  const loc  = state.filterLoc;
+  const n    = state.filtered.length;
+
+  if (!cat && !loc) {
+    bar.style.display = 'none';
+    return;
+  }
+
+  bar.style.display = 'flex';
+  let crumb = '';
+  if (cat) {
+    crumb = escHtml(cat);
+    if (sub) crumb += ` <span class="bc-sep">›</span> ${escHtml(sub)}`;
+  } else if (loc) {
+    crumb = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> ${escHtml(loc)}`;
+  }
+
+  bar.innerHTML = `
+    <span class="bc-icon">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+    </span>
+    <span class="bc-path">${crumb}</span>
+    <span class="bc-count">${n} component${n !== 1 ? 's' : ''}</span>
+  `;
+}
+
+export function initSelectionBarOnce() {
+  initSelectionBar();
 }
 
 // ============================================================

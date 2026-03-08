@@ -1,6 +1,6 @@
 import Database from '@tauri-apps/plugin-sql';
 import { invoke } from '@tauri-apps/api/core';
-import { renderTable, applyFilters } from './modules/table.js';
+import { renderTable, applyFilters, initSelectionBarOnce } from './modules/table.js';
 import { initModals } from './modules/modals.js';
 import { initImport } from './modules/import.js';
 import { initExport } from './modules/export.js';
@@ -155,6 +155,14 @@ export async function renameCategory(oldName, newName, isSubcategory = false, pa
 
 export async function deleteComponent(id) {
   await state.db.execute('DELETE FROM components WHERE id=?', [id]);
+  await triggerBackup();
+  await loadComponents();
+}
+
+export async function deleteComponents(ids) {
+  if (!ids || ids.length === 0) return;
+  const placeholders = ids.map(() => '?').join(',');
+  await state.db.execute(`DELETE FROM components WHERE id IN (${placeholders})`, ids);
   await triggerBackup();
   await loadComponents();
 }
@@ -666,6 +674,7 @@ async function main() {
     initBackupUI();
     initBulkCategorize();
     initRenameModal();
+    initSelectionBarOnce();
 
     // Hide boot loader
     if (bootLoader) {

@@ -1796,6 +1796,47 @@ textarea { resize: vertical; min-height: 52px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--mid-gray); }
 
 /* ================================================================
+   Breadcrumb bar
+   ================================================================ */
+#breadcrumb-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+.bc-icon { color: var(--text-muted); display: flex; align-items: center; }
+.bc-path { font-weight: 500; color: var(--text-primary); }
+.bc-sep  { margin: 0 4px; color: var(--text-muted); }
+.bc-count { margin-left: auto; font-size: 0.73rem; color: var(--text-muted); padding: 1px 8px; background: var(--bg-raised); border-radius: 10px; }
+
+/* ================================================================
+   Selection bar
+   ================================================================ */
+#selection-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 16px;
+  background: var(--accent-dim);
+  border-bottom: 1px solid var(--accent);
+  gap: 12px;
+  font-size: 0.82rem;
+  color: var(--accent);
+  font-weight: 500;
+}
+
+/* Checkbox column in table */
+.col-cb { width: 32px; padding: 0 8px !important; }
+.row-cb-cell { cursor: default; }
+.row-cb  { width: 14px; height: 14px; cursor: pointer; accent-color: var(--accent); }
+#cb-select-all { width: 14px; height: 14px; cursor: pointer; accent-color: var(--accent); }
+tr.row-selected { background: var(--accent-dim) !important; }
+
+/* ================================================================
    Sidebar rename button
    ================================================================ */
 .btn-rename-tree {

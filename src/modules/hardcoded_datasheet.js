@@ -483,6 +483,109 @@ export function lookupComponent(partCode) {
   return null;
 }
 
+// ================================================================
+// Description-based categorization
+// Matches free-text description against known component type keywords.
+// Returns { category, subcategory } or null.
+// ================================================================
+
+// Rules evaluated in order — first match wins.
+const DESC_RULES = [
+  // ── Transistors / MOSFETs ──────────────────────────────────────
+  [/N[-\s]?CH(?:ANNEL)?.{0,15}MOSFET/i,         { category:'Transistors', subcategory:'N-Channel MOSFET' }],
+  [/P[-\s]?CH(?:ANNEL)?.{0,15}MOSFET/i,         { category:'Transistors', subcategory:'P-Channel MOSFET' }],
+  [/SMD.{0,10}MOSFET|MOSFET.{0,10}SMD/i,        { category:'Transistors', subcategory:'Power MOSFET' }],
+  [/POWER MOSFET|MOSFET/i,                        { category:'Transistors', subcategory:'Power MOSFET' }],
+  [/IGBT/i,                                       { category:'Transistors', subcategory:'IGBT' }],
+  [/DARLINGTON.{0,6}NPN|NPN.{0,6}DARLINGTON/i,  { category:'Transistors', subcategory:'Darlington NPN' }],
+  [/DARLINGTON.{0,6}PNP|PNP.{0,6}DARLINGTON/i,  { category:'Transistors', subcategory:'Darlington PNP' }],
+  [/\bNPN\b/i,                                    { category:'Transistors', subcategory:'BJT NPN' }],
+  [/\bPNP\b/i,                                    { category:'Transistors', subcategory:'BJT PNP' }],
+  [/TRENCH.?MOS|TRENCH.?FET/i,                   { category:'Transistors', subcategory:'N-Channel MOSFET' }],
+  // ── Thyristors ────────────────────────────────────────────────
+  [/\bTRIAC\b/i,                                  { category:'Thyristors', subcategory:'TRIAC' }],
+  [/\bSCR\b|THYRISTOR/i,                          { category:'Thyristors', subcategory:'SCR' }],
+  // ── Diodes ────────────────────────────────────────────────────
+  [/DIODE BRIDGE|BRIDGE RECTIFIER|KOPRu DIYOT/i, { category:'Diodes', subcategory:'Bridge Rectifier' }],
+  [/\bZENER\b/i,                                  { category:'Diodes', subcategory:'Zener' }],
+  [/SCHOTTKY/i,                                   { category:'Diodes', subcategory:'Schottky' }],
+  [/TVS|TRANSIENT VOLTAGE SUPP/i,                 { category:'Diodes', subcategory:'TVS' }],
+  [/FAST RECOVERY|ULTRA FAST|HIGH EFFICIENCY/i,  { category:'Diodes', subcategory:'Fast Recovery' }],
+  [/RECTIFIER DIODE|DIODE.{0,10}\d+V|GENERAL PURPOSE.{0,10}DIODE/i, { category:'Diodes', subcategory:'Rectifier' }],
+  // ── Capacitors ────────────────────────────────────────────────
+  [/ELECTROLYTIC|ALUMIN.{0,3}UM CAP/i,           { category:'Capacitors', subcategory:'Electrolytic' }],
+  [/TANTALUM/i,                                   { category:'Capacitors', subcategory:'Tantalum' }],
+  [/CERAMIC|MLCC/i,                               { category:'Capacitors', subcategory:'Ceramic' }],
+  [/FILM CAP|POLYESTER|POLYPROPYLENE/i,           { category:'Capacitors', subcategory:'Film' }],
+  // ── Resistors ─────────────────────────────────────────────────
+  [/PTC.{0,10}RESET|SELF.?RESET/i,               { category:'Sensors', subcategory:'PTC Thermistor' }],
+  [/\bPTC\b.{0,15}THERMISTOR/i,                  { category:'Sensors', subcategory:'PTC Thermistor' }],
+  [/\bNTC\b.{0,15}THERMISTOR|THERMISTOR.{0,15}\bNTC\b/i, { category:'Sensors', subcategory:'NTC Thermistor' }],
+  [/THERMISTOR/i,                                 { category:'Resistors', subcategory:'Thermistor' }],
+  [/CARBON FILM.{0,10}RESIST/i,                   { category:'Resistors', subcategory:'Carbon Film' }],
+  [/METAL FILM.{0,10}RESIST/i,                    { category:'Resistors', subcategory:'Metal Film' }],
+  [/WIREWOUND/i,                                  { category:'Resistors', subcategory:'Wirewound' }],
+  [/VARISTOR|MOV/i,                               { category:'Resistors', subcategory:'Varistor' }],
+  // ── Inductors / Magnetics ─────────────────────────────────────
+  [/FERRITE.{0,10}TOROID|TOROID.{0,10}FERRITE/i, { category:'Inductors', subcategory:'Toroid Core' }],
+  [/FERRITE.{0,10}CORE|FERRITE BEAD/i,            { category:'Inductors', subcategory:'Ferrite Core' }],
+  [/COMMON MODE CHOKE|CMC/i,                      { category:'Inductors', subcategory:'Common Mode Choke' }],
+  [/INDUCTOR|CHOKE COIL/i,                        { category:'Inductors', subcategory:'Inductor' }],
+  [/TRANSFORMER/i,                                { category:'Inductors', subcategory:'Transformer' }],
+  // ── ICs ───────────────────────────────────────────────────────
+  [/GATE DRIVER|HIGH.?LOW SIDE DRIVER|HALF.?BRIDGE DRIVER/i, { category:'ICs', subcategory:'Gate Driver' }],
+  [/PWM CONTROLLER|PWM CONTROL CIRCUIT/i,         { category:'ICs', subcategory:'PWM Controller' }],
+  [/BUCK.{0,15}CONVERTER|STEP.?DOWN CONVERTER/i,  { category:'ICs', subcategory:'Buck Converter' }],
+  [/BOOST.{0,15}CONVERTER|STEP.?UP CONVERTER/i,   { category:'ICs', subcategory:'Boost Converter' }],
+  [/BUCK.?BOOST|SEPIC|FLYBACK/i,                  { category:'ICs', subcategory:'DC-DC Converter' }],
+  [/OP.?AMP|OPERATIONAL AMP/i,                    { category:'ICs', subcategory:'Op-Amp' }],
+  [/COMPARATOR/i,                                  { category:'ICs', subcategory:'Comparator' }],
+  [/555 TIMER|\bTIMER IC\b/i,                     { category:'ICs', subcategory:'Timer' }],
+  [/LOW DROPOUT|LDO REGULATOR/i,                  { category:'ICs', subcategory:'LDO Regulator' }],
+  [/VOLTAGE REGULATOR|LINEAR REGULATOR/i,          { category:'ICs', subcategory:'Linear Regulator' }],
+  [/OPTOCOUPLER|OPTOISOLATOR|PHOTOTRANSISTOR OUTPUT/i, { category:'ICs', subcategory:'Optocoupler' }],
+  [/TOUCH SENSOR|CAPACITIVE TOUCH/i,              { category:'ICs', subcategory:'Touch Sensor' }],
+  [/LED DRIVER|CONSTANT CURRENT.{0,10}LED/i,      { category:'ICs', subcategory:'LED Driver' }],
+  [/MOTOR DRIVER|FULL.?BRIDGE DRIVER|HALF.?BRIDGE DRIVER/i, { category:'ICs', subcategory:'Motor Driver' }],
+  [/STEPPER.{0,10}DRIVER/i,                       { category:'ICs', subcategory:'Stepper Driver' }],
+  [/RS.?232|UART DRIVER/i,                        { category:'ICs', subcategory:'RS-232 Driver' }],
+  [/RS.?485/i,                                    { category:'ICs', subcategory:'RS-485 Transceiver' }],
+  [/RF TRANSCEIVER|2\.4GHZ TRANSCEIVER/i,        { category:'ICs', subcategory:'RF Transceiver' }],
+  [/WI.?FI|BLUETOOTH/i,                           { category:'ICs', subcategory:'WiFi+BT SoC' }],
+  [/MICROCONTROLLER|8.?BIT AVR|ARM CORTEX|PIC MCU/i, { category:'ICs', subcategory:'Microcontroller' }],
+  [/SHIFT REGISTER/i,                              { category:'ICs', subcategory:'Logic / Shift Register' }],
+  [/NAND GATE/i,                                   { category:'ICs', subcategory:'Logic / NAND' }],
+  [/HALL EFFECT|CURRENT SENSOR|POWER MONITOR/i,   { category:'Sensors', subcategory:'Current Sensor' }],
+  // ── Sensors ───────────────────────────────────────────────────
+  [/TEMPERATURE SENSOR|THERMOMETER/i,             { category:'Sensors', subcategory:'Temperature' }],
+  [/HUMIDITY.{0,10}TEMP|TEMP.{0,10}HUMIDITY/i,   { category:'Sensors', subcategory:'Humidity / Temp' }],
+  // ── Connectors ────────────────────────────────────────────────
+  [/IC SOCKET|DIP SOCKET/i,                       { category:'Connectors', subcategory:'IC Socket' }],
+  [/TERMINAL BLOCK/i,                              { category:'Connectors', subcategory:'Terminal Block' }],
+  [/CONNECTOR/i,                                   { category:'Connectors', subcategory:'Connector' }],
+  // ── Crystals ──────────────────────────────────────────────────
+  [/CRYSTAL RESONATOR|QUARTZ CRYSTAL/i,           { category:'Crystals', subcategory:'Crystal' }],
+  // ── Relays ────────────────────────────────────────────────────
+  [/ELECTROMAGNETIC RELAY|RELAY.{0,6}COIL|COIL.{0,6}RELAY/i, { category:'Relays', subcategory:'Relay' }],
+  // ── Mechanical ────────────────────────────────────────────────
+  [/PERTINAKS|PERTINAX|PERFBOARD/i,               { category:'Mechanical', subcategory:'PCB / Board' }],
+  [/HEAT SINK|HEATSINK/i,                          { category:'Mechanical', subcategory:'Heat Sink' }],
+  [/LEHIM|SOLDER/i,                                { category:'Consumables', subcategory:'Solder' }],
+  [/FLUX/i,                                        { category:'Consumables', subcategory:'Flux' }],
+];
+
+/**
+ * Attempt to categorize a component by its description text.
+ * Returns { category, subcategory } or null.
+ */
+export function categorizeByDescription(description) {
+  if (!description) return null;
+  for (const [pattern, result] of DESC_RULES) {
+    if (pattern.test(description)) return result;
+  }
+  return null;
+}
+
 /**
  * Apply hardcoded data to a component object, filling only EMPTY fields.
  * Returns a new object (original not mutated).
