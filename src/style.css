@@ -1829,12 +1829,79 @@ textarea { resize: vertical; min-height: 52px; }
   font-weight: 500;
 }
 
-/* Checkbox column in table */
-.col-cb { width: 32px; padding: 0 8px !important; }
-.row-cb-cell { cursor: default; }
-.row-cb  { width: 14px; height: 14px; cursor: pointer; accent-color: var(--accent); }
-#cb-select-all { width: 14px; height: 14px; cursor: pointer; accent-color: var(--accent); }
+/* Checkbox column — hidden by default, shown only in select-mode */
+.col-cb       { width: 36px; padding: 0 8px !important; display: none; }
+.row-cb-cell  { cursor: default; display: none; }
+
+body.select-mode .col-cb      { display: table-cell; }
+body.select-mode .row-cb-cell { display: table-cell; }
+
+/* Custom checkbox appearance — theme-aware */
+.row-cb,
+#cb-select-all {
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1.5px solid var(--border);
+  border-radius: 3px;
+  background: var(--bg-overlay);
+  transition: background 0.15s, border-color 0.15s;
+  position: relative;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+.row-cb:hover,
+#cb-select-all:hover {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+}
+.row-cb:checked,
+#cb-select-all:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.row-cb:indeterminate,
+#cb-select-all:indeterminate {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+}
+/* Checkmark via pseudo-element */
+.row-cb:checked::after,
+#cb-select-all:checked::after {
+  content: '';
+  display: block;
+  position: absolute;
+  left: 3px;
+  top: 0px;
+  width: 5px;
+  height: 9px;
+  border: 2px solid var(--bg);
+  border-top: none;
+  border-left: none;
+  transform: rotate(45deg);
+}
+#cb-select-all:indeterminate::after {
+  content: '';
+  display: block;
+  position: absolute;
+  left: 2px;
+  top: 5px;
+  width: 8px;
+  height: 2px;
+  background: var(--accent);
+  border-radius: 1px;
+}
+
 tr.row-selected { background: var(--accent-dim) !important; }
+
+/* Select-mode active button style */
+.btn.btn-active {
+  background: var(--accent-dim);
+  color: var(--accent);
+  border-color: var(--accent);
+}
 
 /* ================================================================
    Sidebar rename button

@@ -117,10 +117,12 @@ const CATEGORY_COL_OVERRIDES = {
 };
 
 function getActiveCols() {
-  const cat   = state.filterCat || '';
-  // Match against category name (case-insensitive prefix match against CATEGORY_COL_OVERRIDES)
+  const cat = state.filterCat || '';
   for (const [key, cols] of Object.entries(CATEGORY_COL_OVERRIDES)) {
-    if (cat.toLowerCase().includes(key.toLowerCase())) return cols;
+    // Strip trailing 's' from key, match category prefix case-insensitively
+    // e.g. 'Transistors' key matches 'Transistor (MOSFET)', 'Transistor Array' etc.
+    const base = key.replace(/s$/i, '');
+    if (new RegExp(`^${base}`, 'i').test(cat)) return cols;
   }
   return DEFAULT_COLS;
 }
@@ -613,6 +615,20 @@ function updateBreadcrumb() {
 
 export function initSelectionBarOnce() {
   initSelectionBar();
+  initSelectModeToggle();
+}
+
+function initSelectModeToggle() {
+  const btn = document.getElementById('btn-select-mode');
+  if (!btn) return;
+  btn.addEventListener('click', () => {
+    const active = document.body.classList.toggle('select-mode');
+    btn.classList.toggle('btn-active', active);
+    if (!active) {
+      clearSelection();
+      renderTable();
+    }
+  });
 }
 
 // ============================================================
