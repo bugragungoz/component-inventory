@@ -164,9 +164,9 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="4" height="4" rx="1"/><rect x="3" y="12" width="4" height="4" rx="1"/><rect x="3" y="19" width="4" height="4" rx="1"/><line x1="11" y1="7" x2="21" y2="7"/><line x1="11" y1="14" x2="21" y2="14"/><line x1="11" y1="21" x2="21" y2="21"/></svg>
           Select
         </button>
-        <button class="btn btn-ghost" id="btn-bulk-cat" title="Auto-categorize components using built-in database">
+        <button class="btn btn-ghost" id="btn-bulk-cat" title="Auto — categorize and fill electrical specs from built-in database">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16"/><path d="M4 12h16"/><path d="M4 4h16"/><circle cx="20" cy="4" r="2" fill="currentColor" stroke="none"/><circle cx="20" cy="12" r="2" fill="currentColor" stroke="none"/><circle cx="20" cy="20" r="2" fill="currentColor" stroke="none"/></svg>
-          Auto-Categorize
+          Auto
         </button>
         <div class="btn-divider"></div>
         <button class="btn btn-import" id="btn-import">
@@ -733,6 +733,14 @@
             <span style="font-size:0.75rem;color:var(--text-tertiary)">Database path</span>
             <span id="s-db-path" class="mono" style="font-size:0.68rem;color:var(--text-tertiary);word-break:break-all">—</span>
           </div>
+          <div class="settings-row" style="justify-content:space-between;align-items:center">
+            <span style="font-size:0.78rem;color:var(--text-secondary)">App Updates</span>
+            <button class="btn btn-ghost" id="btn-check-update" style="font-size:0.78rem">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+              Check for Updates
+            </button>
+          </div>
+          <div id="update-status" style="display:none;padding:8px 12px;border-radius:8px;font-size:0.78rem;margin-top:-6px"></div>
         </div>
       </div>
       <div class="modal-footer">
@@ -769,7 +777,7 @@
     <div class="modal modal-lg">
       <div class="modal-header">
         <div>
-          <h2>Auto-Categorize Components</h2>
+          <h2>Auto — Categorize &amp; Fill Specs</h2>
           <p id="bulk-cat-subtitle" style="margin:4px 0 0;font-size:0.8rem;color:var(--text-muted)"></p>
         </div>
         <button class="modal-close" id="btn-bulk-cat-close">
@@ -778,7 +786,10 @@
       </div>
       <div style="padding:12px 20px 0;display:flex;gap:16px;align-items:center">
         <label class="radio-label" style="font-size:0.82rem">
-          <input type="radio" name="bulk-cat-scope" value="uncategorized" checked /> Uncategorized only
+          <input type="radio" name="bulk-cat-scope" value="selected" checked /> Selected (0)
+        </label>
+        <label class="radio-label" style="font-size:0.82rem">
+          <input type="radio" name="bulk-cat-scope" value="uncategorized" /> Uncategorized only
         </label>
         <label class="radio-label" style="font-size:0.82rem">
           <input type="radio" name="bulk-cat-scope" value="all" /> All components
@@ -794,10 +805,11 @@
               <th>Part Code</th>
               <th>Current Category</th>
               <th>Suggested Category</th>
+              <th>Changes</th>
             </tr>
           </thead>
           <tbody id="bulk-cat-tbody">
-            <tr><td colspan="4" style="text-align:center;padding:32px;color:var(--text-muted)">Loading...</td></tr>
+            <tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted)">Loading...</td></tr>
           </tbody>
         </table>
       </div>

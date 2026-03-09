@@ -22,6 +22,11 @@ pub struct BuiltinComponent {
     pub manufacturer: String,
     pub description: String,
     pub datasheet_url: String,
+    pub voltage_max: Option<f64>,
+    pub current_max: Option<f64>,
+    pub resistance: String,
+    pub tolerance: String,
+    pub power_rating: Option<f64>,
     pub attributes: String,
 }
 
@@ -72,7 +77,9 @@ fn search_builtin_library(
     let mut stmt = conn
         .prepare(
             "SELECT id, part_code, category, subcategory, package,
-                    manufacturer, description, datasheet_url, attributes
+                    manufacturer, description, datasheet_url,
+                    voltage_max, current_max, resistance, tolerance,
+                    power_rating, attributes
              FROM components
              WHERE part_code LIKE ?1 OR description LIKE ?1 OR category LIKE ?1
              LIMIT 15",
@@ -90,7 +97,12 @@ fn search_builtin_library(
                 manufacturer: row.get::<_, String>(5).unwrap_or_default(),
                 description: row.get::<_, String>(6).unwrap_or_default(),
                 datasheet_url: row.get::<_, String>(7).unwrap_or_default(),
-                attributes: row.get::<_, String>(8).unwrap_or_default(),
+                voltage_max: row.get::<_, Option<f64>>(8).unwrap_or(None),
+                current_max: row.get::<_, Option<f64>>(9).unwrap_or(None),
+                resistance: row.get::<_, String>(10).unwrap_or_default(),
+                tolerance: row.get::<_, String>(11).unwrap_or_default(),
+                power_rating: row.get::<_, Option<f64>>(12).unwrap_or(None),
+                attributes: row.get::<_, String>(13).unwrap_or_default(),
             })
         })
         .map_err(|e| format!("Query error: {e}"))?;
@@ -105,6 +117,98 @@ fn search_builtin_library(
     Ok(results)
 }
 
+/// Helper to build a BuiltinComponent from a row with the standard column order.
+fn builtin_from_row(row: &rusqlite::Row) -> rusqlite::Result<BuiltinComponent> {
+    Ok(BuiltinComponent {
+        id: row.get(0)?,
+        part_code: row.get::<_, String>(1).unwrap_or_default(),
+        category: row.get::<_, String>(2).unwrap_or_default(),
+        subcategory: row.get::<_, String>(3).unwrap_or_default(),
+        package: row.get::<_, String>(4).unwrap_or_default(),
+        manufacturer: row.get::<_, String>(5).unwrap_or_default(),
+        description: row.get::<_, String>(6).unwrap_or_default(),
+        datasheet_url: row.get::<_, String>(7).unwrap_or_default(),
+        voltage_max: row.get::<_, Option<f64>>(8).unwrap_or(None),
+        current_max: row.get::<_, Option<f64>>(9).unwrap_or(None),
+        resistance: row.get::<_, String>(10).unwrap_or_default(),
+        tolerance: row.get::<_, String>(11).unwrap_or_default(),
+        power_rating: row.get::<_, Option<f64>>(12).unwrap_or(None),
+        attributes: row.get::<_, String>(13).unwrap_or_default(),
+    })
+}
+
+#[tauri::command]
+fn batch_lookup_builtin(
+    part_codes: Vec<String>,
+    db_path: State<BuiltinDbPath>,
+) -> Result<Vec<BuiltinComponent>, String> {
+    if part_codes.is_empty() {
+        return Ok(vec![]);
+    }
+
+    let conn = Connection::open_with_flags(
+        &db_path.0,
+        rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY | rusqlite::OpenFlags::SQLITE_OPEN_NO_MUTEX,
+    )
+    .map_err(|e| format!("Failed to open builtin DB: {e}"))?;
+
+    let mut results = Vec::new();
+
+    // Normalise a part code: uppercase, strip dashes/spaces/dots
+    fn normalise(s: &str) -> String {
+        s.to_uppercase()
+            .chars()
+            .filter(|c| c.is_alphanumeric())
+            .collect()
+    }
+
+    let mut exact_stmt = conn
+        .prepare(
+            "SELECT id, part_code, category, subcategory, package,
+                    manufacturer, description, datasheet_url,
+                    voltage_max, current_max, resistance, tolerance,
+                    power_rating, attributes
+             FROM components
+             WHERE UPPER(REPLACE(REPLACE(REPLACE(part_code, '-', ''), ' ', ''), '.', '')) = ?1
+             LIMIT 1",
+        )
+        .map_err(|e| format!("Prepare error: {e}"))?;
+
+    let mut like_stmt = conn
+        .prepare(
+            "SELECT id, part_code, category, subcategory, package,
+                    manufacturer, description, datasheet_url,
+                    voltage_max, current_max, resistance, tolerance,
+                    power_rating, attributes
+             FROM components
+             WHERE part_code LIKE ?1
+             LIMIT 1",
+        )
+        .map_err(|e| format!("Prepare error: {e}"))?;
+
+    for code in &part_codes {
+        let norm = normalise(code.trim());
+        if norm.is_empty() {
+            continue;
+        }
+
+        // 1. Exact normalised match
+        if let Ok(Some(comp)) = exact_stmt.query_row([&norm], |row| Ok(Some(builtin_from_row(row)?)))
+        {
+            results.push(comp);
+            continue;
+        }
+
+        // 2. LIKE prefix match
+        let pattern = format!("{}%", code.trim());
+        if let Ok(Some(comp)) = like_stmt.query_row([&pattern], |row| Ok(Some(builtin_from_row(row)?)))
+        {
+            results.push(comp);
+        }
+    }
+
+    Ok(results)
+}
 
 // Use std::thread to avoid requiring a Tokio runtime context during setup.
 fn start_backup_scheduler(data_dir: Arc<Mutex<PathBuf>>) {
@@ -173,6 +277,7 @@ pub fn run() {
             restore_backup_cmd,
             get_app_data_dir,
             search_builtin_library,
+            batch_lookup_builtin,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
