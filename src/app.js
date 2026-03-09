@@ -64,6 +64,13 @@ async function initDB() {
     `ALTER TABLE components ADD COLUMN resistance   TEXT DEFAULT ''`,
     `ALTER TABLE components ADD COLUMN tolerance    TEXT DEFAULT ''`,
     `ALTER TABLE components ADD COLUMN power_rating REAL`,
+    // JSON attributes column — stores category-specific parameters
+    // (e.g. rds_on/vgs_th for MOSFETs, hfe/vce_sat for BJTs).
+    // Query example:
+    //   SELECT * FROM components
+    //    WHERE category LIKE '%MOSFET%'
+    //      AND CAST(json_extract(attributes, '$.rds_on') AS REAL) < 50;
+    `ALTER TABLE components ADD COLUMN attributes   TEXT DEFAULT '{}'`,
   ];
   for (const sql of migrations) {
     try { await db.execute(sql); } catch (_) { /* column already exists */ }
@@ -87,19 +94,24 @@ export async function addComponent(data) {
   const { part_code, category, subcategory, quantity, package: pkg,
     manufacturer, mpn, location, voltage_max, current_max,
     description, datasheet_url, unit_price, notes, image_path,
-    resistance, tolerance, power_rating } = data;
+    resistance, tolerance, power_rating, attributes } = data;
+
+  const attrsJson = attributes && typeof attributes === 'object'
+    ? JSON.stringify(attributes)
+    : (typeof attributes === 'string' ? attributes : '{}');
 
   await state.db.execute(
     `INSERT INTO components
       (part_code, category, subcategory, quantity, package, manufacturer, mpn, location,
        voltage_max, current_max, description, datasheet_url, unit_price, notes, image_path,
-       resistance, tolerance, power_rating)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       resistance, tolerance, power_rating, attributes)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [part_code, category || '', subcategory || '', quantity || 0, pkg || '',
      manufacturer || '', mpn || '', location || '',
      voltage_max ?? null, current_max ?? null,
      description || '', datasheet_url || '', unit_price ?? null, notes || '',
-     image_path || '', resistance || '', tolerance || '', power_rating ?? null]
+     image_path || '', resistance || '', tolerance || '', power_rating ?? null,
+     attrsJson]
   );
   await triggerBackup();
   await loadComponents();
@@ -109,21 +121,26 @@ export async function updateComponent(id, data) {
   const { part_code, category, subcategory, quantity, package: pkg,
     manufacturer, mpn, location, voltage_max, current_max,
     description, datasheet_url, unit_price, notes, image_path,
-    resistance, tolerance, power_rating } = data;
+    resistance, tolerance, power_rating, attributes } = data;
+
+  const attrsJson = attributes && typeof attributes === 'object'
+    ? JSON.stringify(attributes)
+    : (typeof attributes === 'string' ? attributes : '{}');
 
   await state.db.execute(
     `UPDATE components SET
       part_code=?, category=?, subcategory=?, quantity=?, package=?,
       manufacturer=?, mpn=?, location=?, voltage_max=?, current_max=?,
       description=?, datasheet_url=?, unit_price=?, notes=?, image_path=?,
-      resistance=?, tolerance=?, power_rating=?,
+      resistance=?, tolerance=?, power_rating=?, attributes=?,
       updated_at=datetime('now')
      WHERE id=?`,
     [part_code, category || '', subcategory || '', quantity || 0, pkg || '',
      manufacturer || '', mpn || '', location || '',
      voltage_max ?? null, current_max ?? null,
      description || '', datasheet_url || '', unit_price ?? null, notes || '',
-     image_path || '', resistance || '', tolerance || '', power_rating ?? null, id]
+     image_path || '', resistance || '', tolerance || '', power_rating ?? null,
+     attrsJson, id]
   );
   await triggerBackup();
   await loadComponents();
