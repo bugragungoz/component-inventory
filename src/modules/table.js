@@ -2,6 +2,7 @@ import { state, escHtml, deleteComponents, showToast } from '../app.js';
 import { lookupComponent, applyDbData }                 from './hardcoded_datasheet.js';
 import { setLabelComponent }                             from './labels.js';
 import { readFile }                                      from '@tauri-apps/plugin-fs';
+import { invoke }                                        from '@tauri-apps/api/core';
 
 // ============================================================
 // Multi-select state
@@ -750,7 +751,28 @@ let _detailObjectUrl = null;
 async function showDetail(comp) {
   _detailComp = comp;
   setLabelComponent(comp);
-  const dbRecord  = lookupComponent(comp.part_code);
+  let dbRecord  = lookupComponent(comp.part_code);
+
+  // If the hardcoded DB doesn't have this component (or lacks a datasheet URL),
+  // fall back to the bundled patched.db (60K+ components) via Tauri backend.
+  if (!dbRecord || !dbRecord.datasheet_url) {
+    try {
+      const hits = await invoke('batch_lookup_builtin', { partCodes: [comp.part_code] });
+      if (hits && hits.length > 0) {
+        const builtinHit = hits[0];
+        if (!dbRecord) {
+          // No hardcoded record at all — use the builtin hit as the DB record
+          dbRecord = builtinHit;
+        } else if (!dbRecord.datasheet_url && builtinHit.datasheet_url) {
+          // Hardcoded record exists but lacks datasheet — merge the URL in
+          dbRecord = { ...dbRecord, datasheet_url: builtinHit.datasheet_url };
+        }
+      }
+    } catch (_) {
+      // Silent — fall back to hardcoded DB only
+    }
+  }
+
   // Merge comp with DB (DB fills only empty fields)
   const effective = applyDbData(comp, dbRecord);
 
@@ -966,7 +988,7 @@ async function showDetail(comp) {
         <span class="detail-label">Notes</span>
         ${val(comp.notes)}
       </div>` : ''}
-      ${datasheetUrl && comp.datasheet_url ? `<div class="detail-field full">
+      ${datasheetUrl ? `<div class="detail-field full">
         <span class="detail-label">Datasheet URL</span>
         <a href="${escHtml(datasheetUrl)}" target="_blank" rel="noopener" class="detail-value" style="color:var(--accent-blue);word-break:break-all;font-size:11px">${escHtml(datasheetUrl)}</a>
       </div>` : ''}

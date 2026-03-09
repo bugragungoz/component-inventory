@@ -46,6 +46,10 @@
   --danger-dim:      rgba(248, 113, 113, 0.14);
   --low-stock:       #e05040;
 
+  /* Surface layers (used for dropdowns, table rows, etc.) */
+  --surface-2:       #1e1d1b;
+  --surface-3:       #2a2826;
+
   /* Typography */
   --font-heading: 'Poppins', system-ui, Arial, sans-serif;
   --font-body:    'Lora', Georgia, serif;
@@ -94,6 +98,8 @@ html.light {
   --danger-hover:    #e05050;
   --danger-dim:      rgba(248, 113, 113, 0.1);
   --low-stock:       #c0392b;
+  --surface-2:       #eae7de;
+  --surface-3:       #d8d4c8;
 }
 
 /* ================================================================

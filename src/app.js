@@ -654,6 +654,55 @@ function compareVersions(a, b) {
   return 0;
 }
 
+/** Silent update check on app launch — shows a toast if a newer version exists. */
+async function autoCheckForUpdates() {
+  try {
+    const currentVersion = await getCurrentVersion();
+    const res = await fetch(GITHUB_RELEASES_API, {
+      headers: { 'Accept': 'application/vnd.github.v3+json' },
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    const latestTag = (data.tag_name || '').replace(/^v/, '');
+    if (compareVersions(latestTag, currentVersion) > 0) {
+      const assets = (data.assets || []);
+      const exeAsset = assets.find(a => a.name.endsWith('.exe'));
+      const msiAsset = assets.find(a => a.name.endsWith('.msi'));
+      const downloadUrl = exeAsset?.browser_download_url
+        || msiAsset?.browser_download_url
+        || data.html_url;
+      showToast(
+        `Update available: v${latestTag} (current: v${currentVersion}). Opening Settings to download…`,
+        'info',
+        6000,
+      );
+      // Also populate the settings update-status area so the user can act
+      const statusEl = document.getElementById('update-status');
+      if (statusEl) {
+        statusEl.style.display = '';
+        statusEl.style.background = 'var(--accent-dim)';
+        statusEl.style.color = 'var(--accent)';
+        statusEl.innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+            <span><strong>v${escHtml(latestTag)}</strong> is available! (current: v${currentVersion})</span>
+            <a href="#" id="btn-download-update-auto" class="btn btn-add" style="font-size:0.74rem;padding:4px 12px;white-space:nowrap">Download</a>
+          </div>`;
+        document.getElementById('btn-download-update-auto')?.addEventListener('click', async (e) => {
+          e.preventDefault();
+          try {
+            const { openUrl } = await import('@tauri-apps/plugin-opener');
+            await openUrl(downloadUrl);
+          } catch {
+            window.open(downloadUrl, '_blank');
+          }
+        });
+      }
+    }
+  } catch (_) {
+    // Silent — do not disturb the user on network errors
+  }
+}
+
 function populateSettings() {
   // Locations toggle
   const locCb = document.getElementById('s-locations-enabled');
@@ -892,6 +941,9 @@ async function main() {
       bootLoader.classList.add('hidden');
       setTimeout(() => { bootLoader.style.display = 'none'; }, 350);
     }
+
+    // Silent auto-check for updates (non-blocking)
+    autoCheckForUpdates();
   } catch (err) {
     console.error('Init error:', err);
     if (bootLoader) {
