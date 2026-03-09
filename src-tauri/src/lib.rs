@@ -140,12 +140,24 @@ pub fn run() {
             backup::ensure_backup_dir(&data_dir)
                 .map_err(|e| format!("failed to create backup dir: {e}"))?;
 
-            // Resolve the bundled patched.db from resources
-            let resource_path = app
+            // Resolve the bundled patched.db from resources.
+            // Tauri 2 maps "../patched.db" → "_up_/patched.db" inside the
+            // resource directory, so we try several candidate paths.
+            let res_dir = app
                 .path()
                 .resource_dir()
-                .map_err(|e| format!("failed to get resource dir: {e}"))?
-                .join("patched.db");
+                .map_err(|e| format!("failed to get resource dir: {e}"))?;
+
+            let candidates = [
+                res_dir.join("_up_").join("patched.db"),   // bundled ("../patched.db" → _up_/)
+                res_dir.join("patched.db"),                 // flat layout / custom bundle
+            ];
+
+            let resource_path = candidates
+                .iter()
+                .find(|p| p.exists())
+                .cloned()
+                .unwrap_or_else(|| candidates[0].clone());
 
             app.manage(BuiltinDbPath(resource_path));
 
