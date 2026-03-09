@@ -3,6 +3,12 @@ import { state, updateComponent, showToast, escHtml }           from '../app.js'
 import { getSelectedIds }                                       from './table.js';
 import { invoke }                                               from '@tauri-apps/api/core';
 
+/** Returns true when a URL looks like a search-engine redirect rather than a direct datasheet link */
+function isSearchUrl(url) {
+  if (!url) return false;
+  return /google\.com\/search|bing\.com\/search|duckduckgo\.com\/\?q=/i.test(url);
+}
+
 /** Returns components based on the selected scope. */
 function getTargetComponents(scope) {
   if (scope === 'selected') {
@@ -54,7 +60,8 @@ async function buildSuggestions(components, scope) {
     // Check if this component actually needs any changes
     const needsCat = !comp.category || comp.category === 'Uncategorized';
     const needsSpecs = needsElectricalFill(comp, hit);
-    const needsDatasheet = !comp.datasheet_url && hit.datasheet_url;
+    const needsDatasheet = (!comp.datasheet_url && hit.datasheet_url) ||
+                           (isSearchUrl(comp.datasheet_url) && hit.datasheet_url && !isSearchUrl(hit.datasheet_url));
 
     // In "all" or "selected" mode, skip if nothing would change
     if (scope !== 'uncategorized') {
@@ -203,7 +210,9 @@ async function applySelected(suggestions) {
         package:       hit.package      || comp.package      || '',
         manufacturer:  hit.manufacturer || comp.manufacturer || '',
         description:   comp.description || hit.description   || '',
-        datasheet_url: comp.datasheet_url || hit.datasheet_url || '',
+        datasheet_url: (hit.datasheet_url && !isSearchUrl(hit.datasheet_url))
+                         ? hit.datasheet_url
+                         : (comp.datasheet_url || hit.datasheet_url || ''),
         voltage_max:   comp.voltage_max  ?? hit.voltage_max  ?? null,
         current_max:   comp.current_max  ?? hit.current_max  ?? null,
         resistance:    comp.resistance   || hit.resistance   || '',
