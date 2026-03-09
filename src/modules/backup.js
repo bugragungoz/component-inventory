@@ -40,19 +40,21 @@ async function loadBackupList() {
   }
 }
 
+let _restoreAbort = null;
+
 async function restoreBackup(path) {
   const overlay = document.getElementById('overlay-confirm-restore');
   const confirmBtn = document.getElementById('btn-confirm-restore');
   if (!overlay || !confirmBtn) return;
 
+  // Abort any previous listener before attaching a new one
+  if (_restoreAbort) _restoreAbort.abort();
+  _restoreAbort = new AbortController();
+
   overlay.style.display = '';
 
-  // Replace the button to remove any previous listeners
-  const freshBtn = confirmBtn.cloneNode(true);
-  confirmBtn.parentNode.replaceChild(freshBtn, confirmBtn);
-
-  freshBtn.addEventListener('click', async () => {
-    freshBtn.disabled = true;
+  confirmBtn.addEventListener('click', async () => {
+    confirmBtn.disabled = true;
     overlay.style.display = 'none';
     try {
       await invoke('restore_backup_cmd', { backupPath: path });
@@ -61,9 +63,9 @@ async function restoreBackup(path) {
     } catch (err) {
       showToast('Restore failed: ' + (err.message || String(err)), 'error');
     } finally {
-      freshBtn.disabled = false;
+      confirmBtn.disabled = false;
     }
-  }, { once: true });
+  }, { once: true, signal: _restoreAbort.signal });
 }
 
 async function createManualBackup() {
