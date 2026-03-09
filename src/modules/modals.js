@@ -616,13 +616,13 @@ function applyBuiltinComponent(comp) {
   const sub = comp.subcategory || '';
   updateTypeFields(cat);
 
-  // Parse attributes JSON
+  // Parse attributes JSON and fill dynamic fields
   let attrs = {};
   try {
     attrs = typeof comp.attributes === 'string' ? JSON.parse(comp.attributes || '{}') : (comp.attributes || {});
   } catch (_) { /* ignore parse errors */ }
 
-  // Render dynamic attribute fields and fill them with patched.db values
+  // Render dynamic attribute fields and fill them with built-in library values
   updateAttributeFields(cat, sub, attrs);
 
   // Map well-known attribute keys to legacy form fields
