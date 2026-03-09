@@ -593,7 +593,7 @@ function setFieldIfEmpty(id, value) {
 /** Extract leading numeric value from a string like "60V" or "83A" */
 function parseNumericFromStr(str) {
   if (!str) return '';
-  const m = str.match(/^[\d.]+/);
+  const m = str.match(/^\d+(\.\d+)?/);
   return m ? m[0] : str;
 }
 
