@@ -563,7 +563,7 @@ function initSettings() {
 // ============================================================
 // In-app update checker (GitHub Releases API)
 // ============================================================
-const CURRENT_VERSION_FALLBACK = '0.1.6';
+const CURRENT_VERSION_FALLBACK = '0.1.9';
 const GITHUB_RELEASES_API = 'https://api.github.com/repos/bugragungoz/component-inventory/releases/latest';
 
 async function getCurrentVersion() {
@@ -666,6 +666,12 @@ function populateSettings() {
   // Export folder
   const ef = document.getElementById('s-export-folder');
   if (ef) ef.value = localStorage.getItem('exportFolder') || '';
+
+  // Version (async)
+  getCurrentVersion().then(v => {
+    const el = document.getElementById('settings-about-ver');
+    if (el) el.textContent = 'v' + v;
+  });
 
   // DB path (async)
   try {

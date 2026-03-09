@@ -40,19 +40,32 @@ async function loadBackupList() {
   }
 }
 
-async function restoreBackup(path) {
-  const confirmed = window.confirm(
-    'Restore this backup? The current inventory data will be replaced.\n\nThe app will restart to apply changes.'
-  );
-  if (!confirmed) return;
+let _restoreAbort = null;
 
-  try {
-    await invoke('restore_backup_cmd', { backupPath: path });
-    showToast('Backup restored. Restarting application...', 'success', 2000);
-    setTimeout(() => location.reload(), 2000);
-  } catch (err) {
-    showToast('Restore failed: ' + (err.message || String(err)), 'error');
-  }
+async function restoreBackup(path) {
+  const overlay = document.getElementById('overlay-confirm-restore');
+  const confirmBtn = document.getElementById('btn-confirm-restore');
+  if (!overlay || !confirmBtn) return;
+
+  // Abort any previous listener before attaching a new one
+  if (_restoreAbort) _restoreAbort.abort();
+  _restoreAbort = new AbortController();
+
+  overlay.style.display = '';
+
+  confirmBtn.addEventListener('click', async () => {
+    confirmBtn.disabled = true;
+    overlay.style.display = 'none';
+    try {
+      await invoke('restore_backup_cmd', { backupPath: path });
+      showToast('Backup restored. Restarting application...', 'success', 2000);
+      setTimeout(() => location.reload(), 2000);
+    } catch (err) {
+      showToast('Restore failed: ' + (err.message || String(err)), 'error');
+    } finally {
+      confirmBtn.disabled = false;
+    }
+  }, { once: true, signal: _restoreAbort.signal });
 }
 
 async function createManualBackup() {
