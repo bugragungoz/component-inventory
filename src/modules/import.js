@@ -378,6 +378,7 @@ function parseExcel(arrayBuffer) {
 
 // ============================================================
 // PDF parser (PDF.js - text extraction)
+// Uses position-based column detection for robust table parsing.
 // ============================================================
 async function parsePDF(arrayBuffer) {
   if (!window.pdfjsLib) {
@@ -387,27 +388,172 @@ async function parsePDF(arrayBuffer) {
   window.pdfjsLib.GlobalWorkerOptions.workerSrc =
     'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-  const pdf = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-  let fullText = '';
+  const loadingTask = window.pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) });
+  const pdf = await loadingTask.promise;
   const maxPages = Math.min(pdf.numPages, 30);
+
+  // Collect all text items with absolute positions across all pages
+  const allItems = [];
+  let yOffset = 0;
+
   for (let p = 1; p <= maxPages; p++) {
     const page    = await pdf.getPage(p);
     const content = await page.getTextContent();
-    // Preserve spacing between items to form readable lines
-    const items   = content.items;
-    let lineText  = '';
-    let prevY     = null;
-    for (const item of items) {
-      const y = item.transform ? item.transform[5] : 0;
-      if (prevY !== null && Math.abs(y - prevY) > 3) {
-        lineText += '\n';
-      } else if (lineText.length > 0 && !lineText.endsWith('\t')) {
-        lineText += '\t';
-      }
-      lineText += item.str;
-      prevY = y;
+    const viewport = page.getViewport({ scale: 1 });
+    const pageHeight = viewport.height;
+
+    for (const item of content.items) {
+      if (!item.str || !item.str.trim()) continue;
+      const x = item.transform ? item.transform[4] : 0;
+      // PDF Y goes bottom-to-top; convert to top-to-bottom
+      const y = item.transform ? (pageHeight - item.transform[5] + yOffset) : yOffset;
+      allItems.push({ text: item.str.trim(), x, y, w: item.width || 0 });
     }
-    fullText += lineText + '\n';
+    yOffset += pageHeight + 20;
+  }
+
+  if (allItems.length === 0) return [];
+
+  // --- Step 1: Group items into rows by Y proximity ---
+  allItems.sort((a, b) => a.y - b.y || a.x - b.x);
+  const rows = [];
+  let currentRow = [allItems[0]];
+  for (let i = 1; i < allItems.length; i++) {
+    const item = allItems[i];
+    const prevY = currentRow[currentRow.length - 1].y;
+    if (Math.abs(item.y - prevY) < 5) {
+      currentRow.push(item);
+    } else {
+      rows.push(currentRow);
+      currentRow = [item];
+    }
+  }
+  if (currentRow.length > 0) rows.push(currentRow);
+
+  // --- Step 2: Sort items within each row by X position ---
+  for (const row of rows) {
+    row.sort((a, b) => a.x - b.x);
+  }
+
+  // --- Step 3: Detect column boundaries ---
+  // Find rows with the most items (likely header or data rows)
+  const itemCounts = rows.map(r => r.length);
+  const maxItems = Math.max(...itemCounts);
+  // Use rows that have at least 60% of the max column count
+  const minCols = Math.max(2, Math.floor(maxItems * 0.6));
+  const denseRows = rows.filter(r => r.length >= minCols);
+
+  if (denseRows.length < 2) {
+    // Fallback: build text line-by-line with intelligent spacing
+    return parsePDFLineByLine(rows);
+  }
+
+  // Collect all X positions from dense rows to find column boundaries
+  const allXPositions = [];
+  for (const row of denseRows) {
+    for (const item of row) {
+      allXPositions.push(item.x);
+    }
+  }
+  allXPositions.sort((a, b) => a - b);
+
+  // Find column boundaries by detecting gaps in X positions
+  const colBoundaries = [0]; // Start from 0
+  const gapThreshold = 15;   // Minimum gap to consider a new column
+  for (let i = 1; i < allXPositions.length; i++) {
+    const gap = allXPositions[i] - allXPositions[i - 1];
+    if (gap > gapThreshold) {
+      const boundary = (allXPositions[i - 1] + allXPositions[i]) / 2;
+      // Only add if not too close to the last boundary
+      if (colBoundaries.length === 0 || boundary - colBoundaries[colBoundaries.length - 1] > gapThreshold) {
+        colBoundaries.push(boundary);
+      }
+    }
+  }
+
+  if (colBoundaries.length < 2) {
+    return parsePDFLineByLine(rows);
+  }
+
+  // --- Step 4: Assign items to columns and build table ---
+  function getColIndex(x) {
+    for (let c = colBoundaries.length - 1; c >= 0; c--) {
+      if (x >= colBoundaries[c] - 5) return c;
+    }
+    return 0;
+  }
+
+  const tableRows = rows.map(row => {
+    const cells = new Array(colBoundaries.length).fill('');
+    for (const item of row) {
+      const col = getColIndex(item.x);
+      cells[col] = cells[col] ? cells[col] + ' ' + item.text : item.text;
+    }
+    return cells;
+  });
+
+  // --- Step 5: Find header row using scoring ---
+  let bestHeaderIdx = 0;
+  let bestScore = -1;
+  const scanLimit = Math.min(tableRows.length, 20);
+
+  for (let i = 0; i < scanLimit; i++) {
+    const row = tableRows[i];
+    const nonEmpty = row.filter(c => c.trim()).length;
+    if (nonEmpty < 2) continue;
+    let score = 0;
+    for (const cell of row) {
+      const v = cell.trim();
+      if (!v || v.length > 80) continue;
+      const norm = asciiNormalize(v.toLowerCase());
+      if (HEADER_MAP[norm] !== undefined) {
+        score += 3;
+      } else if (isNaN(Number(v)) && !/^\d{1,2}[.\/\-]\d{1,2}[.\/\-]\d{2,4}$/.test(v)) {
+        score += 1;
+      }
+    }
+    if (score > bestScore) {
+      bestScore = score;
+      bestHeaderIdx = i;
+    }
+  }
+
+  const headers = tableRows[bestHeaderIdx].map(c => c.trim());
+  const dataRows = tableRows.slice(bestHeaderIdx + 1);
+
+  const result = dataRows
+    .filter(row => row.some(c => c.trim()))
+    .map(row => {
+      const obj = {};
+      headers.forEach((h, idx) => {
+        if (h) obj[h] = (row[idx] ?? '').trim();
+      });
+      return obj;
+    });
+
+  const normalized = normalizeRows(result);
+  if (normalized.length > 0) return normalized;
+
+  // If column-based parsing didn't yield results, fall back to line-by-line
+  return parsePDFLineByLine(rows);
+}
+
+/**
+ * Fallback: convert position-grouped rows into text lines, then parse as CSV/TSV.
+ */
+function parsePDFLineByLine(rows) {
+  let fullText = '';
+  for (const row of rows) {
+    // Use tab separators between items that have significant X gaps
+    let line = '';
+    for (let i = 0; i < row.length; i++) {
+      if (i > 0) {
+        const gap = row[i].x - (row[i - 1].x + (row[i - 1].w || 0));
+        line += gap > 10 ? '\t' : ' ';
+      }
+      line += row[i].text;
+    }
+    fullText += line + '\n';
   }
 
   // Try tab-separated first (better for columnar PDF data)

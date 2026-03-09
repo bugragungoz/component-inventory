@@ -8,6 +8,8 @@ import { readFile }                                      from '@tauri-apps/plugi
 // ============================================================
 const selectedIds = new Set();
 
+export function getSelectedIds() { return new Set(selectedIds); }
+
 function clearSelection() {
   selectedIds.clear();
   updateSelectionBar();
