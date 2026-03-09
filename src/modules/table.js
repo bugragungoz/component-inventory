@@ -768,8 +768,9 @@ async function showDetail(comp) {
           dbRecord = { ...dbRecord, datasheet_url: builtinHit.datasheet_url };
         }
       }
-    } catch (_) {
+    } catch (e) {
       // Silent — fall back to hardcoded DB only
+      console.debug('patched.db lookup failed, using hardcoded DB:', e);
     }
   }
 
@@ -988,7 +989,8 @@ async function showDetail(comp) {
         <span class="detail-label">Notes</span>
         ${val(comp.notes)}
       </div>` : ''}
-      ${datasheetUrl ? `<div class="detail-field full">
+      ${/* datasheetUrl includes URLs from user data, hardcoded DB, and patched.db fallback */
+        datasheetUrl ? `<div class="detail-field full">
         <span class="detail-label">Datasheet URL</span>
         <a href="${escHtml(datasheetUrl)}" target="_blank" rel="noopener" class="detail-value" style="color:var(--accent-blue);word-break:break-all;font-size:11px">${escHtml(datasheetUrl)}</a>
       </div>` : ''}

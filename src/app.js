@@ -698,8 +698,9 @@ async function autoCheckForUpdates() {
         });
       }
     }
-  } catch (_) {
+  } catch (e) {
     // Silent — do not disturb the user on network errors
+    console.debug('Auto update check failed:', e);
   }
 }
 
