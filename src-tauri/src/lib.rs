@@ -154,7 +154,7 @@ fn batch_lookup_builtin(
 
     let mut results = Vec::new();
 
-    // Normalise a part code: uppercase, strip dashes/spaces/dots
+    // Normalize a part code: uppercase, strip dashes/spaces/dots
     fn normalise(s: &str) -> String {
         s.to_uppercase()
             .chars()

@@ -563,8 +563,17 @@ function initSettings() {
 // ============================================================
 // In-app update checker (GitHub Releases API)
 // ============================================================
-const CURRENT_VERSION = '0.1.6';
+const CURRENT_VERSION_FALLBACK = '0.1.6';
 const GITHUB_RELEASES_API = 'https://api.github.com/repos/bugragungoz/component-inventory/releases/latest';
+
+async function getCurrentVersion() {
+  try {
+    const { getVersion } = await import('@tauri-apps/api/app');
+    return await getVersion();
+  } catch {
+    return CURRENT_VERSION_FALLBACK;
+  }
+}
 
 async function checkForUpdates() {
   const btn = document.getElementById('btn-check-update');
@@ -576,6 +585,8 @@ async function checkForUpdates() {
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="spin-icon"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
     Checking…`;
 
+  const currentVersion = await getCurrentVersion();
+
   try {
     const res = await fetch(GITHUB_RELEASES_API, {
       headers: { 'Accept': 'application/vnd.github.v3+json' },
@@ -584,7 +595,7 @@ async function checkForUpdates() {
     const data = await res.json();
 
     const latestTag = (data.tag_name || '').replace(/^v/, '');
-    const isNewer = compareVersions(latestTag, CURRENT_VERSION) > 0;
+    const isNewer = compareVersions(latestTag, currentVersion) > 0;
 
     statusEl.style.display = '';
     if (isNewer) {
@@ -598,7 +609,7 @@ async function checkForUpdates() {
       statusEl.style.color = 'var(--accent)';
       statusEl.innerHTML = `
         <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
-          <span><strong>v${escHtml(latestTag)}</strong> is available! (current: v${CURRENT_VERSION})</span>
+          <span><strong>v${escHtml(latestTag)}</strong> is available! (current: v${currentVersion})</span>
           <a href="#" id="btn-download-update" class="btn btn-add" style="font-size:0.74rem;padding:4px 12px;white-space:nowrap">Download</a>
         </div>
         ${data.body ? `<div style="margin-top:6px;font-size:0.72rem;color:var(--text-muted);max-height:60px;overflow-y:auto;white-space:pre-wrap">${escHtml((data.body || '').slice(0, 300))}</div>` : ''}
@@ -616,7 +627,7 @@ async function checkForUpdates() {
     } else {
       statusEl.style.background = 'var(--bg-hover)';
       statusEl.style.color = 'var(--text-secondary)';
-      statusEl.innerHTML = `✓ You are on the latest version (v${CURRENT_VERSION})`;
+      statusEl.innerHTML = `✓ You are on the latest version (v${currentVersion})`;
     }
   } catch (err) {
     statusEl.style.display = '';

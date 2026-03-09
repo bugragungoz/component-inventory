@@ -29,7 +29,7 @@ async function buildSuggestions(components, scope) {
   try {
     const builtinHits = await invoke('batch_lookup_builtin', { partCodes });
     for (const hit of builtinHits) {
-      // Normalise key for matching
+      // Normalize key for matching
       const key = (hit.part_code || '').toUpperCase().replace(/[-\s.]/g, '');
       builtinMap[key] = hit;
     }
@@ -193,7 +193,7 @@ async function applySelected(suggestions) {
       const hitAttrs = parseAttrs(hit.attributes);
       const mergedAttrs = { ...existingAttrs };
       for (const [key, val] of Object.entries(hitAttrs)) {
-        if (!mergedAttrs[key] && val) mergedAttrs[key] = val;
+        if (!(key in mergedAttrs) && val != null && val !== '') mergedAttrs[key] = val;
       }
 
       const updated = {
@@ -334,7 +334,11 @@ export function initBulkCategorize() {
     if (!radio) return;
     const ids = getSelectedIds();
     const label = radio.parentElement;
-    if (label) label.innerHTML = `<input type="radio" name="bulk-cat-scope" value="selected" ${radio.checked ? 'checked' : ''} /> Selected (${ids.size})`;
+    if (label) {
+      // Update only the text node after the radio input, preserving the input element
+      const textNode = Array.from(label.childNodes).find(n => n.nodeType === Node.TEXT_NODE);
+      if (textNode) textNode.textContent = ` Selected (${ids.size})`;
+    }
   }
   updateSelectedLabel();
   // Re-check when overlay becomes visible
