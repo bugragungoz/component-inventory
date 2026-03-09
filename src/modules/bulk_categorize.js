@@ -1,21 +1,28 @@
 import { lookupComponent, categorizeByDescription }            from './hardcoded_datasheet.js';
 import { state, updateComponent, showToast, escHtml }           from '../app.js';
 
-/** Returns components that are in the Uncategorized bucket. */
-function getUncategorized() {
+/** Returns components based on the selected scope. */
+function getTargetComponents(scope) {
+  if (scope === 'all') return (state.components || []).slice();
   return (state.components || []).filter(
     c => !c.category || c.category === 'Uncategorized'
   );
 }
 
 /** Build suggestion list: [{comp, suggestion}] only where DB has a hit. */
-function buildSuggestions(components) {
+function buildSuggestions(components, scope) {
   const suggestions = [];
   for (const comp of components) {
     const hitByCode = lookupComponent(comp.part_code);
     const hitByDesc = !hitByCode ? categorizeByDescription(comp.description) : null;
     const hit       = hitByCode || hitByDesc;
     if (hit && hit.category && hit.category !== 'Uncategorized') {
+      // In "all" mode, skip components whose category+subcategory already matches
+      if (scope === 'all') {
+        const sameCat = (comp.category || '') === (hit.category || '');
+        const sameSub = (comp.subcategory || '') === (hit.subcategory || '');
+        if (sameCat && sameSub) continue;
+      }
       suggestions.push({
         comp, hit,
         source: hitByCode ? 'part-code' : 'description',
@@ -31,24 +38,28 @@ function renderList(suggestions) {
 
   if (suggestions.length === 0) {
     tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:24px;color:var(--text-muted)">
-      No Uncategorized components matched the built-in database.</td></tr>`;
+      No components matched the built-in database.</td></tr>`;
     return;
   }
 
-  tbody.innerHTML = suggestions.map((s, i) => `
+  tbody.innerHTML = suggestions.map((s, i) => {
+    const currentCat = s.comp.category || 'Uncategorized';
+    const currentSub = s.comp.subcategory || '';
+    const currentLabel = currentSub ? `${currentCat} / ${currentSub}` : currentCat;
+    return `
     <tr>
       <td style="text-align:center">
         <input type="checkbox" class="bulk-cb" data-idx="${i}" checked>
       </td>
       <td style="font-family:var(--font-mono);font-size:0.82rem">${escHtml(s.comp.part_code)}</td>
-      <td style="font-size:0.82rem;color:var(--text-muted)">${escHtml(s.comp.description || s.comp.part_code)}</td>
+      <td style="font-size:0.82rem;color:var(--text-muted)">${escHtml(currentLabel)}</td>
       <td>
         <span class="badge" style="background:var(--accent-dim);color:var(--accent)">${escHtml(s.hit.category)}</span>
         ${s.hit.subcategory ? `<span style="color:var(--text-muted);font-size:0.78rem"> / ${escHtml(s.hit.subcategory)}</span>` : ''}
         <span style="font-size:0.68rem;color:var(--text-muted);margin-left:4px">(${s.source})</span>
       </td>
-    </tr>
-  `).join('');
+    </tr>`;
+  }).join('');
 
   updateApplyButton(suggestions);
 }
@@ -124,26 +135,43 @@ export function initBulkCategorize() {
 
   let currentSuggestions = [];
 
-  btnOpen.addEventListener('click', () => {
-    const uncategorized = getUncategorized();
-    if (uncategorized.length === 0) {
-      showToast('No Uncategorized components found', 'info');
+  function refreshList() {
+    const scopeEl = document.querySelector('input[name="bulk-cat-scope"]:checked');
+    const scope   = scopeEl ? scopeEl.value : 'uncategorized';
+
+    const targets = getTargetComponents(scope);
+    if (targets.length === 0) {
+      showToast(scope === 'all'
+        ? 'No components in inventory'
+        : 'No Uncategorized components found', 'info');
       return;
     }
 
-    currentSuggestions = buildSuggestions(uncategorized);
-    const totalUncategorized = uncategorized.length;
-    const matchCount         = currentSuggestions.length;
+    currentSuggestions = buildSuggestions(targets, scope);
+    const totalCount   = targets.length;
+    const matchCount   = currentSuggestions.length;
 
     const subtitle = document.getElementById('bulk-cat-subtitle');
     if (subtitle) {
+      const label = scope === 'all' ? 'component' : 'Uncategorized component';
       subtitle.textContent =
-        `${totalUncategorized} Uncategorized component${totalUncategorized !== 1 ? 's' : ''} found — ` +
+        `${totalCount} ${label}${totalCount !== 1 ? 's' : ''} found — ` +
         `${matchCount} matched in built-in database.`;
     }
 
     renderList(currentSuggestions);
     overlay.style.display = 'flex';
+  }
+
+  btnOpen.addEventListener('click', refreshList);
+
+  // Re-scan when scope radio changes
+  overlay.addEventListener('change', e => {
+    if (e.target.name === 'bulk-cat-scope') {
+      refreshList();
+    } else if (e.target.classList.contains('bulk-cb')) {
+      updateApplyButton(currentSuggestions);
+    }
   });
 
   overlay.addEventListener('click', e => {
@@ -169,11 +197,5 @@ export function initBulkCategorize() {
   document.getElementById('bulk-cb-header')?.addEventListener('change', e => {
     document.querySelectorAll('.bulk-cb').forEach(cb => { cb.checked = e.target.checked; });
     updateApplyButton(currentSuggestions);
-  });
-
-  overlay.addEventListener('change', e => {
-    if (e.target.classList.contains('bulk-cb')) {
-      updateApplyButton(currentSuggestions);
-    }
   });
 }

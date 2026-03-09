@@ -164,7 +164,7 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="4" height="4" rx="1"/><rect x="3" y="12" width="4" height="4" rx="1"/><rect x="3" y="19" width="4" height="4" rx="1"/><line x1="11" y1="7" x2="21" y2="7"/><line x1="11" y1="14" x2="21" y2="14"/><line x1="11" y1="21" x2="21" y2="21"/></svg>
           Select
         </button>
-        <button class="btn btn-ghost" id="btn-bulk-cat" title="Auto-categorize Uncategorized components using built-in database">
+        <button class="btn btn-ghost" id="btn-bulk-cat" title="Auto-categorize components using built-in database">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16"/><path d="M4 12h16"/><path d="M4 4h16"/><circle cx="20" cy="4" r="2" fill="currentColor" stroke="none"/><circle cx="20" cy="12" r="2" fill="currentColor" stroke="none"/><circle cx="20" cy="20" r="2" fill="currentColor" stroke="none"/></svg>
           Auto-Categorize
         </button>
@@ -769,12 +769,20 @@
     <div class="modal modal-lg">
       <div class="modal-header">
         <div>
-          <h2>Auto-Categorize Uncategorized Components</h2>
+          <h2>Auto-Categorize Components</h2>
           <p id="bulk-cat-subtitle" style="margin:4px 0 0;font-size:0.8rem;color:var(--text-muted)"></p>
         </div>
         <button class="modal-close" id="btn-bulk-cat-close">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
+      </div>
+      <div style="padding:12px 20px 0;display:flex;gap:16px;align-items:center">
+        <label class="radio-label" style="font-size:0.82rem">
+          <input type="radio" name="bulk-cat-scope" value="uncategorized" checked /> Uncategorized only
+        </label>
+        <label class="radio-label" style="font-size:0.82rem">
+          <input type="radio" name="bulk-cat-scope" value="all" /> All components
+        </label>
       </div>
       <div class="modal-body" style="padding:0;max-height:55vh;overflow-y:auto">
         <table class="bulk-cat-table">
@@ -784,7 +792,7 @@
                 <input type="checkbox" id="bulk-cb-header" checked title="Toggle all">
               </th>
               <th>Part Code</th>
-              <th>Description</th>
+              <th>Current Category</th>
               <th>Suggested Category</th>
             </tr>
           </thead>
