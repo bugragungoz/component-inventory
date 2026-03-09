@@ -262,6 +262,20 @@
       <div class="modal-body">
         <form id="form-edit" autocomplete="off">
           <input type="hidden" id="edit-id" />
+          <!-- Built-in Library Search -->
+          <div class="form-section" id="builtin-search-section">
+            <h3 class="form-section-title">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              Search Built-in Library
+            </h3>
+            <div class="form-grid">
+              <div class="form-group col-span-2" style="position:relative">
+                <label for="builtin-search-input">Find a component from 60,000+ reference parts</label>
+                <input type="text" id="builtin-search-input" placeholder="Type part number, e.g. IRF540, LM358, 100nF..." />
+                <div id="builtin-search-results" class="builtin-dropdown" style="display:none"></div>
+              </div>
+            </div>
+          </div>
           <div class="form-section">
             <h3 class="form-section-title">Identity</h3>
             <div class="form-grid">
