@@ -169,8 +169,7 @@ export function initBulkCategorize() {
   overlay.addEventListener('change', e => {
     if (e.target.name === 'bulk-cat-scope') {
       refreshList();
-    }
-    if (e.target.classList.contains('bulk-cb')) {
+    } else if (e.target.classList.contains('bulk-cb')) {
       updateApplyButton(currentSuggestions);
     }
   });
