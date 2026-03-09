@@ -2123,3 +2123,71 @@ tr.row-selected { background: var(--accent-dim) !important; }
   color: var(--text-tertiary);
   line-height: 1.5;
 }
+
+/* ============================================================
+   Built-in Library Search Dropdown
+   ============================================================ */
+.builtin-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-height: 280px;
+  overflow-y: auto;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  z-index: 100;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+}
+
+.builtin-dropdown-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+
+.builtin-dropdown-item:last-child { border-bottom: none; }
+
+.builtin-dropdown-item:hover,
+.builtin-dropdown-item.active {
+  background: var(--surface-3);
+}
+
+.builtin-dropdown-item .builtin-part-code {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--accent);
+}
+
+.builtin-dropdown-item .builtin-desc {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.builtin-dropdown-item .builtin-meta {
+  font-size: 0.7rem;
+  color: var(--text-tertiary);
+}
+
+.builtin-dropdown-empty {
+  padding: 12px;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--text-tertiary);
+}
+
+.builtin-dropdown-loading {
+  padding: 12px;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--text-tertiary);
+}
