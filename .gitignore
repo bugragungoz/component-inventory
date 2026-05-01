@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local scratch files
+.commit-msg.tmp
+.release-notes.tmp
+*.bak

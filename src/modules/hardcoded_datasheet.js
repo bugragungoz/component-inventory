@@ -481,18 +481,40 @@ export function lookupComponent(partCode) {
 
   const key = normaliseKey(partCode);
 
-  // 1. Exact match
   if (DB[key]) return DB[key];
 
-  // 2. Prefix/suffix DB key match — handles suffix variants like "A", "C", "T", package codes
   for (const [dbKey, val] of Object.entries(DB)) {
     if (key === dbKey) return val;
     if (key.startsWith(dbKey) || dbKey.startsWith(key)) return val;
   }
 
-  // 3. Pattern-based family match
   for (const { pattern, result } of PATTERNS) {
     if (pattern.test(key)) return result;
+  }
+
+  return null;
+}
+
+/**
+ * Like lookupComponent, but also returns the canonical DB key when the match
+ * came from a direct (or prefix/suffix) DB entry. Pattern-only matches return
+ * null canonical because the DB does not own a single canonical name there.
+ * Used by duplicate-merge to choose a single authoritative part_code.
+ */
+export function lookupCanonical(partCode) {
+  if (!partCode) return null;
+  const key = normaliseKey(partCode);
+
+  if (DB[key]) return { canonical: key, data: DB[key], match: 'exact' };
+
+  for (const [dbKey, val] of Object.entries(DB)) {
+    if (key === dbKey)            return { canonical: dbKey, data: val, match: 'exact' };
+    if (key.startsWith(dbKey))    return { canonical: dbKey, data: val, match: 'prefix' };
+    if (dbKey.startsWith(key))    return { canonical: dbKey, data: val, match: 'extends' };
+  }
+
+  for (const { pattern, result } of PATTERNS) {
+    if (pattern.test(key)) return { canonical: null, data: result, match: 'pattern' };
   }
 
   return null;

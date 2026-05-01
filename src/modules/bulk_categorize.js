@@ -1,6 +1,112 @@
-import { lookupComponent, categorizeByDescription }            from './hardcoded_datasheet.js';
-import { state, updateComponent, showToast, escHtml }           from '../app.js';
+import { lookupComponent, lookupCanonical, categorizeByDescription } from './hardcoded_datasheet.js';
+import { state, updateComponent, deleteComponent, showToast, escHtml } from '../app.js';
 import { t }                                                    from './i18n.js';
+import { normaliseCategory }                                    from './modals.js';
+
+/**
+ * Detect URLs that are NOT direct datasheet links but Google searches /
+ * marketing pages. Used to know when we may safely overwrite the datasheet.
+ */
+function isWeakDatasheetUrl(url) {
+  if (!url || typeof url !== 'string') return true;
+  const u = url.toLowerCase().trim();
+  if (!u) return true;
+  if (u.includes('google.com/search')) return true;
+  if (u.includes('duckduckgo.com'))    return true;
+  if (u.includes('?q=') && !u.includes('.pdf')) return true;
+  return false;
+}
+
+/** Returns true when the lookup hit's category is consistent with the component. */
+function categoryConsistent(comp, hit) {
+  if (!hit || !hit.category) return false;
+  if (!comp.category || comp.category === 'Uncategorized') return true;
+  return comp.category === hit.category;
+}
+
+/**
+ * Scan all components for ones missing a *real* datasheet URL where the
+ * built-in DB has a confident match (exact or prefix DB key, never pattern-only)
+ * AND the categories agree (or the component is uncategorized).
+ */
+function findDatasheetBackfills() {
+  const out = [];
+  for (const comp of (state.components || [])) {
+    if (!isWeakDatasheetUrl(comp.datasheet_url)) continue;
+    const found = lookupCanonical(comp.part_code);
+    if (!found || !found.data || !found.data.datasheet_url) continue;
+    if (found.match === 'pattern') continue;
+    if (!categoryConsistent(comp, found.data)) continue;
+    out.push({
+      comp,
+      hit: { datasheet_url: found.data.datasheet_url },
+      source: 'datasheet-backfill',
+      confidence: found.match === 'exact' ? 'high' : 'medium',
+      action: 'datasheet',
+    });
+  }
+  return out;
+}
+
+/**
+ * Detect components whose category string is a non-canonical alias of a
+ * known main category (e.g. "Diode" -> "Diodes", "MOSFETs" -> "Transistors").
+ * Returns suggestion rows that only rewrite the category field.
+ */
+function findCategoryNormalizations() {
+  const out = [];
+  for (const comp of (state.components || [])) {
+    if (!comp.category) continue;
+    if (comp.category === 'Uncategorized') continue;
+    const canonical = normaliseCategory(comp.category);
+    if (!canonical || canonical === comp.category) continue;
+    out.push({
+      comp,
+      hit: { category: canonical, subcategory: comp.subcategory || '' },
+      source: 'taxonomy',
+      confidence: 'high',
+      action: 'normalize-cat',
+    });
+  }
+  return out;
+}
+
+/**
+ * Detect duplicate components that share a canonical DB key.
+ * Example: 7805 + L7805 + LM7805 -> canonical "LM7805".
+ * Only groups when BOTH:
+ *   - canonical lookup is exact or prefix (deterministic), AND
+ *   - all members share the same category (or uncategorized).
+ * Returns merge proposals: { canonicalCode, members: [comp...], totalQty }
+ */
+function findDuplicateGroups() {
+  const groups = new Map();
+  for (const comp of (state.components || [])) {
+    const found = lookupCanonical(comp.part_code);
+    if (!found || !found.canonical) continue;
+    if (found.match === 'pattern') continue;
+    if (!categoryConsistent(comp, found.data)) continue;
+    const key = found.canonical;
+    const list = groups.get(key) || { canonical: key, data: found.data, members: [] };
+    list.members.push(comp);
+    groups.set(key, list);
+  }
+  const proposals = [];
+  for (const g of groups.values()) {
+    if (g.members.length < 2) continue;
+    const totalQty = g.members.reduce((s, m) => s + (Number(m.quantity) || 0), 0);
+    proposals.push({
+      canonical: g.canonical,
+      data: g.data,
+      members: g.members,
+      totalQty,
+      action: 'merge',
+      confidence: 'high',
+      source: 'duplicate-merge',
+    });
+  }
+  return proposals;
+}
 
 /** Returns components that are in the Uncategorized bucket. */
 function getUncategorized() {
@@ -125,6 +231,53 @@ function buildSuggestions(components) {
   return suggestions;
 }
 
+function renderActionCell(s) {
+  const confLabel = t('bulk.confidence.' + (s.confidence || 'low'));
+  const confColor = s.confidence === 'high' ? 'var(--accent-green)'
+                  : s.confidence === 'medium' ? 'var(--accent-amber)'
+                  : 'var(--text-tertiary)';
+  const tail =
+    `<span style="font-size:0.68rem;color:${confColor};margin-left:6px">[${escHtml(confLabel)}]</span>` +
+    `<span style="font-size:0.62rem;color:var(--text-tertiary);margin-left:4px">(${escHtml(s.source)})</span>`;
+
+  if (s.action === 'datasheet') {
+    return (
+      `<span class="badge" style="background:var(--accent-blue-dim,var(--accent-dim));color:var(--accent-blue,var(--accent))">` +
+      t('bulk.action.datasheet') + `</span>` +
+      `<span style="color:var(--text-muted);font-size:0.74rem;margin-left:6px;font-family:var(--font-mono)">` +
+      escHtml((s.hit.datasheet_url || '').slice(0, 60)) + `</span>` + tail
+    );
+  }
+  if (s.action === 'normalize-cat') {
+    return (
+      `<span class="badge" style="background:var(--accent-dim);color:var(--accent)">` +
+      t('bulk.action.taxonomy') + `</span>` +
+      `<span style="color:var(--text-muted);font-size:0.74rem;margin-left:6px">` +
+      `<span style="text-decoration:line-through;color:var(--text-tertiary)">${escHtml(s.comp.category)}</span> ` +
+      `&rarr; <strong>${escHtml(s.hit.category)}</strong></span>` + tail
+    );
+  }
+  if (s.action === 'merge') {
+    const memberLabels = s.members.map(m => escHtml(m.part_code)).join(', ');
+    return (
+      `<span class="badge" style="background:var(--accent-amber-dim);color:var(--accent-amber)">` +
+      t('bulk.action.merge') + `</span>` +
+      `<span style="color:var(--text-muted);font-size:0.74rem;margin-left:6px"> ${escHtml(s.canonical)} ` +
+      ` <span style="color:var(--text-tertiary)">&larr;</span> ` + memberLabels + ` (` + s.totalQty + `)</span>` + tail
+    );
+  }
+  // categorize / anomaly default
+  const currentBadge = s.anomaly
+    ? `<span style="font-size:0.7rem;color:var(--text-tertiary);margin-right:6px;text-decoration:line-through">${escHtml(s.comp.category || '')}</span>`
+    : '';
+  return (
+    currentBadge +
+    `<span class="badge" style="background:var(--accent-dim);color:var(--accent)">${escHtml(s.hit.category)}</span>` +
+    (s.hit.subcategory ? `<span style="color:var(--text-muted);font-size:0.78rem"> / ${escHtml(s.hit.subcategory)}</span>` : '') +
+    tail
+  );
+}
+
 function renderList(suggestions) {
   const tbody = document.getElementById('bulk-cat-tbody');
   if (!tbody) return;
@@ -135,32 +288,25 @@ function renderList(suggestions) {
     return;
   }
 
-  // Higher-confidence rows are pre-checked; low-confidence rows are unchecked
-  // so the user must opt in.
   tbody.innerHTML = suggestions.map((s, i) => {
     const checkedAttr = (s.confidence === 'high' || s.confidence === 'medium') ? 'checked' : '';
-    const confLabel = t('bulk.confidence.' + (s.confidence || 'low'));
-    const confColor = s.confidence === 'high' ? 'var(--accent-green)'
-                    : s.confidence === 'medium' ? 'var(--accent-amber)'
-                    : 'var(--text-tertiary)';
-    const rowClass = s.anomaly ? 'bulk-row-anomaly' : '';
-    const currentBadge = s.anomaly
-      ? `<span style="font-size:0.7rem;color:var(--text-tertiary);margin-right:6px;text-decoration:line-through">${escHtml(s.comp.category || '')}</span>`
-      : '';
+    const rowClass = s.anomaly ? 'bulk-row-anomaly'
+                  : s.action === 'merge' ? 'bulk-row-merge'
+                  : s.action === 'datasheet' ? 'bulk-row-datasheet' : '';
+    const partLabel = s.action === 'merge'
+      ? s.members.map(m => m.part_code).join(' + ')
+      : s.comp?.part_code || '';
+    const descLabel = s.action === 'merge'
+      ? t('bulk.merge.summary', { n: s.members.length, q: s.totalQty })
+      : (s.comp?.description || s.comp?.part_code || '');
     return `
     <tr class="${rowClass}">
       <td style="text-align:center">
         <input type="checkbox" class="bulk-cb" data-idx="${i}" ${checkedAttr}>
       </td>
-      <td style="font-family:var(--font-mono);font-size:0.82rem">${escHtml(s.comp.part_code)}</td>
-      <td style="font-size:0.82rem;color:var(--text-muted)">${escHtml(s.comp.description || s.comp.part_code)}</td>
-      <td>
-        ${currentBadge}
-        <span class="badge" style="background:var(--accent-dim);color:var(--accent)">${escHtml(s.hit.category)}</span>
-        ${s.hit.subcategory ? `<span style="color:var(--text-muted);font-size:0.78rem"> / ${escHtml(s.hit.subcategory)}</span>` : ''}
-        <span style="font-size:0.68rem;color:${confColor};margin-left:6px">[${escHtml(confLabel)}]</span>
-        <span style="font-size:0.62rem;color:var(--text-tertiary);margin-left:4px">(${escHtml(s.source)})</span>
-      </td>
+      <td style="font-family:var(--font-mono);font-size:0.82rem">${escHtml(partLabel)}</td>
+      <td style="font-size:0.82rem;color:var(--text-muted)">${escHtml(descLabel)}</td>
+      <td>${renderActionCell(s)}</td>
     </tr>`;
   }).join('');
 
@@ -182,13 +328,72 @@ async function applySelected(suggestions) {
   if (selected.length === 0) return;
 
   const btn = document.getElementById('btn-bulk-apply');
-  if (btn) { btn.disabled = true; btn.textContent = 'Applying…'; }
+  if (btn) { btn.disabled = true; btn.textContent = 'Applying...'; }
 
   let success = 0;
   let failed  = 0;
 
-  for (const { comp, hit } of selected) {
+  for (const s of selected) {
     try {
+      if (s.action === 'datasheet') {
+        await updateComponent(s.comp.id, { ...s.comp, datasheet_url: s.hit.datasheet_url });
+        success++;
+        continue;
+      }
+
+      if (s.action === 'normalize-cat') {
+        await updateComponent(s.comp.id, { ...s.comp, category: s.hit.category });
+        success++;
+        continue;
+      }
+
+      if (s.action === 'merge') {
+        // Merge strategy:
+        //   - Pick the member that already matches the canonical part_code
+        //     if any; otherwise use the first member as keeper.
+        //   - Sum quantities.
+        //   - Prefer non-empty fields from the keeper, then from members,
+        //     finally from the DB hit.
+        //   - Rename the keeper to the canonical part_code.
+        //   - Delete the other members.
+        const members = s.members.slice();
+        const canonical = s.canonical;
+        let keeper = members.find(m => normaliseSimple(m.part_code) === canonical);
+        if (!keeper) keeper = members[0];
+        const others = members.filter(m => m.id !== keeper.id);
+
+        const merged = { ...keeper };
+        merged.part_code   = canonical;
+        merged.quantity    = s.totalQty;
+        // Prefer keeper's non-empty values, then any member's value, else DB.
+        const fields = ['category','subcategory','package','manufacturer','mpn',
+                        'description','datasheet_url','voltage_max','current_max',
+                        'resistance','tolerance','power_rating','notes','location','unit_price'];
+        for (const f of fields) {
+          if (merged[f] != null && merged[f] !== '') continue;
+          for (const m of others) {
+            if (m[f] != null && m[f] !== '') { merged[f] = m[f]; break; }
+          }
+          if ((merged[f] == null || merged[f] === '') && s.data && s.data[f] != null) {
+            merged[f] = s.data[f];
+          }
+        }
+        // Strengthen weak datasheet URL with the canonical one if available
+        if (s.data?.datasheet_url && (!merged.datasheet_url || isWeakDatasheetUrl(merged.datasheet_url))) {
+          merged.datasheet_url = s.data.datasheet_url;
+        }
+
+        await updateComponent(keeper.id, merged);
+        for (const m of others) {
+          try { await deleteComponent(m.id); } catch (err) { console.warn('merge delete failed:', err); }
+        }
+        success++;
+        continue;
+      }
+
+      // Default: categorize / anomaly fix - fill empty fields from hit
+      const comp = s.comp;
+      const hit  = s.hit;
       const updated = {
         ...comp,
         category:     hit.category,
@@ -196,15 +401,14 @@ async function applySelected(suggestions) {
         package:      hit.package      || comp.package      || '',
         manufacturer: hit.manufacturer || comp.manufacturer || '',
         description:  comp.description || hit.description   || '',
-        datasheet_url:comp.datasheet_url|| hit.datasheet_url|| '',
+        datasheet_url: (isWeakDatasheetUrl(comp.datasheet_url) && hit.datasheet_url) ? hit.datasheet_url : (comp.datasheet_url || hit.datasheet_url || ''),
         voltage_max:  comp.voltage_max  ?? hit.voltage_max  ?? null,
         current_max:  comp.current_max  ?? hit.current_max  ?? null,
       };
-
       await updateComponent(comp.id, updated);
       success++;
     } catch (err) {
-      console.error('bulk categorize error:', comp.part_code, err);
+      console.error('bulk apply error:', s, err);
       failed++;
     }
   }
@@ -215,6 +419,10 @@ async function applySelected(suggestions) {
   } else {
     showToast(t('toast.bulkPart', { ok: success, fail: failed }), 'warning');
   }
+}
+
+function normaliseSimple(s) {
+  return String(s || '').toUpperCase().replace(/[\s\-_.]/g, '');
 }
 
 function closeOverlay() {
@@ -239,27 +447,39 @@ export function initBulkCategorize() {
   let currentSuggestions = [];
 
   btnOpen.addEventListener('click', () => {
-    const uncategorized = getUncategorized();
-    const anomalies     = getMisclassified();
+    const uncategorized    = getUncategorized();
+    const anomalies        = getMisclassified();
+    const taxonomyFixes    = findCategoryNormalizations();
+    const datasheetFills   = findDatasheetBackfills();
+    const dedupeGroups     = findDuplicateGroups();
 
-    if (uncategorized.length === 0 && anomalies.length === 0) {
+    if (uncategorized.length === 0 && anomalies.length === 0 &&
+        datasheetFills.length === 0 && dedupeGroups.length === 0 &&
+        taxonomyFixes.length === 0) {
       showToast(t('toast.bulkNone'), 'info');
       return;
     }
 
     const baseSuggestions = buildSuggestions(uncategorized);
-    // Anomalies first (highest user value), then standard suggestions
-    currentSuggestions = [...anomalies, ...baseSuggestions];
+    // Order by user value: anomalies > taxonomy > duplicates > datasheet > categorize
+    currentSuggestions = [
+      ...anomalies,
+      ...taxonomyFixes,
+      ...dedupeGroups,
+      ...datasheetFills,
+      ...baseSuggestions,
+    ];
 
     const subtitle = document.getElementById('bulk-cat-subtitle');
     if (subtitle) {
-      const base = t('bulk.subtitle', {
-        total: uncategorized.length,
-        match: baseSuggestions.length,
-      });
-      subtitle.textContent = anomalies.length > 0
-        ? base + '  -  ' + t('anomaly.btn.open', { n: anomalies.length })
-        : base;
+      const parts = [
+        t('bulk.subtitle', { total: uncategorized.length, match: baseSuggestions.length }),
+      ];
+      if (anomalies.length      > 0) parts.push(t('anomaly.btn.open',     { n: anomalies.length }));
+      if (taxonomyFixes.length  > 0) parts.push(t('bulk.taxonomy.found',  { n: taxonomyFixes.length }));
+      if (dedupeGroups.length   > 0) parts.push(t('bulk.merge.found',     { n: dedupeGroups.length }));
+      if (datasheetFills.length > 0) parts.push(t('bulk.datasheet.found', { n: datasheetFills.length }));
+      subtitle.textContent = parts.join('  -  ');
     }
 
     renderList(currentSuggestions);

@@ -15,38 +15,140 @@ import { rankCandidates } from './fuzzy_search.js';
 // Drives the subcategory datalist so users no longer see NPN/PNP
 // suggestions when they have selected "Resistors", etc.
 // ============================================================
+// Canonical taxonomy. Keep ONE name per main category (English plural).
+// Locale labels are display-only via i18n; the underlying value stored in
+// the DB stays in English so import/export and grouping stay stable.
 const CATEGORY_SUBCATEGORIES = {
-  'Resistors':       ['Carbon Film', 'Metal Film', 'Wirewound', 'SMD', 'Through-Hole', 'Thick Film', 'Thin Film', 'Power', 'Precision'],
-  'Direncler':       ['Karbon Film', 'Metal Film', 'Sarmal', 'SMD', 'Delikli', 'Kalin Film', 'Ince Film', 'Guc', 'Hassas'],
-  'Potentiometers':  ['Trimpot', 'Linear', 'Logarithmic', 'Multi-turn', 'Single-turn'],
-  'Thermistors':     ['NTC', 'PTC'],
-  'Varistors':       ['MOV', 'SIOV'],
-  'Capacitors':      ['Electrolytic', 'Ceramic', 'Tantalum', 'Film', 'Polymer', 'Supercapacitor', 'MLCC', 'SMD'],
-  'Kondansatorler':  ['Elektrolitik', 'Seramik', 'Tantal', 'Film', 'Polimer', 'Superkapasitor', 'MLCC', 'SMD'],
-  'Inductors':       ['Inductor', 'Ferrite Core', 'Toroid Core', 'Common Mode Choke', 'Power', 'SMD'],
-  'Bobinler':        ['Bobin', 'Ferrit Cekirdek', 'Toroid', 'CM Choke', 'Guc', 'SMD'],
-  'Transformers':    ['Step-Up', 'Step-Down', 'Isolation', 'Audio', 'Toroidal'],
-  'Coils':           ['Air Core', 'Ferrite Core', 'Toroid Core'],
-  'Transistors':     ['BJT NPN', 'BJT PNP', 'Power MOSFET', 'N-Channel MOSFET', 'P-Channel MOSFET', 'Darlington NPN', 'Darlington PNP', 'JFET'],
-  'Transistorler':   ['BJT NPN', 'BJT PNP', 'Guc MOSFET', 'N-Kanal MOSFET', 'P-Kanal MOSFET', 'Darlington NPN', 'Darlington PNP', 'JFET'],
-  'MOSFETs':         ['N-Channel', 'P-Channel', 'Power', 'Logic-Level', 'Dual'],
-  'IGBTs':           ['Single', 'Dual', 'Module', 'Half-Bridge'],
-  'Thyristors':      ['SCR', 'TRIAC', 'DIAC'],
-  'Diodes':          ['Rectifier', 'Schottky', 'Zener', 'TVS', 'Fast Recovery', 'Ultra Fast Recovery', 'Bridge Rectifier', 'High Efficiency', 'LED'],
-  'Diyotlar':        ['Rektifier', 'Schottky', 'Zener', 'TVS', 'Hizli Toparlanma', 'Cok Hizli', 'Kopru Diyot', 'Yuksek Verimli', 'LED'],
-  'ICs':             ['Microcontroller', 'Op-Amp', 'Comparator', 'Timer', 'Voltage Regulator', 'LDO Regulator', 'Linear Regulator', 'Buck Converter', 'Boost Converter', 'Gate Driver', 'Motor Driver', 'PWM Controller', 'Optocoupler', 'Logic / Shift Register', 'Logic / NAND', 'Touch Sensor', 'LED Driver', 'RS-232 Driver', 'RS-485 Transceiver', 'WiFi+BT SoC', 'RF Transceiver'],
-  'Microcontrollers':['ARM Cortex', 'AVR', 'PIC', 'ESP', 'MSP430', 'STM32'],
-  'Sensors':         ['Temperature', 'Humidity / Temp', 'Pressure', 'Hall Effect', 'Current Sensor', 'Accelerometer', 'Gyroscope', 'Proximity', 'Ultrasonic', 'NTC Thermistor', 'PTC Thermistor'],
-  'Sensorler':       ['Sicaklik', 'Nem / Sicaklik', 'Basinc', 'Hall Etkisi', 'Akim Sensoru', 'Ivmeolcer', 'Jiroskop', 'Yakinlik', 'Ultrasonik', 'NTC Termistor', 'PTC Termistor'],
-  'Relays':          ['SPST', 'SPDT', 'DPDT', 'Solid State', 'Coil'],
-  'Roleler':         ['SPST', 'SPDT', 'DPDT', 'Yari Iletken', 'Bobinli'],
-  'Optocouplers':    ['Phototransistor', 'Photo-Darlington', 'Photo-Triac'],
-  'Connectors':      ['Pin Header', 'Socket', 'Terminal Block', 'IC Socket', 'JST', 'Molex', 'USB', 'RJ45', 'D-Sub'],
-  'Konektorler':     ['Pin Header', 'Soket', 'Terminal Blok', 'IC Soket', 'JST', 'Molex', 'USB', 'RJ45', 'D-Sub'],
-  'Crystals':        ['Crystal', 'Oscillator', 'Resonator'],
-  'Mechanical':      ['PCB / Board', 'Heat Sink', 'Standoff', 'Screw', 'Switch', 'Button'],
-  'Consumables':     ['Solder', 'Flux', 'Wire', 'Heat Shrink'],
+  'Resistors':      ['Carbon Film', 'Metal Film', 'Wirewound', 'SMD', 'Through-Hole', 'Thick Film', 'Thin Film', 'Power', 'Precision'],
+  'Potentiometers': ['Trimpot', 'Linear', 'Logarithmic', 'Multi-turn', 'Single-turn'],
+  'Thermistors':    ['NTC', 'PTC'],
+  'Varistors':      ['MOV', 'SIOV'],
+  'Capacitors':     ['Electrolytic', 'Ceramic', 'Tantalum', 'Film', 'Polymer', 'Supercapacitor', 'MLCC', 'SMD'],
+  'Inductors':      ['Inductor', 'Ferrite Core', 'Toroid Core', 'Common Mode Choke', 'Power', 'SMD'],
+  'Transformers':   ['Step-Up', 'Step-Down', 'Isolation', 'Audio', 'Toroidal'],
+
+  // Transistors: subcategory captures BJT/MOSFET/JFET/IGBT/Darlington
+  // PLUS the user's HV (high voltage) / HC (high current) / HF (high
+  // frequency) / GP (general purpose) shelves so a single physical box
+  // maps to one subcategory.
+  'Transistors':    [
+    'BJT NPN - General Purpose', 'BJT NPN - HV', 'BJT NPN - HC', 'BJT NPN - HF',
+    'BJT PNP - General Purpose', 'BJT PNP - HV', 'BJT PNP - HC', 'BJT PNP - HF',
+    'MOSFET N-Channel', 'MOSFET N-Channel - HV', 'MOSFET N-Channel - HC', 'MOSFET N-Channel - Logic-Level',
+    'MOSFET P-Channel', 'MOSFET P-Channel - HV', 'MOSFET P-Channel - HC',
+    'IGBT', 'JFET',
+    'Darlington NPN', 'Darlington PNP',
+  ],
+
+  'Thyristors':     ['SCR', 'TRIAC', 'DIAC'],
+
+  // Diodes: a flat list with the most common types only. Standalone LEDs
+  // get their own main category for clarity.
+  'Diodes':         ['Rectifier', 'Schottky', 'Zener', 'TVS', 'Fast Recovery', 'Bridge Rectifier'],
+  'LEDs':           ['Indicator', 'High-Power', 'RGB', 'Addressable', 'IR', 'UV', 'Laser'],
+
+  // ICs: collapsed to functional purpose. Voltage regulator family is one
+  // group instead of three (LDO/Linear/Switching). Microcontrollers stay
+  // as a top-level category so flashing-tools and pinouts are easy to pick.
+  'ICs':            [
+    'Op-Amp', 'Comparator', 'Timer',
+    'Voltage Regulator', 'Switching Regulator', 'Gate Driver', 'Motor Driver',
+    'PWM Controller', 'Optocoupler', 'Logic Gate', 'Shift Register',
+    'LED Driver', 'RS-232 Driver', 'RS-485 Transceiver', 'CAN Transceiver',
+    'WiFi / BT SoC', 'RF Transceiver', 'Audio Amplifier', 'ADC', 'DAC',
+    'EEPROM / Flash', 'Real-Time Clock',
+  ],
+  'Microcontrollers': ['STM32 (ARM Cortex-M)', 'AVR (Atmel)', 'PIC', 'ESP32 / ESP8266', 'MSP430', 'RP2040 (Pi Pico)', '8051'],
+
+  'Sensors':        [
+    'Temperature', 'Humidity', 'Pressure', 'Hall Effect',
+    'Current', 'Accelerometer', 'Gyroscope', 'IMU',
+    'Proximity', 'Distance / ToF', 'Ultrasonic', 'PIR (Motion)',
+    'Light / Color', 'Gas', 'Force / Strain',
+  ],
+  'Relays':         ['SPST', 'SPDT', 'DPDT', 'Solid State', 'Reed'],
+  'Connectors':     ['Pin Header', 'Socket', 'Terminal Block', 'IC Socket', 'JST', 'Molex', 'USB', 'RJ45', 'D-Sub', 'DC Jack', 'XT60 / XT30'],
+  'Crystals':       ['Crystal', 'Oscillator (XO)', 'TCXO', 'Resonator'],
+  'Mechanical':     ['Heat Sink', 'Standoff', 'Screw / Nut', 'Fan', 'Cable / Wire'],
+  'Switches':       ['Tactile', 'Slide', 'Toggle', 'Rotary', 'DIP', 'Rocker', 'Limit'],
+  'Consumables':    ['Solder', 'Flux', 'Heat Shrink', 'Insulating Tape', 'Cleaner'],
+  'Modules':        ['Power Supply', 'Sensor Board', 'Display', 'RF / Wireless', 'Motor Driver', 'Development Board'],
 };
+
+/**
+ * Aliases that should be rewritten to canonical category names. Used by both
+ * the live form (auto-rewrite while typing) and the bulk auto-categorize
+ * normalisation pass. Keys are lowercased and stripped of trailing punctuation.
+ */
+const CATEGORY_ALIASES = {
+  // English variants
+  'diode':            'Diodes',
+  'ic':               'ICs',
+  'integrated circuit':'ICs',
+  'mosfet':           'Transistors',
+  'mosfets':          'Transistors',
+  'bjt':              'Transistors',
+  'bjts':             'Transistors',
+  'transistor':       'Transistors',
+  'igbt':             'Transistors',
+  'igbts':            'Transistors',
+  'resistor':         'Resistors',
+  'capacitor':        'Capacitors',
+  'cap':              'Capacitors',
+  'inductor':         'Inductors',
+  'connector':        'Connectors',
+  'sensor':           'Sensors',
+  'crystal':          'Crystals',
+  'oscillator':       'Crystals',
+  'relay':            'Relays',
+  'led':              'LEDs',
+  'leds':             'LEDs',
+  'microcontroller':  'Microcontrollers',
+  'mcu':              'Microcontrollers',
+  'mcus':             'Microcontrollers',
+  'switch':           'Switches',
+  'module':           'Modules',
+  // Turkish variants
+  'diyot':            'Diodes',
+  'diyotlar':         'Diodes',
+  'direnc':           'Resistors',
+  'direncler':        'Resistors',
+  'kondansator':      'Capacitors',
+  'kondansatorler':   'Capacitors',
+  'bobin':            'Inductors',
+  'bobinler':         'Inductors',
+  'transistorler':    'Transistors',
+  'sensorler':        'Sensors',
+  'roleler':          'Relays',
+  'role':             'Relays',
+  'konektor':         'Connectors',
+  'konektorler':      'Connectors',
+  'mikrodenetleyici': 'Microcontrollers',
+  'mikrodenetleyiciler':'Microcontrollers',
+};
+
+/**
+ * Normalise an arbitrary category string to the canonical form used by the
+ * taxonomy (e.g. "diode" -> "Diodes"). Returns the input unchanged when no
+ * alias matches and the category is not in the canonical set; this keeps
+ * truly user-defined categories intact.
+ */
+export function normaliseCategory(input) {
+  const raw = String(input || '').trim();
+  if (!raw) return raw;
+  if (CATEGORY_SUBCATEGORIES[raw]) return raw; // already canonical
+  const key = raw.toLocaleLowerCase('tr-TR').replace(/[\s\-_/.]+$/, '');
+  if (CATEGORY_ALIASES[key]) return CATEGORY_ALIASES[key];
+  // Try plural/singular fold (drop trailing s)
+  const folded = key.endsWith('s') ? key.slice(0, -1) : key + 's';
+  if (CATEGORY_ALIASES[folded]) return CATEGORY_ALIASES[folded];
+  // Case-insensitive match against canonical keys
+  const canon = Object.keys(CATEGORY_SUBCATEGORIES)
+    .find(k => k.toLocaleLowerCase('tr-TR') === key);
+  return canon || raw;
+}
+
+export const CANONICAL_CATEGORIES = Object.keys(CATEGORY_SUBCATEGORIES);
 
 /**
  * Resolve subcategory candidates for the given category.
@@ -493,7 +595,7 @@ async function handleSave() {
 
   const data = {
     part_code:    partCode,
-    category:     document.getElementById('edit-category').value.trim(),
+    category:     normaliseCategory(document.getElementById('edit-category').value),
     subcategory:  document.getElementById('edit-subcategory').value.trim(),
     quantity,
     package:      document.getElementById('edit-package').value.trim(),

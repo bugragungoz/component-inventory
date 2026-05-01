@@ -9,7 +9,7 @@ import { initLabels }            from './modules/labels.js';
 import { initBulkCategorize }    from './modules/bulk_categorize.js';
 import { initI18n, t, setLocale, getLocale, applyTranslations } from './modules/i18n.js';
 import { initBackupDiff }        from './modules/backup_diff.js';
-import { initDriveSync, triggerDriveSync, getDriveStatus, onDriveStatusChange } from './modules/drive_sync.js';
+import { initDriveSync, triggerDriveSync, triggerDriveSyncManual, getDriveStatus, onDriveStatusChange, DRIVE_DEFAULT_BASE_NAME } from './modules/drive_sync.js';
 import { initSidebarFuzzySearch } from './modules/fuzzy_search.js';
 
 // Rename pencil SVG (inline, reused in tree rendering)
@@ -622,6 +622,22 @@ function initSettings() {
     if (inp) inp.value = '';
   });
 
+  // ---- Sync file base name (default: croxz) ----
+  const baseInp = document.getElementById('s-drive-basename');
+  if (baseInp) {
+    baseInp.value = localStorage.getItem('driveSyncBaseName') || DRIVE_DEFAULT_BASE_NAME;
+    baseInp.placeholder = DRIVE_DEFAULT_BASE_NAME;
+    baseInp.addEventListener('change', () => {
+      const v = baseInp.value.trim();
+      if (v) localStorage.setItem('driveSyncBaseName', v);
+      else   localStorage.removeItem('driveSyncBaseName');
+    });
+  }
+  document.getElementById('s-drive-basename-reset')?.addEventListener('click', () => {
+    localStorage.removeItem('driveSyncBaseName');
+    if (baseInp) baseInp.value = DRIVE_DEFAULT_BASE_NAME;
+  });
+
   // ---- GitHub links ----
   const openGitHub = async (e) => {
     e.preventDefault();
@@ -809,6 +825,8 @@ function populateSettings() {
   if (drvOn) drvOn.checked = localStorage.getItem('driveSyncEnabled') === 'true';
   const drv = document.getElementById('s-drive-folder');
   if (drv) drv.value = localStorage.getItem('driveSyncFolder') || '';
+  const drvBase = document.getElementById('s-drive-basename');
+  if (drvBase) drvBase.value = localStorage.getItem('driveSyncBaseName') || DRIVE_DEFAULT_BASE_NAME;
 
   // DB path (async)
   try {
@@ -878,13 +896,14 @@ function initDriveStatusPill() {
   onDriveStatusChange(paint);
   document.addEventListener('locale-changed', () => paint(getDriveStatus()));
 
-  btn.addEventListener('click', () => {
+  btn.addEventListener('click', async () => {
     const status = getDriveStatus();
     if (status.state === 'off') {
       document.getElementById('btn-settings')?.click();
       return;
     }
-    triggerDriveSync();
+    // Manual sync trigger - shows toast confirmation on success
+    await triggerDriveSyncManual();
   });
 }
 
