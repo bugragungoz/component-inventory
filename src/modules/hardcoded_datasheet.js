@@ -120,12 +120,21 @@ const DB = {
   'LM337':   { category:'ICs', subcategory:'Linear Regulator', package:'TO-220', manufacturer:'Various', voltage_max:40, current_max:1.5, description:'Adjustable Negative Voltage Regulator -1.25 to -37V', datasheet_url:'https://www.ti.com/lit/ds/symlink/lm337.pdf' },
   'AMS1117': { category:'ICs', subcategory:'LDO Regulator', package:'SOT-223', manufacturer:'Advanced Monolithic Systems', voltage_max:15, current_max:1, description:'Low Dropout Regulator (various fixed/adj voltages)', datasheet_url:'https://www.advanced-monolithic.com/pdf/ds1117.pdf' },
   'LM1117':  { category:'ICs', subcategory:'LDO Regulator', package:'SOT-223', manufacturer:'Various', voltage_max:20, current_max:0.8, description:'Low Dropout Voltage Regulator', datasheet_url:'https://www.ti.com/lit/ds/symlink/lm1117.pdf' },
+  'TL431':   { category:'ICs', subcategory:'Voltage Reference', package:'TO-92', manufacturer:'Various', voltage_max:36, current_max:0.1, description:'Adjustable Precision Shunt Regulator 2.5-36V', datasheet_url:'https://www.ti.com/lit/ds/symlink/tl431.pdf' },
+  'TL431A':  { category:'ICs', subcategory:'Voltage Reference', package:'TO-92', manufacturer:'Various', voltage_max:36, current_max:0.1, description:'Adjustable Precision Shunt Regulator 2.5-36V (A Grade)', datasheet_url:'https://www.ti.com/lit/ds/symlink/tl431.pdf' },
+  'LM336':   { category:'ICs', subcategory:'Voltage Reference', package:'TO-92', manufacturer:'Various', voltage_max:null, current_max:0.01, description:'2.5V Reference Diode', datasheet_url:'https://www.ti.com/lit/ds/symlink/lm336-2.5.pdf' },
+  'LM385':   { category:'ICs', subcategory:'Voltage Reference', package:'TO-92', manufacturer:'Various', voltage_max:null, current_max:0.02, description:'Micropower Voltage Reference Diode', datasheet_url:'https://www.ti.com/lit/ds/symlink/lm385.pdf' },
 
   // ================================================================
   // Timer & Op-Amp ICs
   // ================================================================
   'NE555':   { category:'ICs', subcategory:'Timer', package:'DIP-8', manufacturer:'Various', voltage_max:18, current_max:0.2, description:'555 Timer IC', datasheet_url:'https://www.ti.com/lit/ds/symlink/ne555.pdf' },
   'LM555':   { category:'ICs', subcategory:'Timer', package:'DIP-8', manufacturer:'Texas Instruments', voltage_max:18, current_max:0.2, description:'555 Timer IC', datasheet_url:'https://www.ti.com/lit/ds/symlink/lm555.pdf' },
+  'SE555':   { category:'ICs', subcategory:'Timer', package:'DIP-8', manufacturer:'Various', voltage_max:18, current_max:0.2, description:'555 Timer IC (Military Grade)', datasheet_url:'https://www.ti.com/lit/ds/symlink/se555.pdf' },
+  'SA555':   { category:'ICs', subcategory:'Timer', package:'DIP-8', manufacturer:'Various', voltage_max:18, current_max:0.2, description:'555 Timer IC (Automotive)', datasheet_url:'https://www.ti.com/lit/ds/symlink/sa555.pdf' },
+  'ICM7555': { category:'ICs', subcategory:'Timer', package:'DIP-8', manufacturer:'Renesas', voltage_max:18, current_max:0.1, description:'CMOS 555 Timer IC (Low Power)', datasheet_url:'https://www.renesas.com/us/en/document/dst/icm7555-icm7556-datasheet' },
+  'NE556':   { category:'ICs', subcategory:'Timer', package:'DIP-14', manufacturer:'Various', voltage_max:18, current_max:0.2, description:'Dual 555 Timer IC', datasheet_url:'https://www.ti.com/lit/ds/symlink/ne556.pdf' },
+  '555':     { category:'ICs', subcategory:'Timer', package:'DIP-8', manufacturer:'Various', voltage_max:18, current_max:0.2, description:'555 Timer IC', datasheet_url:'https://www.ti.com/lit/ds/symlink/ne555.pdf' },
   'LM358':   { category:'ICs', subcategory:'Op-Amp', package:'DIP-8', manufacturer:'Various', voltage_max:32, current_max:null, description:'Dual General Purpose Op-Amp', datasheet_url:'https://www.ti.com/lit/ds/symlink/lm358.pdf' },
   'LM324':   { category:'ICs', subcategory:'Op-Amp', package:'DIP-14', manufacturer:'Various', voltage_max:32, current_max:null, description:'Quad General Purpose Op-Amp', datasheet_url:'https://www.ti.com/lit/ds/symlink/lm324.pdf' },
   'LM741':   { category:'ICs', subcategory:'Op-Amp', package:'DIP-8', manufacturer:'Various', voltage_max:44, current_max:null, description:'General Purpose Op-Amp', datasheet_url:'https://www.ti.com/lit/ds/symlink/ua741.pdf' },
@@ -133,8 +142,14 @@ const DB = {
   'LM339':   { category:'ICs', subcategory:'Comparator', package:'DIP-14', manufacturer:'Various', voltage_max:36, current_max:null, description:'Quad Voltage Comparator', datasheet_url:'https://www.ti.com/lit/ds/symlink/lm339.pdf' },
   'TL071':   { category:'ICs', subcategory:'Op-Amp', package:'DIP-8', manufacturer:'Various', voltage_max:36, current_max:null, description:'Low Noise JFET Input Op-Amp', datasheet_url:'https://www.ti.com/lit/ds/symlink/tl071.pdf' },
   'TL072':   { category:'ICs', subcategory:'Op-Amp', package:'DIP-8', manufacturer:'Various', voltage_max:36, current_max:null, description:'Dual Low Noise JFET Input Op-Amp', datasheet_url:'https://www.ti.com/lit/ds/symlink/tl072.pdf' },
+  'TL074':   { category:'ICs', subcategory:'Op-Amp', package:'DIP-14', manufacturer:'Various', voltage_max:36, current_max:null, description:'Quad Low Noise JFET Input Op-Amp', datasheet_url:'https://www.ti.com/lit/ds/symlink/tl074.pdf' },
   'NE5532':  { category:'ICs', subcategory:'Op-Amp', package:'DIP-8', manufacturer:'Various', voltage_max:44, current_max:null, description:'Dual Low Noise High Speed Op-Amp', datasheet_url:'https://www.ti.com/lit/ds/symlink/ne5532.pdf' },
   'CA3140':  { category:'ICs', subcategory:'Op-Amp', package:'DIP-8', manufacturer:'Renesas', voltage_max:36, current_max:null, description:'BiMOS Op-Amp with MOSFET Input', datasheet_url:'https://www.renesas.com/us/en/document/dst/ca3140-ca3140a-datasheet' },
+  'LM386':   { category:'ICs', subcategory:'Audio Amplifier', package:'DIP-8', manufacturer:'Various', voltage_max:15, current_max:null, description:'Low Voltage Audio Power Amplifier', datasheet_url:'https://www.ti.com/lit/ds/symlink/lm386.pdf' },
+  'LM2596':  { category:'ICs', subcategory:'Switching Regulator', package:'TO-263', manufacturer:'Various', voltage_max:40, current_max:3, description:'SIMPLE SWITCHER 3A Step-Down Voltage Regulator', datasheet_url:'https://www.ti.com/lit/ds/symlink/lm2596.pdf' },
+  'LM2576':  { category:'ICs', subcategory:'Switching Regulator', package:'TO-263', manufacturer:'Various', voltage_max:40, current_max:3, description:'SIMPLE SWITCHER 3A Step-Down Voltage Regulator', datasheet_url:'https://www.ti.com/lit/ds/symlink/lm2576.pdf' },
+  'XL6009':  { category:'ICs', subcategory:'Switching Regulator', package:'TO-263', manufacturer:'XLSEMI', voltage_max:32, current_max:4, description:'400KHz 60V 4A Switching Current Boost LED Step-Up Converter', datasheet_url:'https://www.xlsemi.com/datasheet/XL6009%20datasheet.pdf' },
+  'MP1584':  { category:'ICs', subcategory:'Switching Regulator', package:'SOIC-8', manufacturer:'MPS', voltage_max:28, current_max:3, description:'3A, 1.5MHz, 28V Step-Down Converter', datasheet_url:'https://www.monolithicpower.com/en/documentview/productdocument/index/version/2/document_type/Datasheet/lang/en/sku/MP1584/document_id/204' },
 
   // ================================================================
   // PWM Controllers & Gate Drivers

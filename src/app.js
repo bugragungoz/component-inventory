@@ -68,6 +68,13 @@ async function initDB() {
     `ALTER TABLE components ADD COLUMN resistance   TEXT DEFAULT ''`,
     `ALTER TABLE components ADD COLUMN tolerance    TEXT DEFAULT ''`,
     `ALTER TABLE components ADD COLUMN power_rating REAL`,
+    // JSON attributes column — stores category-specific parameters
+    // (e.g. rds_on/vgs_th for MOSFETs, hfe/vce_sat for BJTs).
+    // Query example:
+    //   SELECT * FROM components
+    //    WHERE category LIKE '%MOSFET%'
+    //      AND CAST(json_extract(attributes, '$.rds_on') AS REAL) < 50;
+    `ALTER TABLE components ADD COLUMN attributes   TEXT DEFAULT '{}'`,
   ];
   for (const sql of migrations) {
     try { await db.execute(sql); } catch (_) { /* column already exists */ }
@@ -91,19 +98,24 @@ export async function addComponent(data) {
   const { part_code, category, subcategory, quantity, package: pkg,
     manufacturer, mpn, location, voltage_max, current_max,
     description, datasheet_url, unit_price, notes, image_path,
-    resistance, tolerance, power_rating } = data;
+    resistance, tolerance, power_rating, attributes } = data;
+
+  const attrsJson = attributes && typeof attributes === 'object'
+    ? JSON.stringify(attributes)
+    : (typeof attributes === 'string' ? attributes : '{}');
 
   await state.db.execute(
     `INSERT INTO components
       (part_code, category, subcategory, quantity, package, manufacturer, mpn, location,
        voltage_max, current_max, description, datasheet_url, unit_price, notes, image_path,
-       resistance, tolerance, power_rating)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       resistance, tolerance, power_rating, attributes)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [part_code, category || '', subcategory || '', quantity || 0, pkg || '',
      manufacturer || '', mpn || '', location || '',
      voltage_max ?? null, current_max ?? null,
      description || '', datasheet_url || '', unit_price ?? null, notes || '',
-     image_path || '', resistance || '', tolerance || '', power_rating ?? null]
+     image_path || '', resistance || '', tolerance || '', power_rating ?? null,
+     attrsJson]
   );
   await triggerBackup();
   await loadComponents();
@@ -113,21 +125,26 @@ export async function updateComponent(id, data) {
   const { part_code, category, subcategory, quantity, package: pkg,
     manufacturer, mpn, location, voltage_max, current_max,
     description, datasheet_url, unit_price, notes, image_path,
-    resistance, tolerance, power_rating } = data;
+    resistance, tolerance, power_rating, attributes } = data;
+
+  const attrsJson = attributes && typeof attributes === 'object'
+    ? JSON.stringify(attributes)
+    : (typeof attributes === 'string' ? attributes : '{}');
 
   await state.db.execute(
     `UPDATE components SET
       part_code=?, category=?, subcategory=?, quantity=?, package=?,
       manufacturer=?, mpn=?, location=?, voltage_max=?, current_max=?,
       description=?, datasheet_url=?, unit_price=?, notes=?, image_path=?,
-      resistance=?, tolerance=?, power_rating=?,
+      resistance=?, tolerance=?, power_rating=?, attributes=?,
       updated_at=datetime('now')
      WHERE id=?`,
     [part_code, category || '', subcategory || '', quantity || 0, pkg || '',
      manufacturer || '', mpn || '', location || '',
      voltage_max ?? null, current_max ?? null,
      description || '', datasheet_url || '', unit_price ?? null, notes || '',
-     image_path || '', resistance || '', tolerance || '', power_rating ?? null, id]
+     image_path || '', resistance || '', tolerance || '', power_rating ?? null,
+     attrsJson, id]
   );
   await triggerBackup();
   await loadComponents();
@@ -617,6 +634,153 @@ function initSettings() {
   };
   document.getElementById('btn-github-link')?.addEventListener('click', openGitHub);
   document.getElementById('btn-github-sidebar')?.addEventListener('click', openGitHub);
+
+  // ---- Check for updates ----
+  document.getElementById('btn-check-update')?.addEventListener('click', checkForUpdates);
+}
+
+// ============================================================
+// In-app update checker (GitHub Releases API)
+// ============================================================
+const CURRENT_VERSION_FALLBACK = '0.1.9';
+const GITHUB_RELEASES_API = 'https://api.github.com/repos/bugragungoz/component-inventory/releases/latest';
+
+async function getCurrentVersion() {
+  try {
+    const { getVersion } = await import('@tauri-apps/api/app');
+    return await getVersion();
+  } catch {
+    return CURRENT_VERSION_FALLBACK;
+  }
+}
+
+async function checkForUpdates() {
+  const btn = document.getElementById('btn-check-update');
+  const statusEl = document.getElementById('update-status');
+  if (!btn || !statusEl) return;
+
+  btn.disabled = true;
+  btn.innerHTML = `
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="spin-icon"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+    Checking…`;
+
+  const currentVersion = await getCurrentVersion();
+
+  try {
+    const res = await fetch(GITHUB_RELEASES_API, {
+      headers: { 'Accept': 'application/vnd.github.v3+json' },
+    });
+    if (!res.ok) throw new Error(`GitHub API returned ${res.status}`);
+    const data = await res.json();
+
+    const latestTag = (data.tag_name || '').replace(/^v/, '');
+    const isNewer = compareVersions(latestTag, currentVersion) > 0;
+
+    statusEl.style.display = '';
+    if (isNewer) {
+      // Find download assets
+      const assets = (data.assets || []);
+      const exeAsset = assets.find(a => a.name.endsWith('.exe'));
+      const msiAsset = assets.find(a => a.name.endsWith('.msi'));
+      const downloadUrl = exeAsset?.browser_download_url || msiAsset?.browser_download_url || data.html_url;
+
+      statusEl.style.background = 'var(--accent-dim)';
+      statusEl.style.color = 'var(--accent)';
+      statusEl.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+          <span><strong>v${escHtml(latestTag)}</strong> is available! (current: v${currentVersion})</span>
+          <a href="#" id="btn-download-update" class="btn btn-add" style="font-size:0.74rem;padding:4px 12px;white-space:nowrap">Download</a>
+        </div>
+        ${data.body ? `<div style="margin-top:6px;font-size:0.72rem;color:var(--text-muted);max-height:60px;overflow-y:auto;white-space:pre-wrap">${escHtml((data.body || '').slice(0, 300))}</div>` : ''}
+      `;
+
+      document.getElementById('btn-download-update')?.addEventListener('click', async (e) => {
+        e.preventDefault();
+        try {
+          const { openUrl } = await import('@tauri-apps/plugin-opener');
+          await openUrl(downloadUrl);
+        } catch {
+          window.open(downloadUrl, '_blank');
+        }
+      });
+    } else {
+      statusEl.style.background = 'var(--bg-hover)';
+      statusEl.style.color = 'var(--text-secondary)';
+      statusEl.innerHTML = `✓ You are on the latest version (v${currentVersion})`;
+    }
+  } catch (err) {
+    statusEl.style.display = '';
+    statusEl.style.background = 'var(--bg-hover)';
+    statusEl.style.color = 'var(--text-muted)';
+    statusEl.innerHTML = `Could not check for updates: ${escHtml(err.message || String(err))}`;
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      Check for Updates`;
+  }
+}
+
+/** Compare two semver strings. Returns >0 if a > b, <0 if a < b, 0 if equal. */
+function compareVersions(a, b) {
+  const pa = (a || '0').split('.').map(Number);
+  const pb = (b || '0').split('.').map(Number);
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+    const va = pa[i] || 0;
+    const vb = pb[i] || 0;
+    if (va !== vb) return va - vb;
+  }
+  return 0;
+}
+
+/** Silent update check on app launch — shows a toast if a newer version exists. */
+async function autoCheckForUpdates() {
+  try {
+    const currentVersion = await getCurrentVersion();
+    const res = await fetch(GITHUB_RELEASES_API, {
+      headers: { 'Accept': 'application/vnd.github.v3+json' },
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    const latestTag = (data.tag_name || '').replace(/^v/, '');
+    if (compareVersions(latestTag, currentVersion) > 0) {
+      const assets = (data.assets || []);
+      const exeAsset = assets.find(a => a.name.endsWith('.exe'));
+      const msiAsset = assets.find(a => a.name.endsWith('.msi'));
+      const downloadUrl = exeAsset?.browser_download_url
+        || msiAsset?.browser_download_url
+        || data.html_url;
+      showToast(
+        `Update available: v${latestTag} (current: v${currentVersion}). Opening Settings to download…`,
+        'info',
+        6000,
+      );
+      // Also populate the settings update-status area so the user can act
+      const statusEl = document.getElementById('update-status');
+      if (statusEl) {
+        statusEl.style.display = '';
+        statusEl.style.background = 'var(--accent-dim)';
+        statusEl.style.color = 'var(--accent)';
+        statusEl.innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+            <span><strong>v${escHtml(latestTag)}</strong> is available! (current: v${currentVersion})</span>
+            <a href="#" id="btn-download-update-auto" class="btn btn-add" style="font-size:0.74rem;padding:4px 12px;white-space:nowrap">Download</a>
+          </div>`;
+        document.getElementById('btn-download-update-auto')?.addEventListener('click', async (e) => {
+          e.preventDefault();
+          try {
+            const { openUrl } = await import('@tauri-apps/plugin-opener');
+            await openUrl(downloadUrl);
+          } catch {
+            window.open(downloadUrl, '_blank');
+          }
+        });
+      }
+    }
+  } catch (e) {
+    // Silent — do not disturb the user on network errors
+    console.debug('Auto update check failed:', e);
+  }
 }
 
 function populateSettings() {
@@ -901,6 +1065,9 @@ async function main() {
       bootLoader.classList.add('hidden');
       setTimeout(() => { bootLoader.style.display = 'none'; }, 350);
     }
+
+    // Silent auto-check for updates (non-blocking)
+    autoCheckForUpdates();
   } catch (err) {
     console.error('Init error:', err);
     if (bootLoader) {

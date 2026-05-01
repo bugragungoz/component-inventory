@@ -117,6 +117,7 @@ export function initModals() {
   initDeleteConfirm();
   initDetailActions();
   initImagePicker();
+  initBuiltinSearch();
 }
 
 // ============================================================
@@ -168,6 +169,7 @@ function openEditModal(comp) {
     setField('edit-tolerance',   comp.tolerance   || '');
     setField('edit-power-rating',comp.power_rating ?? '');
     setImagePreview(comp.image_path || '');
+    existingAttrs = parseAttrs(comp.attributes);
   } else {
     title.textContent = t('edit.add');
     idEl.value = '';
@@ -192,6 +194,12 @@ function openEditModal(comp) {
 function setField(id, value) {
   const el = document.getElementById(id);
   if (el) el.value = value ?? '';
+}
+
+/** Safely parse the JSON attributes string stored in the database. */
+function parseAttrs(raw) {
+  if (!raw) return {};
+  try { return JSON.parse(raw) || {}; } catch (_) { return {}; }
 }
 
 // ============================================================
@@ -239,6 +247,32 @@ function updateTypeFields(category) {
   const lblI = document.getElementById('lbl-current-max');
   if (lblV) lblV.textContent = type === 'capacitor' ? t('edit.vmax.cap') : t('edit.vmax');
   if (lblI) lblI.textContent = type === 'transistor' ? t('edit.imax.fet') : t('edit.imax');
+}
+
+/**
+ * Renders (or hides) the "Advanced Parameters" section based on
+ * the selected category and subcategory. Preserves existing
+ * attribute values passed via `attrs`.
+ *
+ * @param {string} category
+ * @param {string} [subcategory]
+ * @param {Object} [attrs]  - existing attribute values (from DB)
+ */
+function updateAttributeFields(category, subcategory = '', attrs = {}) {
+  const section   = document.getElementById('attr-fields-section');
+  const container = document.getElementById('attr-fields-container');
+  const titleEl   = document.getElementById('attr-fields-title');
+  if (!section || !container) return;
+
+  const schema = getSchemaForCategory(category, subcategory);
+  if (schema) {
+    titleEl.textContent = schema.label;
+    renderAttributeFields(container, schema, attrs);
+    section.style.display = '';
+  } else {
+    section.style.display = 'none';
+    container.innerHTML = '';
+  }
 }
 
 /** Builds a description string from the form fields based on component type. */
@@ -319,6 +353,7 @@ function initEditForm() {
 
   // Dynamic type fields and subcategory list when category changes
   catInput?.addEventListener('input', function() {
+    const sub = document.getElementById('edit-subcategory')?.value || '';
     updateTypeFields(this.value);
     refreshSubcategoryList(this.value);
   });
@@ -475,6 +510,7 @@ async function handleSave() {
     resistance:   document.getElementById('edit-resistance')?.value.trim() || '',
     tolerance:    document.getElementById('edit-tolerance')?.value.trim()  || '',
     power_rating: parseOptFloat('edit-power-rating'),
+    attributes:   collectAttributeValues(document.getElementById('attr-fields-container')),
   };
 
   const saveBtn = document.getElementById('btn-save-component');
@@ -638,4 +674,145 @@ function initDetailActions() {
     document.getElementById('overlay-backup').style.display = '';
     document.dispatchEvent(new CustomEvent('backup-modal-opened'));
   });
+}
+
+// ============================================================
+// Built-in Library Search (Auto-fill from patched.db)
+// ============================================================
+let _builtinDebounceTimer = null;
+
+function initBuiltinSearch() {
+  const input   = document.getElementById('builtin-search-input');
+  const results  = document.getElementById('builtin-search-results');
+  if (!input || !results) return;
+
+  input.addEventListener('input', () => {
+    clearTimeout(_builtinDebounceTimer);
+    const term = input.value.trim();
+
+    if (term.length < 2) {
+      results.style.display = 'none';
+      results.innerHTML = '';
+      return;
+    }
+
+    results.style.display = '';
+    results.innerHTML = '<div class="builtin-dropdown-loading">Searching...</div>';
+
+    _builtinDebounceTimer = setTimeout(async () => {
+      try {
+        const items = await invoke('search_builtin_library', { searchTerm: term });
+        renderBuiltinResults(items, results);
+      } catch (err) {
+        results.innerHTML = '<div class="builtin-dropdown-empty">Search error: ' + escHtmlLocal(String(err)) + '</div>';
+      }
+    }, 300);
+  });
+
+  // Close dropdown when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!input.contains(e.target) && !results.contains(e.target)) {
+      results.style.display = 'none';
+    }
+  });
+
+  // Clear search field when the edit modal is opened fresh
+  document.addEventListener('open-edit', () => {
+    input.value = '';
+    results.style.display = 'none';
+    results.innerHTML = '';
+  });
+}
+
+function renderBuiltinResults(items, container) {
+  if (!items || items.length === 0) {
+    container.innerHTML = '<div class="builtin-dropdown-empty">No matching components found</div>';
+    return;
+  }
+
+  container.innerHTML = items.map((item, i) => {
+    const desc = escHtmlLocal(item.description || '').slice(0, 80);
+    const meta = [item.category, item.subcategory, item.package].filter(Boolean).join(' · ');
+    return `<div class="builtin-dropdown-item" data-idx="${i}">
+      <span class="builtin-part-code">${escHtmlLocal(item.part_code)}</span>
+      <span class="builtin-desc">${desc}</span>
+      <span class="builtin-meta">${escHtmlLocal(meta)}</span>
+    </div>`;
+  }).join('');
+
+  // Attach click handlers
+  container.querySelectorAll('.builtin-dropdown-item').forEach(el => {
+    el.addEventListener('click', () => {
+      const idx = parseInt(el.dataset.idx, 10);
+      applyBuiltinComponent(items[idx]);
+      container.style.display = 'none';
+      document.getElementById('builtin-search-input').value = '';
+    });
+  });
+}
+
+function applyBuiltinComponent(comp) {
+  // Fill basic form fields
+  if (comp.part_code)     setField('edit-part-code', comp.part_code);
+  if (comp.category)      setField('edit-category', comp.category);
+  if (comp.subcategory)   setField('edit-subcategory', comp.subcategory);
+  if (comp.package)       setField('edit-package', comp.package);
+  if (comp.manufacturer)  setField('edit-manufacturer', comp.manufacturer);
+  if (comp.description)   setField('edit-description', comp.description);
+  if (comp.datasheet_url) setField('edit-datasheet-url', comp.datasheet_url);
+
+  // Trigger type-specific field visibility update
+  const cat = comp.category || '';
+  const sub = comp.subcategory || '';
+  updateTypeFields(cat);
+
+  // Parse attributes JSON and fill dynamic fields
+  let attrs = {};
+  try {
+    attrs = typeof comp.attributes === 'string' ? JSON.parse(comp.attributes || '{}') : (comp.attributes || {});
+  } catch (_) { /* ignore parse errors */ }
+
+  // Render dynamic attribute fields and fill them with built-in library values
+  updateAttributeFields(cat, sub, attrs);
+
+  // Map well-known attribute keys to legacy form fields
+  for (const [key, value] of Object.entries(attrs)) {
+    const lk = key.toLowerCase();
+    const strVal = String(value);
+
+    if (lk.includes('voltage') || lk.includes('vdss') || lk.includes('vds'))  {
+      setFieldIfEmpty('edit-voltage-max', parseNumericFromStr(strVal));
+    } else if (lk.includes('current') && (lk.includes('drain') || lk.includes('id') || lk.includes('max') || lk.includes('rated'))) {
+      setFieldIfEmpty('edit-current-max', parseNumericFromStr(strVal));
+    } else if (lk.includes('resistance') || lk === 'rds_on' || lk.includes('rds(on)') || lk.includes('dcr')) {
+      setFieldIfEmpty('edit-resistance', strVal);
+    } else if (lk.includes('tolerance')) {
+      setFieldIfEmpty('edit-tolerance', strVal);
+    } else if (lk.includes('power') && (lk.includes('dissipation') || lk.includes('rating'))) {
+      setFieldIfEmpty('edit-power-rating', parseNumericFromStr(strVal));
+    }
+  }
+
+  showToast(`Applied data from built-in library: "${comp.part_code}"`, 'success');
+}
+
+/** Set a field only if it's currently empty */
+function setFieldIfEmpty(id, value) {
+  const el = document.getElementById(id);
+  if (el && !el.value && value != null && value !== '') {
+    el.value = value;
+  }
+}
+
+/** Extract leading numeric value from a string like "60V" or "83A" */
+function parseNumericFromStr(str) {
+  if (!str) return '';
+  const m = str.match(/^\d+(\.\d+)?/);
+  return m ? m[0] : str;
+}
+
+/** Minimal HTML escaping for dropdown rendering */
+function escHtmlLocal(str) {
+  if (!str) return '';
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }

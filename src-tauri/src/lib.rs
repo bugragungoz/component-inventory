@@ -5,8 +5,31 @@ use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
 use tauri::{Manager, State};
 use backup::{BackupEntry, create_backup_file, get_db_path, list_backups, restore_backup_file};
+use rusqlite::Connection;
+use serde::{Deserialize, Serialize};
 
 pub struct AppDataDir(pub Arc<Mutex<PathBuf>>);
+
+/// Path to the bundled patched.db reference library
+pub struct BuiltinDbPath(pub PathBuf);
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct BuiltinComponent {
+    pub id: i64,
+    pub part_code: String,
+    pub category: String,
+    pub subcategory: String,
+    pub package: String,
+    pub manufacturer: String,
+    pub description: String,
+    pub datasheet_url: String,
+    pub voltage_max: Option<f64>,
+    pub current_max: Option<f64>,
+    pub resistance: String,
+    pub tolerance: String,
+    pub power_rating: Option<f64>,
+    pub attributes: String,
+}
 
 // ============================================================
 // Backup commands — lock is released before any file I/O
@@ -90,6 +113,127 @@ fn read_external_file(path: String) -> Result<Vec<u8>, String> {
     fs::read(PathBuf::from(path)).map_err(|e| format!("Read failed: {e}"))
 }
 
+// ============================================================
+// Built-in reference library (patched.db) lookup commands
+// ============================================================
+
+/// Helper to build a BuiltinComponent from a row with the standard column order.
+fn builtin_from_row(row: &rusqlite::Row) -> rusqlite::Result<BuiltinComponent> {
+    Ok(BuiltinComponent {
+        id: row.get(0)?,
+        part_code:     row.get::<_, String>(1).unwrap_or_default(),
+        category:      row.get::<_, String>(2).unwrap_or_default(),
+        subcategory:   row.get::<_, String>(3).unwrap_or_default(),
+        package:       row.get::<_, String>(4).unwrap_or_default(),
+        manufacturer:  row.get::<_, String>(5).unwrap_or_default(),
+        description:   row.get::<_, String>(6).unwrap_or_default(),
+        datasheet_url: row.get::<_, String>(7).unwrap_or_default(),
+        voltage_max:   row.get::<_, Option<f64>>(8).unwrap_or(None),
+        current_max:   row.get::<_, Option<f64>>(9).unwrap_or(None),
+        resistance:    row.get::<_, String>(10).unwrap_or_default(),
+        tolerance:     row.get::<_, String>(11).unwrap_or_default(),
+        power_rating:  row.get::<_, Option<f64>>(12).unwrap_or(None),
+        attributes:    row.get::<_, String>(13).unwrap_or_default(),
+    })
+}
+
+#[tauri::command]
+fn search_builtin_library(
+    search_term: String,
+    db_path: State<BuiltinDbPath>,
+) -> Result<Vec<BuiltinComponent>, String> {
+    if search_term.trim().is_empty() {
+        return Ok(vec![]);
+    }
+    let conn = Connection::open_with_flags(
+        &db_path.0,
+        rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY | rusqlite::OpenFlags::SQLITE_OPEN_NO_MUTEX,
+    )
+    .map_err(|e| format!("Failed to open builtin DB: {e}"))?;
+
+    let pattern = format!("%{}%", search_term.trim());
+    let mut stmt = conn
+        .prepare(
+            "SELECT id, part_code, category, subcategory, package,
+                    manufacturer, description, datasheet_url,
+                    voltage_max, current_max, resistance, tolerance,
+                    power_rating, attributes
+             FROM components
+             WHERE part_code LIKE ?1 OR description LIKE ?1 OR category LIKE ?1
+             LIMIT 15",
+        )
+        .map_err(|e| format!("Query prepare error: {e}"))?;
+
+    let rows = stmt
+        .query_map([&pattern], builtin_from_row)
+        .map_err(|e| format!("Query error: {e}"))?;
+
+    let mut results = Vec::new();
+    for row in rows {
+        if let Ok(comp) = row { results.push(comp); }
+    }
+    Ok(results)
+}
+
+#[tauri::command]
+fn batch_lookup_builtin(
+    part_codes: Vec<String>,
+    db_path: State<BuiltinDbPath>,
+) -> Result<Vec<BuiltinComponent>, String> {
+    if part_codes.is_empty() {
+        return Ok(vec![]);
+    }
+    let conn = Connection::open_with_flags(
+        &db_path.0,
+        rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY | rusqlite::OpenFlags::SQLITE_OPEN_NO_MUTEX,
+    )
+    .map_err(|e| format!("Failed to open builtin DB: {e}"))?;
+
+    fn normalise(s: &str) -> String {
+        s.to_uppercase().chars().filter(|c| c.is_alphanumeric()).collect()
+    }
+
+    let mut exact_stmt = conn
+        .prepare(
+            "SELECT id, part_code, category, subcategory, package,
+                    manufacturer, description, datasheet_url,
+                    voltage_max, current_max, resistance, tolerance,
+                    power_rating, attributes
+             FROM components
+             WHERE UPPER(REPLACE(REPLACE(REPLACE(part_code, '-', ''), ' ', ''), '.', '')) = ?1
+             LIMIT 1",
+        )
+        .map_err(|e| format!("Prepare error: {e}"))?;
+
+    let mut like_stmt = conn
+        .prepare(
+            "SELECT id, part_code, category, subcategory, package,
+                    manufacturer, description, datasheet_url,
+                    voltage_max, current_max, resistance, tolerance,
+                    power_rating, attributes
+             FROM components
+             WHERE part_code LIKE ?1
+             LIMIT 1",
+        )
+        .map_err(|e| format!("Prepare error: {e}"))?;
+
+    let mut results = Vec::new();
+    for code in &part_codes {
+        let norm = normalise(code.trim());
+        if norm.is_empty() { continue; }
+
+        if let Ok(Some(comp)) = exact_stmt.query_row([&norm], |row| Ok(Some(builtin_from_row(row)?))) {
+            results.push(comp);
+            continue;
+        }
+        let pattern = format!("{}%", code.trim());
+        if let Ok(Some(comp)) = like_stmt.query_row([&pattern], |row| Ok(Some(builtin_from_row(row)?))) {
+            results.push(comp);
+        }
+    }
+    Ok(results)
+}
+
 
 // Use std::thread to avoid requiring a Tokio runtime context during setup.
 fn start_backup_scheduler(data_dir: Arc<Mutex<PathBuf>>) {
@@ -127,6 +271,27 @@ pub fn run() {
             backup::ensure_backup_dir(&data_dir)
                 .map_err(|e| format!("failed to create backup dir: {e}"))?;
 
+            // Resolve the bundled patched.db from resources.
+            // Tauri 2 maps "../patched.db" → "_up_/patched.db" inside the
+            // resource directory, so we try several candidate paths.
+            let res_dir = app
+                .path()
+                .resource_dir()
+                .map_err(|e| format!("failed to get resource dir: {e}"))?;
+
+            let candidates = [
+                res_dir.join("_up_").join("patched.db"),   // bundled ("../patched.db" → _up_/)
+                res_dir.join("patched.db"),                 // flat layout / custom bundle
+            ];
+
+            let resource_path = candidates
+                .iter()
+                .find(|p| p.exists())
+                .cloned()
+                .unwrap_or_else(|| candidates[0].clone());
+
+            app.manage(BuiltinDbPath(resource_path));
+
             let data_arc = Arc::new(Mutex::new(data_dir));
             app.manage(AppDataDir(Arc::clone(&data_arc)));
             start_backup_scheduler(data_arc);
@@ -141,6 +306,8 @@ pub fn run() {
             write_external_file,
             copy_db_to_external,
             read_external_file,
+            search_builtin_library,
+            batch_lookup_builtin,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
