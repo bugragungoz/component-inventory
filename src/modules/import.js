@@ -1,5 +1,6 @@
 import { upsertComponents, showToast, escHtml, parseLocaleNumber } from '../app.js';
 import { invoke } from '@tauri-apps/api/core';
+import { t } from './i18n.js';
 
 // Normalize Turkish diacritics to ASCII for header matching
 function asciiNormalize(str) {
@@ -536,10 +537,10 @@ export function initImport() {
           7000
         );
       } else {
-        showToast(`Imported ${count} components (${mode} mode)`, 'success');
+        showToast(t('import.imported', { n: count, mode }), 'success');
       }
     } catch (err) {
-      showToast('Import failed: ' + (err.message || err), 'error');
+      showToast(t('import.failed') + (err.message || err), 'error');
     } finally {
       confirmBtn.disabled = false;
     }
@@ -601,16 +602,16 @@ async function handleFile(file) {
         return;
       }
     } else {
-      showToast('Unsupported file type. Use CSV, JSON, Excel (.xlsx), or PDF.', 'error');
+      showToast(t('import.unsupported'), 'error');
       return;
     }
   } catch (err) {
-    showToast('Failed to parse file: ' + (err.message || err), 'error');
+    showToast(t('import.parseFailed') + (err.message || err), 'error');
     return;
   }
 
   if (normalized.length === 0) {
-    showToast('No valid component rows found. Check column headers.', 'warning');
+    showToast(t('import.noRows'), 'warning');
     return;
   }
 

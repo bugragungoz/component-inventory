@@ -7,6 +7,10 @@ import { initExport } from './modules/export.js';
 import { initBackupUI } from './modules/backup.js';
 import { initLabels }            from './modules/labels.js';
 import { initBulkCategorize }    from './modules/bulk_categorize.js';
+import { initI18n, t, setLocale, getLocale, applyTranslations } from './modules/i18n.js';
+import { initBackupDiff }        from './modules/backup_diff.js';
+import { initDriveSync, triggerDriveSync, getDriveStatus, onDriveStatusChange } from './modules/drive_sync.js';
+import { initSidebarFuzzySearch } from './modules/fuzzy_search.js';
 
 // Rename pencil SVG (inline, reused in tree rendering)
 const RENAME_SVG = `<svg class="rename-icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`;
@@ -224,10 +228,13 @@ export async function upsertComponents(rows, mode = 'merge') {
 
 async function triggerBackup() {
   try {
-    await invoke('create_backup');
+    const retention = parseInt(localStorage.getItem('backupRetention') || '30', 10);
+    await invoke('create_backup', { retention: isNaN(retention) ? 30 : retention });
   } catch (_) {
-    // Non-critical — backup failure should not block the UI
+    // Non-critical - backup failure must not block the UI
   }
+  // Cloud sync (Drive / Dropbox / OneDrive) - fire-and-forget
+  try { await triggerDriveSync(); } catch (_) { /* logged inside */ }
 }
 
 // ============================================================
@@ -246,9 +253,22 @@ function updateStats() {
   if (exportCount) exportCount.textContent = total;
 }
 
+/**
+ * Locale-aware case-fold + Turkish-safe normalization for search.
+ * Maps Turkish dotted/dotless I correctly and strips diacritics so that
+ * typing "direnc" matches "DIRENC" or "Direnc".
+ */
+export function normalizeForSearch(str) {
+  if (str === undefined || str === null) return '';
+  return String(str)
+    .toLocaleLowerCase('tr-TR')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+}
+
 function updateCategoryTree() {
   const tree = document.getElementById('category-tree');
-  const catSearch = document.getElementById('sidebar-search').value.toLowerCase();
+  const catSearch = document.getElementById('sidebar-search').value.toLowerCase().trim();
 
   const map = {};
   for (const c of state.components) {
@@ -261,13 +281,17 @@ function updateCategoryTree() {
 
   let html = `<div class="tree-item${!state.filterCat ? ' active' : ''}" data-cat="" data-sub="">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-    All Components
+    ${t('sidebar.allComponents')}
     <span class="tree-count">${state.components.length}</span>
   </div>`;
 
-  const sortedCats = Object.keys(map).sort();
+  // Locale-aware sort handles Turkish 'I/i' correctly
+  const sortedCats = Object.keys(map).sort((a, b) =>
+    a.localeCompare(b, getLocale(), { sensitivity: 'base' })
+  );
   for (const cat of sortedCats) {
-    if (catSearch && !cat.toLowerCase().includes(catSearch)) continue;
+    // Locale-insensitive substring match (handles Turkish dotless/dotted i for filter)
+    if (catSearch && !normalizeForSearch(cat).includes(normalizeForSearch(catSearch))) continue;
     const catTotal = Object.values(map[cat]).reduce((a, b) => a + b, 0);
     const isActiveCat = state.filterCat === cat && !state.filterSub;
     html += `<div class="tree-group">
@@ -278,7 +302,9 @@ function updateCategoryTree() {
         <button class="btn-rename-tree" data-rename-cat="${escHtml(cat)}" data-rename-sub="" title="Rename category">${RENAME_SVG}</button>
       </div>`;
 
-    const sortedSubs = Object.keys(map[cat]).sort();
+    const sortedSubs = Object.keys(map[cat]).sort((a, b) =>
+      a.localeCompare(b, getLocale(), { sensitivity: 'base' })
+    );
     for (const sub of sortedSubs) {
       if (!sub) continue;
       const isActiveSub = state.filterCat === cat && state.filterSub === sub;
@@ -334,8 +360,8 @@ function openRenameModal(cat, sub) {
 
   const isSub = sub !== '';
   label.textContent = isSub
-    ? `Rename subcategory "${sub}" (in ${cat})`
-    : `Rename category "${cat}"`;
+    ? t('rename.sub', { sub, cat })
+    : t('rename.cat', { name: cat });
   input.value = isSub ? sub : cat;
   overlay.dataset.renameCat = cat;
   overlay.dataset.renameSub = sub;
@@ -354,7 +380,7 @@ async function applyRename() {
   const oldSub   = overlay.dataset.renameSub;
   const isSub    = oldSub !== '';
 
-  if (!newName) { showToast('Name cannot be empty', 'warning'); return; }
+  if (!newName) { showToast(t('toast.nameEmpty'), 'warning'); return; }
   if (newName === (isSub ? oldSub : oldCat)) {
     overlay.style.display = 'none';
     return;
@@ -363,9 +389,9 @@ async function applyRename() {
   try {
     await renameCategory(isSub ? oldSub : oldCat, newName, isSub, oldCat);
     overlay.style.display = 'none';
-    showToast(`Renamed to "${newName}"`, 'success');
+    showToast(t('toast.renamed', { name: newName }), 'success');
   } catch (err) {
-    showToast('Rename failed: ' + (err.message || err), 'error');
+    showToast(t('toast.renameFailed') + (err.message || err), 'error');
   }
 }
 
@@ -488,10 +514,25 @@ export function applyLocationsVisibility() {
 }
 
 function initSettings() {
-  // ---- Open settings ----
   document.getElementById('btn-settings')?.addEventListener('click', () => {
     populateSettings();
     document.getElementById('overlay-settings').style.display = '';
+  });
+
+  // ---- Language ----
+  document.getElementById('s-language')?.addEventListener('change', e => {
+    setLocale(e.target.value);
+    // Re-render dynamic UI parts that build text in JS
+    renderTable();
+    updateStats();
+    updateCategoryTree();
+    updateLocationTree();
+  });
+
+  // ---- Form mode (simple / detailed) ----
+  document.getElementById('s-form-mode')?.addEventListener('change', e => {
+    localStorage.setItem('formMode', e.target.value);
+    applyFormMode();
   });
 
   // ---- Locations toggle ----
@@ -503,26 +544,64 @@ function initSettings() {
   // ---- Low stock threshold ----
   document.getElementById('s-low-stock')?.addEventListener('change', e => {
     const val = parseInt(e.target.value);
-    if (!isNaN(val) && val >= 0) localStorage.setItem('lowStockThreshold', String(val));
+    if (!isNaN(val) && val >= 0) {
+      localStorage.setItem('lowStockThreshold', String(val));
+      renderTable();
+    }
+  });
+
+  // ---- Default quantity ----
+  document.getElementById('s-default-qty')?.addEventListener('change', e => {
+    const val = parseInt(e.target.value);
+    if (!isNaN(val) && val >= 0) localStorage.setItem('defaultQty', String(val));
+  });
+
+  // ---- Backup retention ----
+  document.getElementById('s-backup-retention')?.addEventListener('change', e => {
+    const val = parseInt(e.target.value);
+    if (!isNaN(val) && val >= 0) localStorage.setItem('backupRetention', String(val));
   });
 
   // ---- Export folder ----
   document.getElementById('s-export-browse')?.addEventListener('click', async () => {
     try {
       const { open: openDir } = await import('@tauri-apps/plugin-dialog');
-      const selected = await openDir({ directory: true, title: 'Select Export Folder' });
+      const selected = await openDir({ directory: true, title: t('settings.exportFolder') });
       if (selected) {
         localStorage.setItem('exportFolder', selected);
         const inp = document.getElementById('s-export-folder');
         if (inp) inp.value = selected;
       }
     } catch (err) {
-      showToast('Could not open folder picker: ' + (err.message || err), 'error');
+      showToast(t('toast.folderFailed') + (err.message || err), 'error');
     }
   });
   document.getElementById('s-export-clear')?.addEventListener('click', () => {
     localStorage.removeItem('exportFolder');
     const inp = document.getElementById('s-export-folder');
+    if (inp) inp.value = '';
+  });
+
+  // ---- Drive / cloud sync ----
+  document.getElementById('s-drive-enabled')?.addEventListener('change', e => {
+    localStorage.setItem('driveSyncEnabled', e.target.checked ? 'true' : 'false');
+  });
+  document.getElementById('s-drive-browse')?.addEventListener('click', async () => {
+    try {
+      const { open: openDir } = await import('@tauri-apps/plugin-dialog');
+      const selected = await openDir({ directory: true, title: t('settings.driveFolder') });
+      if (selected) {
+        localStorage.setItem('driveSyncFolder', selected);
+        const inp = document.getElementById('s-drive-folder');
+        if (inp) inp.value = selected;
+      }
+    } catch (err) {
+      showToast(t('toast.folderFailed') + (err.message || err), 'error');
+    }
+  });
+  document.getElementById('s-drive-clear')?.addEventListener('click', () => {
+    localStorage.removeItem('driveSyncFolder');
+    const inp = document.getElementById('s-drive-folder');
     if (inp) inp.value = '';
   });
 
@@ -541,17 +620,31 @@ function initSettings() {
 }
 
 function populateSettings() {
-  // Locations toggle
+  const lang = document.getElementById('s-language');
+  if (lang) lang.value = getLocale();
+
+  const fm = document.getElementById('s-form-mode');
+  if (fm) fm.value = localStorage.getItem('formMode') || 'detailed';
+
   const locCb = document.getElementById('s-locations-enabled');
   if (locCb) locCb.checked = localStorage.getItem('locationsEnabled') === 'true';
 
-  // Low stock threshold
   const ls = document.getElementById('s-low-stock');
   if (ls) ls.value = localStorage.getItem('lowStockThreshold') || '1';
 
-  // Export folder
+  const dq = document.getElementById('s-default-qty');
+  if (dq) dq.value = localStorage.getItem('defaultQty') || '1';
+
+  const br = document.getElementById('s-backup-retention');
+  if (br) br.value = localStorage.getItem('backupRetention') || '30';
+
   const ef = document.getElementById('s-export-folder');
   if (ef) ef.value = localStorage.getItem('exportFolder') || '';
+
+  const drvOn = document.getElementById('s-drive-enabled');
+  if (drvOn) drvOn.checked = localStorage.getItem('driveSyncEnabled') === 'true';
+  const drv = document.getElementById('s-drive-folder');
+  if (drv) drv.value = localStorage.getItem('driveSyncFolder') || '';
 
   // DB path (async)
   try {
@@ -560,6 +653,12 @@ function populateSettings() {
       if (el) el.textContent = dir + 'component_inventory.db';
     }).catch(() => {});
   } catch (_) {}
+}
+
+/** Apply simple/detailed form mode to <body>. */
+export function applyFormMode() {
+  const mode = localStorage.getItem('formMode') || 'detailed';
+  document.body.classList.toggle('simple-form', mode === 'simple');
 }
 
 function applyTheme(theme) {
@@ -587,39 +686,52 @@ function applyTheme(theme) {
 }
 
 // ============================================================
-// View toggle (compact / detailed)
+// Drive sync sidebar pill
+// Shows live state (off/syncing/ok/error). Click opens settings or
+// retries the last failed sync depending on state.
 // ============================================================
-function initViewToggle() {
-  const btn       = document.getElementById('btn-view-toggle');
-  const lblEl     = document.getElementById('view-label');
-  const iconComp  = document.getElementById('icon-view-compact');
-  const iconFull  = document.getElementById('icon-view-full');
+function initDriveStatusPill() {
+  const btn   = document.getElementById('drive-status-btn');
+  const label = document.getElementById('drive-status-text');
+  if (!btn || !label) return;
 
-  function applyView() {
-    if (state.viewCompact) {
-      document.body.classList.add('compact-view');
-      lblEl.textContent      = 'Detailed';
-      iconComp.style.display = 'none';
-      iconFull.style.display = '';
-    } else {
-      document.body.classList.remove('compact-view');
-      lblEl.textContent      = 'Compact';
-      iconComp.style.display = '';
-      iconFull.style.display = 'none';
-    }
+  function paint(status) {
+    btn.dataset.state = status.state;
+    btn.classList.remove(
+      'drive-state-off', 'drive-state-ok', 'drive-state-syncing', 'drive-state-error'
+    );
+    btn.classList.add('drive-state-' + status.state);
+    label.textContent = t('drive.status.' + status.state);
+    let title;
+    if      (status.state === 'off')     title = t('drive.tooltip.off');
+    else if (status.state === 'syncing') title = t('drive.tooltip.syncing');
+    else if (status.state === 'error')   title = t('drive.tooltip.error', { err: status.error || '' });
+    else                                 title = t('drive.tooltip.ok',    { folder: status.folder || '' });
+    btn.setAttribute('title', title);
   }
 
-  // Restore saved preference BEFORE first render to avoid layout flash
-  const saved = localStorage.getItem('viewCompact');
-  if (saved !== null) state.viewCompact = saved === '1';
-
-  applyView();
+  paint(getDriveStatus());
+  onDriveStatusChange(paint);
+  document.addEventListener('locale-changed', () => paint(getDriveStatus()));
 
   btn.addEventListener('click', () => {
-    state.viewCompact = !state.viewCompact;
-    localStorage.setItem('viewCompact', state.viewCompact ? '1' : '0');
-    applyView();
+    const status = getDriveStatus();
+    if (status.state === 'off') {
+      document.getElementById('btn-settings')?.click();
+      return;
+    }
+    triggerDriveSync();
   });
+}
+
+// ============================================================
+// View mode (compact only - detailed toggle was removed for clarity)
+// The body always renders in compact mode; layout is consistent
+// across sessions with no extra UI to manage.
+// ============================================================
+function initViewToggle() {
+  state.viewCompact = true;
+  document.body.classList.add('compact-view');
 }
 
 // ============================================================
@@ -639,6 +751,14 @@ function initSearch() {
 
   document.getElementById('sidebar-search').addEventListener('input', () => {
     updateCategoryTree();
+  });
+
+  // Re-apply translations after locale change (also re-renders dynamic strings)
+  document.addEventListener('locale-changed', () => {
+    applyFilters();
+    renderTable();
+    updateCategoryTree();
+    updateLocationTree();
   });
 }
 
@@ -750,7 +870,10 @@ async function main() {
   const bootLoader = document.getElementById('boot-loader');
 
   try {
+    // i18n must run BEFORE building any dynamic UI so all data-i18n nodes get populated
+    initI18n();
     initTheme();
+    applyFormMode();
     initSettings();
     applyLocationsVisibility();
     initModalCloseHandlers();
@@ -766,8 +889,14 @@ async function main() {
     initBulkCategorize();
     initRenameModal();
     initSelectionBarOnce();
+    initBackupDiff();
+    initDriveSync();
+    initDriveStatusPill();
+    initSidebarFuzzySearch();
 
-    // Hide boot loader
+    // Re-apply translations after dynamic content (datalists already rebuilt by loadComponents)
+    applyTranslations();
+
     if (bootLoader) {
       bootLoader.classList.add('hidden');
       setTimeout(() => { bootLoader.style.display = 'none'; }, 350);
@@ -777,9 +906,9 @@ async function main() {
     if (bootLoader) {
       bootLoader.innerHTML = `
         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        <span style="color:#c0392b;font-weight:600">Startup Error</span>
+        <span style="color:#c0392b;font-weight:600">${t('boot.error')}</span>
         <span style="max-width:360px;text-align:center;color:#b0aea5;font-size:12px">${escHtml(err.message || String(err))}</span>
-        <button onclick="location.reload()" style="margin-top:8px;padding:8px 16px;background:#d97757;color:#fff;border:none;border-radius:6px;cursor:pointer;font-family:Arial;font-size:13px">Retry</button>
+        <button onclick="location.reload()" style="margin-top:8px;padding:8px 16px;background:#d97757;color:#fff;border:none;border-radius:6px;cursor:pointer;font-family:Arial;font-size:13px">${t('boot.retry')}</button>
       `;
     }
   }

@@ -7,6 +7,105 @@ import { lookupComponent, categorizeByDescription } from './hardcoded_datasheet.
 import { readFile, copyFile, mkdir } from '@tauri-apps/plugin-fs';
 import { open as openDialog } from '@tauri-apps/plugin-dialog';
 import { invoke } from '@tauri-apps/api/core';
+import { t } from './i18n.js';
+import { rankCandidates } from './fuzzy_search.js';
+
+// ============================================================
+// Curated category -> subcategories map
+// Drives the subcategory datalist so users no longer see NPN/PNP
+// suggestions when they have selected "Resistors", etc.
+// ============================================================
+const CATEGORY_SUBCATEGORIES = {
+  'Resistors':       ['Carbon Film', 'Metal Film', 'Wirewound', 'SMD', 'Through-Hole', 'Thick Film', 'Thin Film', 'Power', 'Precision'],
+  'Direncler':       ['Karbon Film', 'Metal Film', 'Sarmal', 'SMD', 'Delikli', 'Kalin Film', 'Ince Film', 'Guc', 'Hassas'],
+  'Potentiometers':  ['Trimpot', 'Linear', 'Logarithmic', 'Multi-turn', 'Single-turn'],
+  'Thermistors':     ['NTC', 'PTC'],
+  'Varistors':       ['MOV', 'SIOV'],
+  'Capacitors':      ['Electrolytic', 'Ceramic', 'Tantalum', 'Film', 'Polymer', 'Supercapacitor', 'MLCC', 'SMD'],
+  'Kondansatorler':  ['Elektrolitik', 'Seramik', 'Tantal', 'Film', 'Polimer', 'Superkapasitor', 'MLCC', 'SMD'],
+  'Inductors':       ['Inductor', 'Ferrite Core', 'Toroid Core', 'Common Mode Choke', 'Power', 'SMD'],
+  'Bobinler':        ['Bobin', 'Ferrit Cekirdek', 'Toroid', 'CM Choke', 'Guc', 'SMD'],
+  'Transformers':    ['Step-Up', 'Step-Down', 'Isolation', 'Audio', 'Toroidal'],
+  'Coils':           ['Air Core', 'Ferrite Core', 'Toroid Core'],
+  'Transistors':     ['BJT NPN', 'BJT PNP', 'Power MOSFET', 'N-Channel MOSFET', 'P-Channel MOSFET', 'Darlington NPN', 'Darlington PNP', 'JFET'],
+  'Transistorler':   ['BJT NPN', 'BJT PNP', 'Guc MOSFET', 'N-Kanal MOSFET', 'P-Kanal MOSFET', 'Darlington NPN', 'Darlington PNP', 'JFET'],
+  'MOSFETs':         ['N-Channel', 'P-Channel', 'Power', 'Logic-Level', 'Dual'],
+  'IGBTs':           ['Single', 'Dual', 'Module', 'Half-Bridge'],
+  'Thyristors':      ['SCR', 'TRIAC', 'DIAC'],
+  'Diodes':          ['Rectifier', 'Schottky', 'Zener', 'TVS', 'Fast Recovery', 'Ultra Fast Recovery', 'Bridge Rectifier', 'High Efficiency', 'LED'],
+  'Diyotlar':        ['Rektifier', 'Schottky', 'Zener', 'TVS', 'Hizli Toparlanma', 'Cok Hizli', 'Kopru Diyot', 'Yuksek Verimli', 'LED'],
+  'ICs':             ['Microcontroller', 'Op-Amp', 'Comparator', 'Timer', 'Voltage Regulator', 'LDO Regulator', 'Linear Regulator', 'Buck Converter', 'Boost Converter', 'Gate Driver', 'Motor Driver', 'PWM Controller', 'Optocoupler', 'Logic / Shift Register', 'Logic / NAND', 'Touch Sensor', 'LED Driver', 'RS-232 Driver', 'RS-485 Transceiver', 'WiFi+BT SoC', 'RF Transceiver'],
+  'Microcontrollers':['ARM Cortex', 'AVR', 'PIC', 'ESP', 'MSP430', 'STM32'],
+  'Sensors':         ['Temperature', 'Humidity / Temp', 'Pressure', 'Hall Effect', 'Current Sensor', 'Accelerometer', 'Gyroscope', 'Proximity', 'Ultrasonic', 'NTC Thermistor', 'PTC Thermistor'],
+  'Sensorler':       ['Sicaklik', 'Nem / Sicaklik', 'Basinc', 'Hall Etkisi', 'Akim Sensoru', 'Ivmeolcer', 'Jiroskop', 'Yakinlik', 'Ultrasonik', 'NTC Termistor', 'PTC Termistor'],
+  'Relays':          ['SPST', 'SPDT', 'DPDT', 'Solid State', 'Coil'],
+  'Roleler':         ['SPST', 'SPDT', 'DPDT', 'Yari Iletken', 'Bobinli'],
+  'Optocouplers':    ['Phototransistor', 'Photo-Darlington', 'Photo-Triac'],
+  'Connectors':      ['Pin Header', 'Socket', 'Terminal Block', 'IC Socket', 'JST', 'Molex', 'USB', 'RJ45', 'D-Sub'],
+  'Konektorler':     ['Pin Header', 'Soket', 'Terminal Blok', 'IC Soket', 'JST', 'Molex', 'USB', 'RJ45', 'D-Sub'],
+  'Crystals':        ['Crystal', 'Oscillator', 'Resonator'],
+  'Mechanical':      ['PCB / Board', 'Heat Sink', 'Standoff', 'Screw', 'Switch', 'Button'],
+  'Consumables':     ['Solder', 'Flux', 'Wire', 'Heat Shrink'],
+};
+
+/**
+ * Resolve subcategory candidates for the given category.
+ * Falls back to all known subcategories when the category does not match.
+ */
+function getSubcategoryCandidatesFor(category) {
+  const cat = (category || '').trim();
+  if (!cat) return getAllSubcategories();
+
+  // Exact match
+  if (CATEGORY_SUBCATEGORIES[cat]) {
+    return mergeWithUserData(cat, CATEGORY_SUBCATEGORIES[cat]);
+  }
+  // Case-insensitive match
+  const key = Object.keys(CATEGORY_SUBCATEGORIES)
+    .find(k => k.toLocaleLowerCase('tr-TR') === cat.toLocaleLowerCase('tr-TR'));
+  if (key) return mergeWithUserData(key, CATEGORY_SUBCATEGORIES[key]);
+
+  // Prefix family match (e.g. "Resistors - precision" -> "Resistors")
+  for (const k of Object.keys(CATEGORY_SUBCATEGORIES)) {
+    if (cat.toLocaleLowerCase('tr-TR').startsWith(k.toLocaleLowerCase('tr-TR'))) {
+      return mergeWithUserData(k, CATEGORY_SUBCATEGORIES[k]);
+    }
+  }
+  return getAllSubcategories();
+}
+
+function mergeWithUserData(category, curated) {
+  const userSubs = state.components
+    .filter(c => (c.category || '').toLocaleLowerCase('tr-TR') === category.toLocaleLowerCase('tr-TR'))
+    .map(c => c.subcategory)
+    .filter(Boolean);
+  const set = new Set(curated);
+  for (const u of userSubs) set.add(u);
+  return Array.from(set).sort((a, b) => a.localeCompare(b, 'tr-TR', { sensitivity: 'base' }));
+}
+
+function getAllSubcategories() {
+  const set = new Set();
+  for (const arr of Object.values(CATEGORY_SUBCATEGORIES)) {
+    for (const s of arr) set.add(s);
+  }
+  for (const c of state.components) {
+    if (c.subcategory) set.add(c.subcategory);
+  }
+  return Array.from(set).sort((a, b) => a.localeCompare(b, 'tr-TR', { sensitivity: 'base' }));
+}
+
+/** Repopulate the subcategory datalist scoped to the current category value. */
+function refreshSubcategoryList(category) {
+  const dl = document.getElementById('list-subcategory');
+  if (!dl) return;
+  const candidates = getSubcategoryCandidatesFor(category);
+  dl.innerHTML = candidates.map(v => `<option value="${escapeAttr(v)}">`).join('');
+}
+
+function escapeAttr(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+}
 
 // ============================================================
 // Initialize all modal interactions
@@ -44,8 +143,12 @@ function openEditModal(comp) {
 
   refreshDatalistsGlobal();
 
+  // Reset DB hit banner
+  const banner = document.getElementById('db-hit-banner');
+  if (banner) { banner.style.display = 'none'; banner.innerHTML = ''; }
+
   if (comp) {
-    title.textContent = 'Edit Component';
+    title.textContent = t('edit.edit');
     idEl.value = comp.id;
     setField('edit-part-code',   comp.part_code);
     setField('edit-category',    comp.category);
@@ -66,12 +169,21 @@ function openEditModal(comp) {
     setField('edit-power-rating',comp.power_rating ?? '');
     setImagePreview(comp.image_path || '');
   } else {
-    title.textContent = 'Add Component';
+    title.textContent = t('edit.add');
     idEl.value = '';
     document.getElementById('form-edit').reset();
+    // Default qty placeholder reflects user setting (visible only when field is empty)
+    const qtyEl = document.getElementById('edit-quantity');
+    if (qtyEl) {
+      const def = parseInt(localStorage.getItem('defaultQty') || '1', 10);
+      qtyEl.placeholder = isNaN(def) ? '1' : String(def);
+      qtyEl.value = '';
+    }
     setImagePreview('');
   }
 
+  // Refresh subcategory candidates against the current category value
+  refreshSubcategoryList(document.getElementById('edit-category').value);
   updateTypeFields(document.getElementById('edit-category').value);
   document.getElementById('overlay-edit').style.display = '';
   setTimeout(() => document.getElementById('edit-part-code').focus(), 60);
@@ -125,8 +237,8 @@ function updateTypeFields(category) {
   // Update contextual labels
   const lblV = document.getElementById('lbl-voltage-max');
   const lblI = document.getElementById('lbl-current-max');
-  if (lblV) lblV.textContent = type === 'capacitor' ? 'Voltage Rating (V)' : 'Voltage Max (V)';
-  if (lblI) lblI.textContent = type === 'transistor' ? 'Current Max / I_D (A)' : 'Current Max (A)';
+  if (lblV) lblV.textContent = type === 'capacitor' ? t('edit.vmax.cap') : t('edit.vmax');
+  if (lblI) lblI.textContent = type === 'transistor' ? t('edit.imax.fet') : t('edit.imax');
 }
 
 /** Builds a description string from the form fields based on component type. */
@@ -205,54 +317,116 @@ function initEditForm() {
     if (!this.value.trim()) this.value = 'Uncategorized';
   });
 
-  // Dynamic type fields when category changes
+  // Dynamic type fields and subcategory list when category changes
   catInput?.addEventListener('input', function() {
     updateTypeFields(this.value);
+    refreshSubcategoryList(this.value);
+  });
+
+  // Smart subcategory autocorrect: on blur, snap to closest curated value
+  // when the user typed a near-miss (e.g. "BJT NP" -> "BJT NPN").
+  const subInput = document.getElementById('edit-subcategory');
+  subInput?.addEventListener('blur', function() {
+    const cur = this.value.trim();
+    if (!cur) return;
+    const candidates = getSubcategoryCandidatesFor(catInput.value);
+    if (candidates.includes(cur)) return;
+    const ranked = rankCandidates(cur, candidates, 1);
+    if (ranked.length > 0 && ranked[0].score < 1.5) {
+      this.value = ranked[0].value;
+    }
+  });
+
+  // Live DB hit banner: as the user types a part code, show a hint when it
+  // matches a built-in database entry so they know Lookup DB will succeed.
+  const pcInput = document.getElementById('edit-part-code');
+  const banner  = document.getElementById('db-hit-banner');
+  pcInput?.addEventListener('input', () => {
+    if (!banner) return;
+    const code = pcInput.value.trim();
+    if (!code) { banner.style.display = 'none'; return; }
+    const hit = lookupComponent(code);
+    if (hit) {
+      banner.style.display = '';
+      banner.innerHTML =
+        `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>` +
+        `<span><strong>${escapeAttr(code)}</strong> &mdash; ${escapeAttr(hit.description || hit.category || '')}</span>`;
+    } else {
+      banner.style.display = 'none';
+    }
   });
 
   // Auto-fill: use Description text to suggest Category + Subcategory
   document.getElementById('btn-auto-desc')?.addEventListener('click', () => {
     const desc = document.getElementById('edit-description').value.trim();
     if (!desc) {
-      showToast('Enter a description first', 'warning');
+      showToast(t('toast.descRequired'), 'warning');
       return;
     }
     const result = categorizeByDescription(desc);
     if (!result) {
-      showToast('No category match found for this description', 'info');
+      showToast(t('toast.noMatch'), 'info');
       return;
     }
     const catEl = document.getElementById('edit-category');
     const subEl = document.getElementById('edit-subcategory');
-    if (result.category)    { catEl.value = result.category;    updateTypeFields(result.category); }
+    if (result.category) {
+      catEl.value = result.category;
+      updateTypeFields(result.category);
+      refreshSubcategoryList(result.category);
+    }
     if (result.subcategory) { subEl.value = result.subcategory; }
-    showToast(`Category set from description: ${result.category}`, 'success');
+    showToast(t('toast.descSet', { cat: result.category }), 'success');
   });
 
-  // Hardcoded DB lookup button
+  // Hardcoded DB lookup button (now in modal-body, no scrolling needed).
+  // Fills only EMPTY fields (never overwrites user input).
   document.getElementById('btn-db-lookup').addEventListener('click', () => {
     const partCode = document.getElementById('edit-part-code').value.trim();
     if (!partCode) {
-      showToast('Enter a Part Code first', 'warning');
+      showToast(t('toast.partCodeFirst'), 'warning');
       return;
     }
     const data = lookupComponent(partCode);
     if (!data) {
-      showToast(`"${partCode}" not found in built-in database`, 'info');
+      showToast(t('toast.notInDb', { code: partCode }), 'info');
       return;
     }
-    const curCat = document.getElementById('edit-category').value;
-    if (data.category    && (!curCat || curCat === 'Uncategorized'))            setField('edit-category',     data.category);
-    if (data.subcategory && !document.getElementById('edit-subcategory').value) setField('edit-subcategory',  data.subcategory);
-    if (data.package     && !document.getElementById('edit-package').value)     setField('edit-package',      data.package);
-    if (data.manufacturer&& !document.getElementById('edit-manufacturer').value)setField('edit-manufacturer', data.manufacturer);
-    if (data.description && !document.getElementById('edit-description').value) setField('edit-description',  data.description);
-    if (data.datasheet_url&&!document.getElementById('edit-datasheet-url').value)setField('edit-datasheet-url',data.datasheet_url);
-    if (data.voltage_max != null && !document.getElementById('edit-voltage-max').value)
-      setField('edit-voltage-max', data.voltage_max);
-    if (data.current_max != null && !document.getElementById('edit-current-max').value)
-      setField('edit-current-max', data.current_max);
-    showToast(`Data applied from built-in database for "${partCode}"`, 'success');
+
+    // Map DB fields -> input ids; null/undefined and "Uncategorized" are skipped.
+    const mappings = [
+      { id: 'edit-category',      v: data.category,      treatUncatAsEmpty: true },
+      { id: 'edit-subcategory',   v: data.subcategory },
+      { id: 'edit-package',       v: data.package },
+      { id: 'edit-manufacturer',  v: data.manufacturer },
+      { id: 'edit-mpn',           v: data.mpn },
+      { id: 'edit-description',   v: data.description },
+      { id: 'edit-datasheet-url', v: data.datasheet_url },
+      { id: 'edit-voltage-max',   v: data.voltage_max },
+      { id: 'edit-current-max',   v: data.current_max },
+      { id: 'edit-resistance',    v: data.resistance },
+      { id: 'edit-tolerance',     v: data.tolerance },
+      { id: 'edit-power-rating',  v: data.power_rating },
+      { id: 'edit-notes',         v: data.notes },
+    ];
+
+    let filled = 0;
+    for (const m of mappings) {
+      const el = document.getElementById(m.id);
+      if (!el || m.v == null || m.v === '') continue;
+      const cur = (el.value || '').trim();
+      const empty = !cur || (m.treatUncatAsEmpty && cur === 'Uncategorized');
+      if (empty) { setField(m.id, m.v); filled++; }
+    }
+
+    refreshSubcategoryList(document.getElementById('edit-category').value);
+    updateTypeFields(document.getElementById('edit-category').value);
+
+    if (filled > 0) {
+      showToast(t('toast.dbApplied', { code: partCode }) + ' (' + filled + ')', 'success');
+    } else {
+      showToast(t('toast.dbApplied', { code: partCode }), 'info');
+    }
   });
 }
 
@@ -269,15 +443,24 @@ async function handleSave() {
   const partCode  = document.getElementById('edit-part-code').value.trim();
 
   if (!partCode) {
-    showToast('Part Code is required', 'error');
+    showToast(t('toast.partCodeRequired'), 'error');
     return;
   }
+
+  // Resolve default quantity when the field is empty.
+  // Settings can override; falls back to 1 (never 0) so a freshly added
+  // component is never mistakenly treated as out-of-stock.
+  const qtyRaw = document.getElementById('edit-quantity').value;
+  const defaultQty = parseInt(localStorage.getItem('defaultQty') || '1', 10);
+  const quantity = qtyRaw === ''
+    ? (isNaN(defaultQty) ? 1 : defaultQty)
+    : (parseInt(qtyRaw, 10) || 0);
 
   const data = {
     part_code:    partCode,
     category:     document.getElementById('edit-category').value.trim(),
     subcategory:  document.getElementById('edit-subcategory').value.trim(),
-    quantity:     parseInt(document.getElementById('edit-quantity').value) || 0,
+    quantity,
     package:      document.getElementById('edit-package').value.trim(),
     manufacturer: document.getElementById('edit-manufacturer').value.trim(),
     mpn:          document.getElementById('edit-mpn').value.trim(),
@@ -300,14 +483,14 @@ async function handleSave() {
   try {
     if (idVal) {
       await updateComponent(Number(idVal), data);
-      showToast('Component updated', 'success');
+      showToast(t('toast.componentUpdated'), 'success');
     } else {
       await addComponent(data);
-      showToast('Component added', 'success');
+      showToast(t('toast.componentAdded'), 'success');
     }
     document.getElementById('overlay-edit').style.display = 'none';
   } catch (err) {
-    showToast('Save failed: ' + (err.message || err), 'error');
+    showToast(t('toast.saveFailed') + (err.message || err), 'error');
   } finally {
     saveBtn.disabled = false;
   }
@@ -374,7 +557,7 @@ function initImagePicker() {
       const allowedExt = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'];
       const ext        = (selected.split('.').pop() || '').toLowerCase();
       if (!allowedExt.includes(ext)) {
-        showToast('Unsupported image format. Use JPG, PNG, GIF, or WebP.', 'error');
+        showToast(t('toast.imageFmt'), 'error');
         return;
       }
       // Sanitize part code: keep only alphanumeric, dash, underscore (no path separators)
@@ -385,7 +568,7 @@ function initImagePicker() {
       await copyFile(selected, destPath);
       await setImagePreview(destPath);
     } catch (err) {
-      showToast('Image pick failed: ' + (err.message || err), 'error');
+      showToast(t('toast.imageFailed') + (err.message || err), 'error');
     }
   });
 
@@ -410,11 +593,11 @@ function initDeleteConfirm() {
     if (_deleteTargetId === null) return;
     try {
       await deleteComponent(_deleteTargetId);
-      showToast('Component deleted', 'success');
+      showToast(t('toast.componentDeleted'), 'success');
       document.getElementById('overlay-confirm').style.display = 'none';
       document.getElementById('overlay-detail').style.display = 'none';
     } catch (err) {
-      showToast('Delete failed: ' + (err.message || err), 'error');
+      showToast(t('toast.deleteFailed') + (err.message || err), 'error');
     } finally {
       _deleteTargetId = null;
     }

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="tr" class="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -30,7 +30,7 @@
       <circle cx="12" cy="12" r="10" stroke="#2e2c28" />
       <path d="M12 2a10 10 0 0 1 10 10" />
     </svg>
-    <span>Loading Component Inventory...</span>
+    <span data-i18n="boot.loading">Loading Component Inventory...</span>
   </div>
 
   <!-- ===================== SIDEBAR ===================== -->
@@ -66,21 +66,21 @@
         </svg>
         <div class="logo-text-wrap">
           <span class="logo-title">CompInv</span>
-          <span class="logo-sub">Inventory Manager</span>
+          <span class="logo-sub" data-i18n="sidebar.subtitle">Inventory Manager</span>
         </div>
       </div>
-      <button id="btn-github-sidebar" class="icon-btn" title="View on GitHub">
+      <button id="btn-github-sidebar" class="icon-btn" data-i18n-title="sidebar.tooltip.github" title="View on GitHub">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
           <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
         </svg>
       </button>
-      <button id="btn-settings" class="icon-btn" title="Settings">
+      <button id="btn-settings" class="icon-btn" data-i18n-title="sidebar.tooltip.settings" title="Settings">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="3"/>
           <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
         </svg>
       </button>
-      <button id="btn-theme" class="icon-btn" title="Toggle dark / light theme">
+      <button id="btn-theme" class="icon-btn" data-i18n-title="sidebar.tooltip.theme" title="Toggle dark / light theme">
         <svg id="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/>
           <line x1="4.22" y1="4.22" x2="7.05" y2="7.05"/><line x1="16.95" y1="16.95" x2="19.78" y2="19.78"/>
@@ -97,29 +97,30 @@
     <div class="stat-pills" id="stat-pills">
       <div class="pill">
         <span class="pill-value" id="stat-types">0</span>
-        <span class="pill-label">Types</span>
+        <span class="pill-label" data-i18n="sidebar.stats.types">Types</span>
       </div>
       <div class="pill">
         <span class="pill-value" id="stat-units">0</span>
-        <span class="pill-label">Units</span>
+        <span class="pill-label" data-i18n="sidebar.stats.units">Units</span>
       </div>
       <div class="pill">
         <span class="pill-value" id="stat-cats">0</span>
-        <span class="pill-label">Categories</span>
+        <span class="pill-label" data-i18n="sidebar.stats.cats">Categories</span>
       </div>
     </div>
 
     <!-- Category search -->
     <div class="sidebar-search">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-tertiary);flex-shrink:0"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input type="text" id="sidebar-search" placeholder="Filter categories..." autocomplete="off" />
+      <input type="text" id="sidebar-search" data-i18n-placeholder="sidebar.search.placeholder" placeholder="Filter categories..." autocomplete="off" />
+      <div id="sidebar-suggest" class="sidebar-suggest" style="display:none"></div>
     </div>
 
     <!-- Category tree -->
     <nav class="category-tree" id="category-tree">
       <div class="tree-item active" data-cat="" data-sub="">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-        All Components
+        <span data-i18n="sidebar.allComponents">All Components</span>
       </div>
     </nav>
 
@@ -127,14 +128,32 @@
     <div class="sidebar-divider" id="locations-divider"></div>
     <div class="sidebar-section-label" id="locations-label">
       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-      Locations
+      <span data-i18n="sidebar.locations">Locations</span>
     </div>
     <nav class="category-tree" id="location-tree">
       <div id="location-empty-hint" class="location-empty-hint" style="display:none">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-        Add a Location field when editing components to group inventory by physical location (e.g. Drawer A1, Box-3).
+        <span data-i18n="sidebar.location.empty">Add a Location field when editing components to group inventory by physical location (e.g. Drawer A1, Box-3).</span>
       </div>
     </nav>
+
+    <!-- Drive sync footer indicator -->
+    <div class="sidebar-footer">
+      <button class="drive-pill drive-state-off" id="drive-status-btn" data-state="off" type="button">
+        <svg class="drive-pill-icon" width="16" height="16" viewBox="0 0 87.3 78" aria-hidden="true">
+          <path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8h-27.5c0 1.55.4 3.1 1.2 4.5z" fill="#0066da"/>
+          <path d="m43.65 25-13.75-23.8c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44a9.06 9.06 0 0 0-1.2 4.5h27.5z" fill="#00ac47"/>
+          <path d="m73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5h-27.502l5.852 11.5z" fill="#ea4335"/>
+          <path d="m43.65 25 13.75-23.8c-1.35-.8-2.9-1.2-4.5-1.2h-18.5c-1.6 0-3.15.45-4.5 1.2z" fill="#00832d"/>
+          <path d="m59.8 53h-32.3l-13.75 23.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc"/>
+          <path d="m73.4 26.5-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8 16.15 28h27.45c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00"/>
+        </svg>
+        <span class="drive-pill-text">
+          <span class="drive-pill-title" data-i18n="drive.title">Drive Sync</span>
+          <span class="drive-pill-status" id="drive-status-text" data-i18n="drive.status.off">Off</span>
+        </span>
+      </button>
+    </div>
 
   </aside>
 
@@ -146,40 +165,34 @@
       <div class="topbar-left">
         <div class="search-wrap">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="text" id="search-input" placeholder="Search by part code, description, manufacturer..." autocomplete="off" />
+          <input type="text" id="search-input" data-i18n-placeholder="topbar.search.placeholder" placeholder="Search by part code, description, manufacturer..." autocomplete="off" />
         </div>
       </div>
       <div class="topbar-right">
-        <button class="btn btn-ghost" id="btn-backup-mgr" title="Backup Manager">
+        <button class="btn btn-ghost" id="btn-backup-mgr" data-i18n-title="topbar.btn.backups.title" title="Backup Manager">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-          Backups
+          <span data-i18n="topbar.btn.backups">Backups</span>
         </button>
-        <!-- View toggle: compact / detailed -->
-        <button class="btn btn-ghost btn-view-toggle" id="btn-view-toggle" title="Toggle compact / detailed view">
-          <svg id="icon-view-compact" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-          <svg id="icon-view-full" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-          <span id="view-label">Compact</span>
-        </button>
-        <button class="btn btn-ghost" id="btn-select-mode" title="Toggle multi-select mode to select and delete components">
+        <button class="btn btn-ghost" id="btn-select-mode" data-i18n-title="topbar.btn.select.title" title="Toggle multi-select mode to select and delete components">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="4" height="4" rx="1"/><rect x="3" y="12" width="4" height="4" rx="1"/><rect x="3" y="19" width="4" height="4" rx="1"/><line x1="11" y1="7" x2="21" y2="7"/><line x1="11" y1="14" x2="21" y2="14"/><line x1="11" y1="21" x2="21" y2="21"/></svg>
-          Select
+          <span data-i18n="topbar.btn.select">Select</span>
         </button>
-        <button class="btn btn-ghost" id="btn-bulk-cat" title="Auto-categorize Uncategorized components using built-in database">
+        <button class="btn btn-ghost" id="btn-bulk-cat" data-i18n-title="topbar.btn.autocat.title" title="Auto-categorize Uncategorized components using built-in database">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16"/><path d="M4 12h16"/><path d="M4 4h16"/><circle cx="20" cy="4" r="2" fill="currentColor" stroke="none"/><circle cx="20" cy="12" r="2" fill="currentColor" stroke="none"/><circle cx="20" cy="20" r="2" fill="currentColor" stroke="none"/></svg>
-          Auto-Categorize
+          <span data-i18n="topbar.btn.autocat">Auto-Categorize</span>
         </button>
         <div class="btn-divider"></div>
         <button class="btn btn-import" id="btn-import">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Import
+          <span data-i18n="topbar.btn.import">Import</span>
         </button>
         <button class="btn btn-export" id="btn-export">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-          Export
+          <span data-i18n="topbar.btn.export">Export</span>
         </button>
         <button class="btn btn-add" id="btn-add">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Add Component
+          <span data-i18n="topbar.btn.add">Add Component</span>
         </button>
       </div>
     </div>
@@ -195,10 +208,10 @@
       <div id="selection-bar" style="display:none">
         <span id="selection-count"></span>
         <div style="display:flex;gap:8px">
-          <button class="btn btn-ghost" id="btn-sel-clear">Deselect All</button>
+          <button class="btn btn-ghost" id="btn-sel-clear" data-i18n="selection.deselect">Deselect All</button>
           <button class="btn btn-danger" id="btn-sel-delete">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
-            Delete Selected
+            <span data-i18n="selection.delete">Delete Selected</span>
           </button>
         </div>
       </div>
@@ -240,11 +253,11 @@
           <line x1="13" y1="23" x2="13" y2="31" stroke="var(--border-subtle)" stroke-width="1.5" stroke-linecap="round"/>
           <line x1="19" y1="23" x2="19" y2="31" stroke="var(--border-subtle)" stroke-width="1.5" stroke-linecap="round"/>
         </svg>
-        <p>No components found</p>
-        <span class="empty-hint">Add your first component or import an existing inventory file</span>
+        <p data-i18n="empty.title">No components found</p>
+        <span class="empty-hint" data-i18n="empty.hint">Add your first component or import an existing inventory file</span>
         <div class="empty-actions">
-          <button class="btn btn-primary" id="btn-add-empty">Add Component</button>
-          <button class="btn btn-ghost" id="btn-import-empty">Import File</button>
+          <button class="btn btn-primary" id="btn-add-empty" data-i18n="empty.add">Add Component</button>
+          <button class="btn btn-ghost" id="btn-import-empty" data-i18n="empty.import">Import File</button>
         </div>
       </div>
     </div>
@@ -254,7 +267,7 @@
   <div class="modal-overlay" id="overlay-edit" style="display:none">
     <div class="modal modal-lg" id="modal-edit">
       <div class="modal-header">
-        <h2 id="modal-edit-title">Add Component</h2>
+        <h2 id="modal-edit-title" data-i18n="edit.add">Add Component</h2>
         <button class="modal-close" data-close="overlay-edit">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
@@ -262,100 +275,112 @@
       <div class="modal-body">
         <form id="form-edit" autocomplete="off">
           <input type="hidden" id="edit-id" />
+
+          <!-- Identity + DB lookup row (Lookup DB moved to top so user does not need to scroll) -->
           <div class="form-section">
-            <h3 class="form-section-title">Identity</h3>
+            <h3 class="form-section-title" data-i18n="edit.section.identity">Identity</h3>
             <div class="form-grid">
               <div class="form-group col-span-2">
-                <label for="edit-part-code">Part Code <span class="required">*</span></label>
-                <input type="text" id="edit-part-code" placeholder="e.g. RES-0402-10K" required />
+                <label for="edit-part-code"><span data-i18n="edit.partCode">Part Code</span> <span class="required">*</span></label>
+                <div class="part-code-row">
+                  <input type="text" id="edit-part-code" data-i18n-placeholder="edit.partCode.placeholder" placeholder="e.g. RES-0402-10K" required />
+                  <button type="button" class="btn btn-ghost btn-sm btn-inline-lookup" id="btn-db-lookup" data-i18n-title="edit.btn.lookup.title" title="Lookup specs from built-in component database">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <span data-i18n="edit.btn.lookup">Lookup DB</span>
+                  </button>
+                </div>
+                <div class="db-hit-banner" id="db-hit-banner" style="display:none"></div>
               </div>
-              <div class="form-group">
-                <label for="edit-category">Category</label>
-                <input type="text" id="edit-category" list="list-category" placeholder="e.g. Resistors" />
+              <div class="form-group form-detailed-only">
+                <label for="edit-category" data-i18n="edit.category">Category</label>
+                <input type="text" id="edit-category" list="list-category" data-i18n-placeholder="edit.category.placeholder" placeholder="e.g. Resistors" />
                 <datalist id="list-category"></datalist>
               </div>
-              <div class="form-group">
-                <label for="edit-subcategory">Subcategory</label>
-                <input type="text" id="edit-subcategory" list="list-subcategory" placeholder="e.g. SMD" />
+              <div class="form-group form-detailed-only">
+                <label for="edit-subcategory" data-i18n="edit.subcategory">Subcategory</label>
+                <input type="text" id="edit-subcategory" list="list-subcategory" data-i18n-placeholder="edit.subcategory.placeholder" placeholder="e.g. SMD" />
                 <datalist id="list-subcategory"></datalist>
               </div>
             </div>
           </div>
+
           <div class="form-section">
-            <h3 class="form-section-title">Stock</h3>
+            <h3 class="form-section-title" data-i18n="edit.section.stock">Stock</h3>
             <div class="form-grid">
               <div class="form-group">
-                <label for="edit-quantity">Quantity</label>
-                <input type="number" id="edit-quantity" min="0" value="0" />
+                <label for="edit-quantity" data-i18n="edit.quantity">Quantity</label>
+                <input type="number" id="edit-quantity" min="0" placeholder="1" />
               </div>
-              <div class="form-group">
-                <label for="edit-location">Location / Bin</label>
-                <input type="text" id="edit-location" list="list-location" placeholder="e.g. A1, Drawer-3" />
+              <div class="form-group form-detailed-only">
+                <label for="edit-location" data-i18n="edit.location">Location / Bin</label>
+                <input type="text" id="edit-location" list="list-location" data-i18n-placeholder="edit.location.placeholder" placeholder="e.g. A1, Drawer-3" />
                 <datalist id="list-location"></datalist>
               </div>
-              <div class="form-group">
-                <label for="edit-unit-price">Unit Price ($)</label>
+              <div class="form-group form-detailed-only">
+                <label for="edit-unit-price" data-i18n="edit.unitPrice">Unit Price ($)</label>
                 <input type="number" id="edit-unit-price" step="any" min="0" placeholder="0.00" />
               </div>
             </div>
           </div>
-          <div class="form-section">
-            <h3 class="form-section-title">Component Details</h3>
+
+          <div class="form-section form-detailed-only">
+            <h3 class="form-section-title" data-i18n="edit.section.details">Component Details</h3>
             <div class="form-grid">
               <div class="form-group">
-                <label for="edit-package">Package / Footprint</label>
-                <input type="text" id="edit-package" list="list-package" placeholder="e.g. 0402, TO-220, DIP-8" />
+                <label for="edit-package" data-i18n="edit.package">Package / Footprint</label>
+                <input type="text" id="edit-package" list="list-package" data-i18n-placeholder="edit.package.placeholder" placeholder="e.g. 0402, TO-220, DIP-8" />
                 <datalist id="list-package"></datalist>
               </div>
               <div class="form-group">
-                <label for="edit-manufacturer">Manufacturer</label>
-                <input type="text" id="edit-manufacturer" list="list-manufacturer" placeholder="e.g. Yageo, TI, STM" />
+                <label for="edit-manufacturer" data-i18n="edit.manufacturer">Manufacturer</label>
+                <input type="text" id="edit-manufacturer" list="list-manufacturer" data-i18n-placeholder="edit.manufacturer.placeholder" placeholder="e.g. Yageo, TI, STM" />
                 <datalist id="list-manufacturer"></datalist>
               </div>
               <div class="form-group">
-                <label for="edit-mpn">MPN</label>
-                <input type="text" id="edit-mpn" placeholder="Manufacturer Part Number" />
+                <label for="edit-mpn" data-i18n="edit.mpn">MPN</label>
+                <input type="text" id="edit-mpn" data-i18n-placeholder="edit.mpn.placeholder" placeholder="Manufacturer Part Number" />
               </div>
               <!-- Type-specific fields (shown/hidden by JS based on category) -->
               <div class="form-group type-field-resistance" style="display:none">
-                <label for="edit-resistance" id="lbl-resistance">Resistance</label>
-                <input type="text" id="edit-resistance" placeholder="e.g. 10k, 4.7k, 100R, 1M" />
+                <label for="edit-resistance" id="lbl-resistance" data-i18n="edit.resistance">Resistance</label>
+                <input type="text" id="edit-resistance" data-i18n-placeholder="edit.resistance.placeholder" placeholder="e.g. 10k, 4.7k, 100R, 1M" />
               </div>
               <div class="form-group type-field-tolerance" style="display:none">
-                <label for="edit-tolerance">Tolerance</label>
-                <input type="text" id="edit-tolerance" placeholder="e.g. 1%, 5%, 10%" />
+                <label for="edit-tolerance" data-i18n="edit.tolerance">Tolerance</label>
+                <input type="text" id="edit-tolerance" data-i18n-placeholder="edit.tolerance.placeholder" placeholder="e.g. 1%, 5%, 10%" />
               </div>
               <div class="form-group type-field-power" style="display:none">
-                <label for="edit-power-rating">Power Rating (W)</label>
-                <input type="number" id="edit-power-rating" step="any" min="0" placeholder="e.g. 0.25, 0.5, 1" />
+                <label for="edit-power-rating" data-i18n="edit.power">Power Rating (W)</label>
+                <input type="number" id="edit-power-rating" step="any" min="0" data-i18n-placeholder="edit.power.placeholder" placeholder="e.g. 0.25, 0.5, 1" />
               </div>
               <div class="form-group type-field-voltage">
-                <label for="edit-voltage-max" id="lbl-voltage-max">Voltage Max (V)</label>
+                <label for="edit-voltage-max" id="lbl-voltage-max" data-i18n="edit.vmax">Voltage Max (V)</label>
                 <input type="number" id="edit-voltage-max" step="any" min="0" placeholder="e.g. 50" />
               </div>
               <div class="form-group type-field-current">
-                <label for="edit-current-max" id="lbl-current-max">Current Max (A)</label>
+                <label for="edit-current-max" id="lbl-current-max" data-i18n="edit.imax">Current Max (A)</label>
                 <input type="number" id="edit-current-max" step="any" min="0" placeholder="e.g. 1.5" />
               </div>
               <div class="form-group col-span-2">
-                <label for="edit-description">Description
-                  <button type="button" id="btn-auto-desc" class="btn-inline-action" title="Auto-generate description from filled fields">Auto-fill</button>
+                <label for="edit-description"><span data-i18n="edit.description">Description</span>
+                  <button type="button" id="btn-auto-desc" class="btn-inline-action" data-i18n-title="edit.description.autofill.title" title="Auto-generate description from filled fields" data-i18n="edit.description.autofill">Auto-fill</button>
                 </label>
-                <input type="text" id="edit-description" placeholder="Brief description of the component" />
+                <input type="text" id="edit-description" data-i18n-placeholder="edit.description.placeholder" placeholder="Brief description of the component" />
               </div>
               <div class="form-group col-span-2">
-                <label for="edit-datasheet-url">Datasheet URL</label>
+                <label for="edit-datasheet-url" data-i18n="edit.datasheet">Datasheet URL</label>
                 <input type="url" id="edit-datasheet-url" placeholder="https://example.com/datasheet.pdf" />
               </div>
               <div class="form-group col-span-2">
-                <label for="edit-notes">Notes</label>
-                <textarea id="edit-notes" rows="2" placeholder="Additional notes, alternatives, warnings..."></textarea>
+                <label for="edit-notes" data-i18n="edit.notes">Notes</label>
+                <textarea id="edit-notes" rows="2" data-i18n-placeholder="edit.notes.placeholder" placeholder="Additional notes, alternatives, warnings..."></textarea>
               </div>
             </div>
           </div>
+
           <!-- Image attachment -->
-          <div class="form-section">
-            <h3 class="form-section-title">Component Image</h3>
+          <div class="form-section form-detailed-only">
+            <h3 class="form-section-title" data-i18n="edit.section.image">Component Image</h3>
             <div class="image-pick-row">
               <div class="image-preview-wrap" id="image-preview-wrap">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-tertiary)"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
@@ -364,26 +389,28 @@
               <div class="image-pick-actions">
                 <button type="button" class="btn btn-ghost btn-sm" id="btn-pick-image">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                  Pick Image
+                  <span data-i18n="edit.image.pick">Pick Image</span>
                 </button>
                 <button type="button" class="btn btn-ghost btn-sm" id="btn-clear-image" style="display:none">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                  Clear
+                  <span data-i18n="edit.image.clear">Clear</span>
                 </button>
                 <input type="hidden" id="edit-image-path" />
-                <span class="image-hint">JPG, PNG, WEBP — stored locally</span>
+                <span class="image-hint" data-i18n="edit.image.hint">JPG, PNG, WEBP - stored locally</span>
               </div>
             </div>
+          </div>
+
+          <!-- Simple-mode hint -->
+          <div class="simple-mode-hint" data-simple-only>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span data-i18n="edit.simple.hint">Simple mode is enabled. Toggle in Settings to access detailed fields.</span>
           </div>
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-ghost" data-close="overlay-edit">Cancel</button>
-        <button type="button" class="btn btn-ghost" id="btn-db-lookup" title="Lookup specs from built-in component database">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          Lookup DB
-        </button>
-        <button type="button" class="btn btn-primary" id="btn-save-component">Save</button>
+        <button type="button" class="btn btn-ghost" data-close="overlay-edit" data-i18n="edit.btn.cancel">Cancel</button>
+        <button type="button" class="btn btn-primary" id="btn-save-component" data-i18n="edit.btn.save">Save</button>
       </div>
     </div>
   </div>
@@ -398,19 +425,19 @@
         <div class="detail-header-right">
           <a href="#" target="_blank" rel="noopener" class="btn btn-pdf btn-sm" id="btn-detail-pdf" style="display:none">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-            Datasheet PDF
+            <span data-i18n="detail.btn.datasheet">Datasheet PDF</span>
           </a>
-          <button class="btn btn-ghost btn-sm" id="btn-print-label" title="Print component label with QR code">
+          <button class="btn btn-ghost btn-sm" id="btn-print-label" data-i18n-title="detail.btn.label.title" title="Print component label with QR code">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-            Print Label
+            <span data-i18n="detail.btn.label">Print Label</span>
           </button>
           <button class="btn btn-ghost btn-sm" id="btn-detail-edit">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-            Edit
+            <span data-i18n="detail.btn.edit">Edit</span>
           </button>
           <button class="btn btn-danger btn-sm" id="btn-detail-delete">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
-            Delete
+            <span data-i18n="detail.btn.delete">Delete</span>
           </button>
           <button class="modal-close" data-close="overlay-detail">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -425,17 +452,17 @@
   <div class="modal-overlay" id="overlay-import" style="display:none">
     <div class="modal" id="modal-import">
       <div class="modal-header">
-        <h2>Import Inventory</h2>
+        <h2 data-i18n="import.title">Import Inventory</h2>
         <button class="modal-close" data-close="overlay-import">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
       <div class="modal-body">
-        <p class="label-sm" style="margin-bottom:14px">Supported: CSV, JSON, Excel (.xlsx / .xls), PDF</p>
+        <p class="label-sm" style="margin-bottom:14px" data-i18n="import.supported">Supported: CSV, JSON, Excel (.xlsx / .xls), PDF</p>
         <div class="drop-zone" id="drop-zone">
           <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-          <p>Drop file here or <button class="link-btn" id="btn-browse-file">browse</button></p>
-          <span class="drop-hint">Maximum 50 MB</span>
+          <p><span data-i18n="import.drop">Drop file here or</span> <button class="link-btn" id="btn-browse-file" data-i18n="import.browse">browse</button></p>
+          <span class="drop-hint" data-i18n="import.maxSize">Maximum 50 MB</span>
           <input type="file" id="file-input" accept=".csv,.json,.xlsx,.xls,.pdf" style="display:none" />
         </div>
         <div id="import-preview" style="display:none">
@@ -445,15 +472,15 @@
             <span id="import-row-count" class="badge-blue"></span>
           </div>
           <div class="import-mode">
-            <label class="radio-label"><input type="radio" name="import-mode" value="merge" checked /> <strong>Merge</strong> — update existing by Part Code, add new rows</label>
-            <label class="radio-label"><input type="radio" name="import-mode" value="replace" /> <strong>Replace</strong> — delete all current data and import fresh</label>
+            <label class="radio-label"><input type="radio" name="import-mode" value="merge" checked /> <span data-i18n-html="import.mode.merge">Merge - update existing by Part Code, add new rows</span></label>
+            <label class="radio-label"><input type="radio" name="import-mode" value="replace" /> <span data-i18n-html="import.mode.replace">Replace - delete all current data and import fresh</span></label>
           </div>
           <div class="table-preview" id="table-preview"></div>
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-ghost" data-close="overlay-import">Cancel</button>
-        <button class="btn btn-primary" id="btn-confirm-import" disabled>Import</button>
+        <button class="btn btn-ghost" data-close="overlay-import" data-i18n="edit.btn.cancel">Cancel</button>
+        <button class="btn btn-primary" id="btn-confirm-import" disabled data-i18n="import.btn.import">Import</button>
       </div>
     </div>
   </div>
@@ -462,13 +489,13 @@
   <div class="modal-overlay" id="overlay-export" style="display:none">
     <div class="modal modal-sm" id="modal-export">
       <div class="modal-header">
-        <h2>Export Inventory</h2>
+        <h2 data-i18n="export.title">Export Inventory</h2>
         <button class="modal-close" data-close="overlay-export">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
       <div class="modal-body">
-        <p class="label-sm" style="margin-bottom:14px">Select export format. All <strong id="export-count">0</strong> components will be exported.</p>
+        <p class="label-sm" style="margin-bottom:14px"><span data-i18n="export.subtitle">Select export format. All</span> <strong id="export-count">0</strong> <span data-i18n="export.subtitleSuffix">components will be exported.</span></p>
         <div class="format-grid">
           <button class="format-btn" data-format="csv">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
@@ -499,7 +526,7 @@
   <div class="modal-overlay" id="overlay-label" style="display:none">
     <div class="modal modal-sm" id="modal-label">
       <div class="modal-header">
-        <h2>Print Component Label</h2>
+        <h2 data-i18n="label.title">Print Component Label</h2>
         <button class="modal-close" data-close="overlay-label">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
@@ -525,16 +552,16 @@
         </div>
         <div class="label-options">
           <label class="label-opt-row">
-            <span>Copies</span>
+            <span data-i18n="label.copies">Copies</span>
             <input type="number" id="label-copies" value="1" min="1" max="100" style="width:60px;padding:4px 8px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg-overlay);color:var(--text-primary)" />
           </label>
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-ghost" data-close="overlay-label">Cancel</button>
+        <button class="btn btn-ghost" data-close="overlay-label" data-i18n="label.btn.cancel">Cancel</button>
         <button class="btn btn-primary" id="btn-label-pdf">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          Export PDF Labels
+          <span data-i18n="label.btn.export">Export PDF Labels</span>
         </button>
       </div>
     </div>
@@ -544,7 +571,7 @@
   <div class="modal-overlay" id="overlay-backup" style="display:none">
     <div class="modal" id="modal-backup">
       <div class="modal-header">
-        <h2>Backup Manager</h2>
+        <h2 data-i18n="backup.title">Backup Manager</h2>
         <button class="modal-close" data-close="overlay-backup">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
@@ -552,19 +579,19 @@
       <div class="modal-body">
         <div class="backup-header-row">
           <div>
-            <p class="backup-info-text">Auto-backup runs every 15 minutes and after every change. Up to 30 backups are retained (oldest removed automatically).</p>
+            <p class="backup-info-text" data-i18n="backup.info">Auto-backup runs every 15 minutes and after every change. Old backups are pruned per the retention setting (Settings > Backup).</p>
           </div>
           <button class="btn btn-primary" id="btn-create-backup">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-            Backup Now
+            <span data-i18n="backup.btn.now">Backup Now</span>
           </button>
         </div>
         <div id="backup-list" class="backup-list">
-          <div class="loading-row">Loading backups...</div>
+          <div class="loading-row" data-i18n="backup.loading">Loading backups...</div>
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-ghost" data-close="overlay-backup">Close</button>
+        <button class="btn btn-ghost" data-close="overlay-backup" data-i18n="backup.btn.close">Close</button>
       </div>
     </div>
   </div>
@@ -573,7 +600,7 @@
   <div class="modal-overlay" id="overlay-confirm" style="display:none">
     <div class="modal modal-sm" id="modal-confirm">
       <div class="modal-header">
-        <h2>Delete Component</h2>
+        <h2 data-i18n="confirm.deleteTitle">Delete Component</h2>
         <button class="modal-close" data-close="overlay-confirm">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
@@ -582,14 +609,14 @@
         <div class="confirm-body">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
           <div>
-            <p>Delete <code id="confirm-part-code"></code>?</p>
-            <p class="confirm-hint">This action cannot be undone. A backup will be created automatically.</p>
+            <p><span data-i18n="confirm.deletePrompt">Delete</span> <code id="confirm-part-code"></code>?</p>
+            <p class="confirm-hint" data-i18n="confirm.deleteHint">This action cannot be undone. A backup will be created automatically.</p>
           </div>
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-ghost" data-close="overlay-confirm">Cancel</button>
-        <button class="btn btn-danger" id="btn-confirm-delete">Delete</button>
+        <button class="btn btn-ghost" data-close="overlay-confirm" data-i18n="confirm.btn.cancel">Cancel</button>
+        <button class="btn btn-danger" id="btn-confirm-delete" data-i18n="confirm.btn.delete">Delete</button>
       </div>
     </div>
   </div>
@@ -598,7 +625,7 @@
   <div class="modal-overlay" id="overlay-bulk-confirm" style="display:none">
     <div class="modal modal-sm" id="modal-bulk-confirm">
       <div class="modal-header">
-        <h2>Delete Selected</h2>
+        <h2 data-i18n="confirm.bulkTitle">Delete Selected</h2>
         <button class="modal-close" id="btn-bulk-del-cancel">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
@@ -608,13 +635,13 @@
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
           <div>
             <p id="bulk-confirm-label">Delete selected components?</p>
-            <p class="confirm-hint">This action cannot be undone.</p>
+            <p class="confirm-hint" data-i18n="confirm.deleteHint">This action cannot be undone.</p>
           </div>
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-ghost" id="btn-bulk-del-cancel-footer">Cancel</button>
-        <button class="btn btn-danger" id="btn-bulk-del-confirm">Delete</button>
+        <button class="btn btn-ghost" id="btn-bulk-del-cancel-footer" data-i18n="confirm.btn.cancel">Cancel</button>
+        <button class="btn btn-danger" id="btn-bulk-del-confirm" data-i18n="confirm.btn.delete">Delete</button>
       </div>
     </div>
   </div>
@@ -623,7 +650,7 @@
   <div class="modal-overlay" id="overlay-settings" style="display:none">
     <div class="modal modal-sm" id="modal-settings">
       <div class="modal-header">
-        <h2>Settings</h2>
+        <h2 data-i18n="settings.title">Settings</h2>
         <button class="modal-close" data-close="overlay-settings">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
@@ -645,13 +672,38 @@
           </a>
         </div>
 
-        <!-- Inventory -->
+        <!-- General -->
         <div class="settings-section">
-          <div class="settings-label">Inventory</div>
+          <div class="settings-label" data-i18n="settings.section.general">General</div>
           <div class="settings-row">
             <div>
-              <div>Show Locations</div>
-              <div class="settings-hint">Display the Locations panel in the sidebar</div>
+              <div data-i18n="settings.lang">Language</div>
+              <div class="settings-hint" data-i18n="settings.lang.hint">Interface language</div>
+            </div>
+            <select id="s-language" class="settings-select">
+              <option value="tr">Turkce</option>
+              <option value="en">English</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Inventory -->
+        <div class="settings-section">
+          <div class="settings-label" data-i18n="settings.section.inventory">Inventory</div>
+          <div class="settings-row">
+            <div>
+              <div data-i18n="settings.formMode">Component Form Mode</div>
+              <div class="settings-hint" data-i18n="settings.formMode.hint">Simple shows only Part Code / Quantity. Detailed shows all fields.</div>
+            </div>
+            <select id="s-form-mode" class="settings-select">
+              <option value="simple" data-i18n="settings.formMode.simple">Simple</option>
+              <option value="detailed" data-i18n="settings.formMode.detailed">Detailed</option>
+            </select>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div data-i18n="settings.locations">Show Locations</div>
+              <div class="settings-hint" data-i18n="settings.locations.hint">Display the Locations panel in the sidebar</div>
             </div>
             <label class="toggle-switch">
               <input type="checkbox" id="s-locations-enabled">
@@ -660,62 +712,107 @@
           </div>
           <div class="settings-row">
             <div>
-              <div>Low Stock Threshold</div>
-              <div class="settings-hint">Highlight quantity at or below this value</div>
+              <div data-i18n="settings.lowStock">Low Stock Threshold</div>
+              <div class="settings-hint" data-i18n="settings.lowStock.hint">Highlight quantity at or below this value</div>
             </div>
             <input type="number" id="s-low-stock" class="settings-input-sm" min="0" max="99" value="1">
+          </div>
+          <div class="settings-row">
+            <div>
+              <div data-i18n="settings.defaultQty">Default Quantity</div>
+              <div class="settings-hint" data-i18n="settings.defaultQty.hint">Default quantity for new components when field is empty</div>
+            </div>
+            <input type="number" id="s-default-qty" class="settings-input-sm" min="0" max="9999" value="1">
           </div>
         </div>
 
         <!-- Backup -->
         <div class="settings-section">
-          <div class="settings-label">Backup</div>
+          <div class="settings-label" data-i18n="settings.section.backup">Backup</div>
           <div class="settings-row">
-            <span>Auto-backup interval</span>
+            <span data-i18n="settings.backupInterval">Auto-backup interval</span>
             <select id="s-backup-interval" class="settings-select">
-              <option value="5">5 minutes</option>
-              <option value="15" selected>15 minutes</option>
-              <option value="30">30 minutes</option>
-              <option value="60">1 hour</option>
+              <option value="5">5 min</option>
+              <option value="15" selected>15 min</option>
+              <option value="30">30 min</option>
+              <option value="60">1 h</option>
             </select>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div data-i18n="settings.backupRetention">Backup Retention</div>
+              <div class="settings-hint" data-i18n="settings.backupRetention.hint">How many backups to keep (0 = unlimited)</div>
+            </div>
+            <input type="number" id="s-backup-retention" class="settings-input-sm" min="0" max="9999" value="30">
+          </div>
+          <div class="settings-row">
+            <div>
+              <div data-i18n="settings.backupDiff">Compare Backups</div>
+              <div class="settings-hint" data-i18n="settings.backupDiff.hint">Pick two backup files to view differences</div>
+            </div>
+            <button class="btn btn-ghost btn-sm" id="btn-open-backup-diff" data-i18n="settings.backupDiff.btn">Compare...</button>
           </div>
         </div>
 
         <!-- Export -->
         <div class="settings-section">
-          <div class="settings-label">Export</div>
+          <div class="settings-label" data-i18n="settings.section.export">Export</div>
           <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:6px">
-            <span>Default Export Folder</span>
+            <span data-i18n="settings.exportFolder">Default Export Folder</span>
             <div style="display:flex;gap:8px;width:100%">
               <input type="text" id="s-export-folder" class="settings-input-path" placeholder="System Downloads folder" readonly>
-              <button class="btn btn-ghost btn-sm" id="s-export-browse">Browse</button>
+              <button class="btn btn-ghost btn-sm" id="s-export-browse" data-i18n="settings.btn.browse">Browse</button>
               <button class="btn btn-ghost btn-sm" id="s-export-clear" title="Reset to default">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
               </button>
             </div>
-            <div class="settings-hint">When set, CSV/JSON exports save directly to this folder without a dialog.</div>
+            <div class="settings-hint" data-i18n="settings.exportFolder.hint">When set, CSV/JSON exports save directly to this folder without a dialog.</div>
+          </div>
+        </div>
+
+        <!-- Cloud Sync -->
+        <div class="settings-section">
+          <div class="settings-label" data-i18n="settings.section.sync">Cloud Sync (Drive / Dropbox / OneDrive)</div>
+          <div class="settings-row">
+            <div>
+              <div data-i18n="settings.driveFolder.enabled">Enable cloud sync</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="s-drive-enabled">
+              <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            </label>
+          </div>
+          <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:6px">
+            <span data-i18n="settings.driveFolder">Auto-Sync Folder</span>
+            <div style="display:flex;gap:8px;width:100%">
+              <input type="text" id="s-drive-folder" class="settings-input-path" placeholder="C:\Users\you\Google Drive\..." readonly>
+              <button class="btn btn-ghost btn-sm" id="s-drive-browse" data-i18n="settings.btn.browse">Browse</button>
+              <button class="btn btn-ghost btn-sm" id="s-drive-clear" title="Clear">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+            <div class="settings-hint" data-i18n="settings.driveFolder.hint">Choose a Drive-synced folder...</div>
           </div>
         </div>
 
         <!-- About -->
         <div class="settings-section">
-          <div class="settings-label">About</div>
+          <div class="settings-label" data-i18n="settings.section.about">About</div>
           <div class="settings-row settings-about">
             <span class="settings-about-name">Component Inventory</span>
-            <span class="settings-about-ver">v0.1.6</span>
+            <span class="settings-about-ver">v0.1.7</span>
           </div>
           <div class="settings-row" style="font-size:0.78rem;color:var(--text-secondary);display:block">
-            Local-first electronic component inventory manager.
-            Data stored in SQLite on your device. No telemetry, no cloud.
+            <span data-i18n="settings.about.desc">Local-first electronic component inventory manager.</span>
           </div>
           <div class="settings-row" id="s-db-path-row" style="flex-direction:column;align-items:flex-start;gap:4px">
-            <span style="font-size:0.75rem;color:var(--text-tertiary)">Database path</span>
-            <span id="s-db-path" class="mono" style="font-size:0.68rem;color:var(--text-tertiary);word-break:break-all">—</span>
+            <span style="font-size:0.75rem;color:var(--text-tertiary)" data-i18n="settings.about.dbPath">Database path</span>
+            <span id="s-db-path" class="mono" style="font-size:0.68rem;color:var(--text-tertiary);word-break:break-all">-</span>
           </div>
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-ghost" data-close="overlay-settings">Close</button>
+        <button class="btn btn-ghost" data-close="overlay-settings" data-i18n="settings.btn.close">Close</button>
       </div>
     </div>
   </div>
@@ -727,18 +824,18 @@
   <div class="modal-overlay" id="overlay-rename-cat" style="display:none">
     <div class="modal modal-sm">
       <div class="modal-header">
-        <h2>Rename</h2>
+        <h2 data-i18n="rename.title">Rename</h2>
         <button class="modal-close" id="btn-rename-cat-cancel">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
       <div class="modal-body">
         <p id="rename-cat-label" style="font-size:0.82rem;color:var(--text-muted);margin-bottom:10px"></p>
-        <input type="text" id="rename-cat-input" class="input-full" placeholder="New name" autocomplete="off" />
+        <input type="text" id="rename-cat-input" class="input-full" data-i18n-placeholder="rename.placeholder" placeholder="New name" autocomplete="off" />
       </div>
       <div class="modal-footer">
-        <button class="btn btn-ghost" id="btn-rename-cat-cancel-footer">Cancel</button>
-        <button class="btn btn-add" id="btn-rename-cat-ok">Apply</button>
+        <button class="btn btn-ghost" id="btn-rename-cat-cancel-footer" data-i18n="rename.btn.cancel">Cancel</button>
+        <button class="btn btn-add" id="btn-rename-cat-ok" data-i18n="rename.btn.apply">Apply</button>
       </div>
     </div>
   </div>
@@ -748,7 +845,7 @@
     <div class="modal modal-lg">
       <div class="modal-header">
         <div>
-          <h2>Auto-Categorize Uncategorized Components</h2>
+          <h2 data-i18n="bulk.title">Auto-Categorize Uncategorized Components</h2>
           <p id="bulk-cat-subtitle" style="margin:4px 0 0;font-size:0.8rem;color:var(--text-muted)"></p>
         </div>
         <button class="modal-close" id="btn-bulk-cat-close">
@@ -762,25 +859,69 @@
               <th style="width:40px;text-align:center">
                 <input type="checkbox" id="bulk-cb-header" checked title="Toggle all">
               </th>
-              <th>Part Code</th>
-              <th>Description</th>
-              <th>Suggested Category</th>
+              <th data-i18n="bulk.col.partCode">Part Code</th>
+              <th data-i18n="bulk.col.description">Description</th>
+              <th data-i18n="bulk.col.suggested">Suggested Category</th>
             </tr>
           </thead>
           <tbody id="bulk-cat-tbody">
-            <tr><td colspan="4" style="text-align:center;padding:32px;color:var(--text-muted)">Loading...</td></tr>
+            <tr><td colspan="4" style="text-align:center;padding:32px;color:var(--text-muted)" data-i18n="bulk.loading">Loading...</td></tr>
           </tbody>
         </table>
       </div>
       <div class="modal-footer" style="justify-content:space-between">
         <div style="display:flex;gap:8px">
-          <button class="btn btn-ghost" id="btn-bulk-sel-all">Select All</button>
-          <button class="btn btn-ghost" id="btn-bulk-desel">Deselect All</button>
+          <button class="btn btn-ghost" id="btn-bulk-sel-all" data-i18n="bulk.btn.selectAll">Select All</button>
+          <button class="btn btn-ghost" id="btn-bulk-desel" data-i18n="bulk.btn.deselect">Deselect All</button>
         </div>
         <div style="display:flex;gap:8px">
-          <button class="btn btn-ghost" id="btn-bulk-cat-close-footer">Cancel</button>
+          <button class="btn btn-ghost" id="btn-bulk-cat-close-footer" data-i18n="bulk.btn.cancel">Cancel</button>
           <button class="btn btn-add" id="btn-bulk-apply" disabled>Apply Selected (0)</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Backup Diff Modal -->
+  <div class="modal-overlay" id="overlay-backup-diff" style="display:none">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h2 data-i18n="diff.title">Compare Backups</h2>
+        <button class="modal-close" data-close="overlay-backup-diff">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="diff-pickers">
+          <div class="diff-picker-col">
+            <label data-i18n="diff.pickA">Backup A (older / left)</label>
+            <select id="diff-pick-a" class="settings-select" style="width:100%"></select>
+          </div>
+          <div class="diff-picker-col">
+            <label data-i18n="diff.pickB">Backup B (newer / right)</label>
+            <select id="diff-pick-b" class="settings-select" style="width:100%"></select>
+          </div>
+          <button class="btn btn-primary btn-sm" id="btn-run-diff" data-i18n="diff.btn.run">Run Comparison</button>
+        </div>
+        <div class="diff-summary" id="diff-summary" style="display:none">
+          <div class="diff-pill diff-pill-add"><span data-i18n="diff.summary.added">Added</span>: <strong id="diff-count-add">0</strong></div>
+          <div class="diff-pill diff-pill-rem"><span data-i18n="diff.summary.removed">Removed</span>: <strong id="diff-count-rem">0</strong></div>
+          <div class="diff-pill diff-pill-chg"><span data-i18n="diff.summary.changed">Changed</span>: <strong id="diff-count-chg">0</strong></div>
+        </div>
+        <div id="diff-empty-hint" class="diff-empty" data-i18n="diff.empty">Pick two different backup files to view differences.</div>
+        <div id="diff-result" style="display:none">
+          <div class="diff-tabs">
+            <button class="diff-tab active" data-diff-tab="changed"><span data-i18n="diff.summary.changed">Changed</span> <span class="diff-badge" id="diff-tab-chg">0</span></button>
+            <button class="diff-tab" data-diff-tab="added"><span data-i18n="diff.summary.added">Added</span> <span class="diff-badge" id="diff-tab-add">0</span></button>
+            <button class="diff-tab" data-diff-tab="removed"><span data-i18n="diff.summary.removed">Removed</span> <span class="diff-badge" id="diff-tab-rem">0</span></button>
+          </div>
+          <div class="diff-table-wrap">
+            <table class="diff-table" id="diff-table"></table>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" data-close="overlay-backup-diff" data-i18n="diff.btn.close">Close</button>
       </div>
     </div>
   </div>

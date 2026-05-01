@@ -25,7 +25,10 @@ pub fn ensure_backup_dir(app_data_dir: &PathBuf) -> Result<PathBuf, String> {
     Ok(backup_dir)
 }
 
-pub fn create_backup_file(app_data_dir: &PathBuf) -> Result<BackupEntry, String> {
+/// Create a backup. `retention` controls how many backups to keep:
+///   0  -> keep all (never prune)
+///   N  -> keep at most N most-recent backups (older ones removed)
+pub fn create_backup_file(app_data_dir: &PathBuf, retention: usize) -> Result<BackupEntry, String> {
     let db_path = get_db_path(app_data_dir);
     if !db_path.exists() {
         return Err("Database file not found".to_string());
@@ -47,7 +50,9 @@ pub fn create_backup_file(app_data_dir: &PathBuf) -> Result<BackupEntry, String>
         size_bytes: metadata.len(),
     };
 
-    prune_old_backups(&backup_dir, 30)?;
+    if retention > 0 {
+        prune_old_backups(&backup_dir, retention)?;
+    }
 
     Ok(entry)
 }

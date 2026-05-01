@@ -1,5 +1,7 @@
 import { invoke } from '@tauri-apps/api/core';
 import { showToast, escHtml } from '../app.js';
+import { t } from './i18n.js';
+import { triggerDriveSync } from './drive_sync.js';
 
 function formatBytes(bytes) {
   if (bytes < 1024) return `${bytes} B`;
@@ -9,13 +11,13 @@ function formatBytes(bytes) {
 
 async function loadBackupList() {
   const list = document.getElementById('backup-list');
-  list.innerHTML = '<div class="loading-row">Loading backups...</div>';
+  list.innerHTML = `<div class="loading-row">${t('backup.loading')}</div>`;
 
   try {
     const backups = await invoke('list_backups_cmd');
 
     if (!backups || backups.length === 0) {
-      list.innerHTML = '<div class="loading-row">No backups found.</div>';
+      list.innerHTML = `<div class="loading-row">${t('backup.empty')}</div>`;
       return;
     }
 
@@ -25,9 +27,9 @@ async function loadBackupList() {
           <span class="backup-name">${escHtml(b.filename)}</span>
           <span class="backup-meta">${escHtml(b.created_at)} &mdash; ${formatBytes(b.size_bytes)}</span>
         </div>
-        <button type="button" class="btn btn-ghost btn-sm btn-restore" data-path="${escHtml(b.path)}" title="Restore this backup">
+        <button type="button" class="btn btn-ghost btn-sm btn-restore" data-path="${escHtml(b.path)}" title="${t('backup.btn.restore.title')}">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.36"/></svg>
-          Restore
+          ${t('backup.btn.restore')}
         </button>
       </div>`).join('');
 
@@ -36,22 +38,20 @@ async function loadBackupList() {
     });
 
   } catch (err) {
-    list.innerHTML = `<div class="loading-row" style="color:var(--danger)">Failed to load: ${escHtml(err.message || String(err))}</div>`;
+    list.innerHTML = `<div class="loading-row" style="color:var(--danger)">${escHtml(err.message || String(err))}</div>`;
   }
 }
 
 async function restoreBackup(path) {
-  const confirmed = window.confirm(
-    'Restore this backup? The current inventory data will be replaced.\n\nThe app will restart to apply changes.'
-  );
+  const confirmed = window.confirm(t('backup.confirmRestore'));
   if (!confirmed) return;
 
   try {
     await invoke('restore_backup_cmd', { backupPath: path });
-    showToast('Backup restored. Restarting application...', 'success', 2000);
+    showToast(t('backup.restored'), 'success', 2000);
     setTimeout(() => location.reload(), 2000);
   } catch (err) {
-    showToast('Restore failed: ' + (err.message || String(err)), 'error');
+    showToast(t('backup.restoreFailed') + (err.message || String(err)), 'error');
   }
 }
 
@@ -59,11 +59,15 @@ async function createManualBackup() {
   const btn = document.getElementById('btn-create-backup');
   btn.disabled = true;
   try {
-    const result = await invoke('create_backup');
-    showToast(`Backup created: ${result.filename}`, 'success');
+    const retention = parseInt(localStorage.getItem('backupRetention') || '30', 10);
+    const result = await invoke('create_backup', { retention: isNaN(retention) ? 30 : retention });
+    showToast(t('backup.created') + result.filename, 'success');
     await loadBackupList();
+    // After a manual backup, push the latest snapshot to the cloud folder
+    // so Sheets / mobile users always have the freshest copy.
+    triggerDriveSync();
   } catch (err) {
-    showToast('Backup failed: ' + (err.message || String(err)), 'error');
+    showToast(t('backup.failed') + (err.message || String(err)), 'error');
   } finally {
     btn.disabled = false;
   }

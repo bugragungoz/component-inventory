@@ -1,6 +1,7 @@
 import { state, showToast } from '../app.js';
 import { save as saveDialog }  from '@tauri-apps/plugin-dialog';
 import { writeFile }            from '@tauri-apps/plugin-fs';
+import { t } from './i18n.js';
 
 const EXPORT_COLUMNS = [
   { key: 'part_code',    label: 'Part Code' },
@@ -204,7 +205,7 @@ export function initExport() {
       document.getElementById('overlay-export').style.display = 'none';
 
       if (state.components.length === 0) {
-        showToast('Nothing to export — inventory is empty', 'warning');
+        showToast(t('toast.exportEmpty'), 'warning');
         return;
       }
 
@@ -214,9 +215,9 @@ export function initExport() {
         if (format === 'json')  saved = await exportJSON();
         if (format === 'excel') saved = await exportExcel();
         if (format === 'pdf')   saved = await exportPDF();
-        if (saved !== false) showToast(`Exported as ${format.toUpperCase()}`, 'success');
+        if (saved !== false) showToast(t('toast.exported', { fmt: format.toUpperCase() }), 'success');
       } catch (err) {
-        showToast('Export failed: ' + (err.message || err), 'error');
+        showToast(t('toast.exportFailed') + (err.message || err), 'error');
       }
     });
   });

@@ -476,7 +476,7 @@ dependencies = [
 
 [[package]]
 name = "component-inventory"
-version = "0.1.6"
+version = "0.2.3"
 dependencies = [
  "chrono",
  "serde",

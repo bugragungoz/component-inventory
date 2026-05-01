@@ -2,6 +2,7 @@ import { state, escHtml, deleteComponents, showToast } from '../app.js';
 import { lookupComponent, applyDbData }                 from './hardcoded_datasheet.js';
 import { setLabelComponent }                             from './labels.js';
 import { readFile }                                      from '@tauri-apps/plugin-fs';
+import { t }                                             from './i18n.js';
 
 // ============================================================
 // Multi-select state
@@ -19,8 +20,7 @@ function updateSelectionBar() {
   const n      = selectedIds.size;
   if (!bar) return;
   bar.style.display = n > 0 ? 'flex' : 'none';
-  if (label) label.textContent = `${n} component${n !== 1 ? 's' : ''} selected`;
-  // Keep header checkbox in sync
+  if (label) label.textContent = t(n === 1 ? 'selection.count.one' : 'selection.count.many', { n });
   const headerCb = document.getElementById('cb-select-all');
   if (headerCb) {
     headerCb.checked = n > 0 && n === state.filtered.length;
@@ -39,7 +39,6 @@ function initSelectionBar() {
   }
   if (btnClr) btnClr.addEventListener('click', clearSelection);
 
-  // Bulk delete confirm modal
   document.getElementById('btn-bulk-del-confirm')?.addEventListener('click', async () => {
     const n = selectedIds.size;
     const overlay = document.getElementById('overlay-bulk-confirm');
@@ -47,9 +46,9 @@ function initSelectionBar() {
     try {
       await deleteComponents(Array.from(selectedIds));
       clearSelection();
-      showToast(`Deleted ${n} component${n !== 1 ? 's' : ''}`, 'success');
+      showToast(t('toast.deletedMany', { n }), 'success');
     } catch (err) {
-      showToast('Delete failed: ' + (err.message || err), 'error');
+      showToast(t('toast.deleteFailed') + (err.message || err), 'error');
     }
   });
   const closeBulk = () => { document.getElementById('overlay-bulk-confirm').style.display = 'none'; };
@@ -59,7 +58,7 @@ function initSelectionBar() {
 
 function openBulkDeleteConfirm(n) {
   const label = document.getElementById('bulk-confirm-label');
-  if (label) label.textContent = `Delete ${n} selected component${n !== 1 ? 's' : ''}? This cannot be undone. A backup will be created automatically.`;
+  if (label) label.textContent = t(n === 1 ? 'confirm.bulkPrompt.one' : 'confirm.bulkPrompt.many', { n });
   document.getElementById('overlay-bulk-confirm').style.display = '';
 }
 
@@ -151,6 +150,31 @@ function getActiveCols() {
     if (new RegExp(`^${base}`, 'i').test(cat)) return cols;
   }
   return DEFAULT_COLS;
+}
+
+/**
+ * Map English column labels to i18n keys so existing column definitions do
+ * not need to be rewritten. Falls back to the raw label when no key matches.
+ */
+const COL_LABEL_I18N = {
+  'Part Code':    'th.partCode',
+  'Category':     'th.category',
+  'Subcategory':  'th.subcategory',
+  'Type':         'th.subcategory',
+  'Qty':          'th.qty',
+  'Package':      'th.package',
+  'Manufacturer': 'th.manufacturer',
+  'Mfr':          'th.manufacturer',
+  'MPN':          'th.mpn',
+  'Location':     'th.location',
+  'V Max':        'th.vmax',
+  'I Max':        'th.imax',
+  'Description':  'th.description',
+  'Price':        'th.price',
+};
+function translateColLabel(label) {
+  const key = COL_LABEL_I18N[label];
+  return key ? t(key) : label;
 }
 
 // ============================================================
@@ -473,7 +497,8 @@ export function applyFilters() {
     if (isNum) {
       cmp = (Number(va) || 0) - (Number(vb) || 0);
     } else {
-      cmp = String(va).localeCompare(String(vb), undefined, { sensitivity: 'base' });
+      // Turkish-aware sort: dotted/dotless I, c-cedilla, etc., are ordered correctly
+      cmp = String(va).localeCompare(String(vb), 'tr-TR', { sensitivity: 'base' });
     }
     return state.sortDir === 'asc' ? cmp : -cmp;
   });
@@ -482,9 +507,11 @@ export function applyFilters() {
 
   const count = document.getElementById('result-count');
   if (count) {
-    count.textContent = result.length === state.components.length
-      ? `${result.length} component${result.length !== 1 ? 's' : ''}`
-      : `${result.length} of ${state.components.length} components`;
+    if (result.length === state.components.length) {
+      count.textContent = t(result.length === 1 ? 'result.count.one' : 'result.count.many', { n: result.length });
+    } else {
+      count.textContent = t('result.count.partial', { n: result.length, total: state.components.length });
+    }
   }
 }
 
@@ -509,15 +536,15 @@ export function renderTable() {
     return;
   }
 
-  // Dynamic thead — rebuild columns based on active category filter
+  // Dynamic thead - rebuild columns based on active category filter
   const cols = getActiveCols();
   if (thead) {
     thead.innerHTML =
-      `<th class="col-cb"><input type="checkbox" id="cb-select-all" title="Select all"></th>` +
+      `<th class="col-cb"><input type="checkbox" id="cb-select-all" title="${t('th.selectAll')}"></th>` +
       cols.map(col =>
-        `<th data-col="${col.sort || ''}" class="${col.sort ? 'sortable ' : ''}${col.width}">${col.label} ${col.sort ? '<span class="sort-icon"></span>' : ''}</th>`
+        `<th data-col="${col.sort || ''}" class="${col.sort ? 'sortable ' : ''}${col.width}">${translateColLabel(col.label)} ${col.sort ? '<span class="sort-icon"></span>' : ''}</th>`
       ).join('') +
-      `<th class="col-actions">Actions</th>`;
+      `<th class="col-actions">${t('th.actions')}</th>`;
 
     // Re-attach sort listeners after thead rebuild
     initSortHeaders();
@@ -635,7 +662,7 @@ function updateBreadcrumb() {
       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
     </span>
     <span class="bc-path">${crumb}</span>
-    <span class="bc-count">${n} component${n !== 1 ? 's' : ''}</span>
+    <span class="bc-count">${t(n === 1 ? 'result.count.one' : 'result.count.many', { n })}</span>
   `;
 }
 
@@ -710,42 +737,42 @@ async function showDetail(comp) {
     ? `<span class="detail-value ${cls}">${escHtml(String(v))}</span>`
     : `<span class="detail-value empty">—</span>`;
 
-  // Spec cards — pulled from effective (component OR hardcoded DB)
+  // Spec cards - pulled from effective (component OR hardcoded DB)
   const specCards = [
     comp.resistance ? `<div class="spec-card">
-      <span class="spec-label">Resistance</span>
+      <span class="spec-label">${t('detail.spec.resistance')}</span>
       <span class="spec-value" style="font-size:13px">${escHtml(comp.resistance)}</span>
     </div>` : '',
     comp.tolerance ? `<div class="spec-card">
-      <span class="spec-label">Tolerance</span>
+      <span class="spec-label">${t('detail.spec.tolerance')}</span>
       <span class="spec-value" style="font-size:13px">${escHtml(comp.tolerance)}</span>
     </div>` : '',
     comp.power_rating != null ? `<div class="spec-card">
-      <span class="spec-label">Power Rating</span>
+      <span class="spec-label">${t('detail.spec.power')}</span>
       <span class="spec-value">${comp.power_rating}<span class="spec-unit"> W</span></span>
     </div>` : '',
     effective.voltage_max != null ? `<div class="spec-card">
-      <span class="spec-label">Voltage Max</span>
+      <span class="spec-label">${t('detail.spec.vmax')}</span>
       <span class="spec-value">${effective.voltage_max}<span class="spec-unit"> V</span></span>
     </div>` : '',
     effective.current_max != null ? `<div class="spec-card">
-      <span class="spec-label">Current Max</span>
+      <span class="spec-label">${t('detail.spec.imax')}</span>
       <span class="spec-value">${effective.current_max}<span class="spec-unit"> A</span></span>
     </div>` : '',
     effective.package ? `<div class="spec-card">
-      <span class="spec-label">Package</span>
+      <span class="spec-label">${t('detail.spec.package')}</span>
       <span class="spec-value" style="font-size:13px">${escHtml(effective.package)}</span>
     </div>` : '',
     comp.quantity != null ? `<div class="spec-card">
-      <span class="spec-label">In Stock</span>
-      <span class="spec-value" style="color:${Number(comp.quantity) <= 1 ? 'var(--low-stock)' : 'var(--accent-green)'}">${comp.quantity}<span class="spec-unit"> pcs</span></span>
+      <span class="spec-label">${t('detail.spec.stock')}</span>
+      <span class="spec-value" style="color:${Number(comp.quantity) <= 1 ? 'var(--low-stock)' : 'var(--accent-green)'}">${comp.quantity}<span class="spec-unit"> ${t('detail.spec.stockUnit')}</span></span>
     </div>` : '',
     comp.unit_price != null ? `<div class="spec-card">
-      <span class="spec-label">Unit Price</span>
+      <span class="spec-label">${t('detail.spec.price')}</span>
       <span class="spec-value" style="font-size:13px">$${Number(comp.unit_price).toFixed(4)}</span>
     </div>` : '',
     effective.manufacturer ? `<div class="spec-card">
-      <span class="spec-label">Manufacturer</span>
+      <span class="spec-label">${t('detail.spec.manufacturer')}</span>
       <span class="spec-value" style="font-size:11px;font-family:var(--font-body)">${escHtml(effective.manufacturer)}</span>
     </div>` : '',
   ].filter(Boolean);
@@ -773,8 +800,7 @@ async function showDetail(comp) {
   const dbBanner = hasGap ? `
     <div class="db-suggestion-banner">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-      <strong>${escHtml(comp.part_code)}</strong> found in built-in database.
-      Open <em>Edit</em> → <em>Lookup DB</em> to persist full data.
+      <strong>${escHtml(comp.part_code)}</strong> ${t('detail.dbBanner')}
     </div>` : '';
 
   // Revoke previous object URL to prevent memory leak
@@ -821,36 +847,36 @@ async function showDetail(comp) {
 
     <!-- Key specifications (from component + DB) -->
     ${specCards.length > 0 ? `
-    <div class="detail-section-title">Key Specifications</div>
+    <div class="detail-section-title">${t('detail.section.specs')}</div>
     <div class="spec-grid">${specCards.join('')}</div>
     ` : ''}
 
     <!-- Description / Notes -->
-    <div class="detail-section-title">Component Details</div>
+    <div class="detail-section-title">${t('detail.section.details')}</div>
     <div class="detail-grid">
       <div class="detail-field">
-        <span class="detail-label">MPN</span>
+        <span class="detail-label">${t('detail.field.mpn')}</span>
         ${val(comp.mpn, 'mono')}
       </div>
       <div class="detail-field full">
-        <span class="detail-label">Description</span>
+        <span class="detail-label">${t('detail.field.description')}</span>
         ${val(effective.description || comp.description)}
       </div>
       ${comp.notes ? `<div class="detail-field full">
-        <span class="detail-label">Notes</span>
+        <span class="detail-label">${t('detail.field.notes')}</span>
         ${val(comp.notes)}
       </div>` : ''}
       ${datasheetUrl && comp.datasheet_url ? `<div class="detail-field full">
-        <span class="detail-label">Datasheet URL</span>
+        <span class="detail-label">${t('detail.field.datasheet')}</span>
         <a href="${escHtml(datasheetUrl)}" target="_blank" rel="noopener" class="detail-value" style="color:var(--accent-blue);word-break:break-all;font-size:11px">${escHtml(datasheetUrl)}</a>
       </div>` : ''}
       <div class="detail-field">
-        <span class="detail-label">Created</span>
-        <span class="detail-value mono" style="font-size:11px">${comp.created_at || '—'}</span>
+        <span class="detail-label">${t('detail.field.created')}</span>
+        <span class="detail-value mono" style="font-size:11px">${comp.created_at || '-'}</span>
       </div>
       <div class="detail-field">
-        <span class="detail-label">Updated</span>
-        <span class="detail-value mono" style="font-size:11px">${comp.updated_at || '—'}</span>
+        <span class="detail-label">${t('detail.field.updated')}</span>
+        <span class="detail-value mono" style="font-size:11px">${comp.updated_at || '-'}</span>
       </div>
     </div>`;
 
