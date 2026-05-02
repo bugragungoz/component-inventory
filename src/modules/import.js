@@ -1,6 +1,26 @@
 import { upsertComponents, showToast, escHtml, parseLocaleNumber } from '../app.js';
 import { invoke } from '@tauri-apps/api/core';
 import { t } from './i18n.js';
+import { detectDelimiter as detectDelimiterCore, normalizeRowsCore, getMappedHeaderNamesCore, validateRowsCore } from './import_core.js';
+
+let _xlsx = null;
+let _pdfjs = null;
+let _pdfWorkerUrl = null;
+
+async function getXlsx() {
+  if (_xlsx) return _xlsx;
+  _xlsx = await import('xlsx');
+  return _xlsx;
+}
+
+async function getPdfjs() {
+  if (!_pdfjs) _pdfjs = await import('pdfjs-dist');
+  if (!_pdfWorkerUrl) {
+    const worker = await import('pdfjs-dist/build/pdf.worker.min.mjs?url');
+    _pdfWorkerUrl = worker.default;
+  }
+  return { pdfjsLib: _pdfjs, workerUrl: _pdfWorkerUrl };
+}
 
 // Normalize Turkish diacritics to ASCII for header matching
 function asciiNormalize(str) {
@@ -140,70 +160,16 @@ function normalizeHeader(h) {
 
 // Detect CSV delimiter (comma or semicolon)
 function detectDelimiter(text) {
-  const firstLine = text.split(/[\r\n]/)[0];
-  const commas    = (firstLine.match(/,/g) || []).length;
-  const semis     = (firstLine.match(/;/g) || []).length;
-  const tabs      = (firstLine.match(/\t/g) || []).length;
-  if (tabs > commas && tabs > semis) return '\t';
-  if (semis > commas) return ';';
-  return ',';
+  return detectDelimiterCore(text);
 }
 
 function normalizeRows(rows) {
-  if (!rows || rows.length === 0) return [];
-  const headers = Object.keys(rows[0]);
-  const mapped  = {};
-  headers.forEach(h => {
-    const norm = normalizeHeader(h);
-    if (norm) mapped[h] = norm;
-  });
-
-  if (Object.keys(mapped).length === 0) return [];
-
-  const hasPartCode = Object.values(mapped).includes('part_code');
-
-  return rows
-    .map((row, idx) => {
-      const out = {};
-      Object.entries(mapped).forEach(([orig, norm]) => {
-        const val = row[orig];
-        out[norm] = val !== undefined && val !== null ? String(val).trim() : '';
-      });
-
-      // Auto-generate part_code from description or sequential ID when not present
-      if (!hasPartCode || !out.part_code) {
-        if (out.description && out.description.length > 0) {
-          // Derive a slug from description (first 24 chars, alphanumeric + dash)
-          const slug = out.description
-            .substring(0, 24)
-            .replace(/[^a-zA-Z0-9\-_]/g, '-')
-            .replace(/-+/g, '-')
-            .replace(/^-|-$/g, '')
-            .toUpperCase();
-          out.part_code = slug || `IMP-${String(idx + 1).padStart(4, '0')}`;
-        } else {
-          out.part_code = `IMP-${String(idx + 1).padStart(4, '0')}`;
-        }
-      }
-
-      return out;
-    })
-    .filter(r => {
-      if (!r.part_code || r.part_code.length === 0) return false;
-      // Skip summary/footer rows (e.g. "Toplam:", "KDV:", blank rows with auto-generated ID)
-      // A valid component row must have at least 2 meaningful fields beyond part_code
-      const MEANINGFUL = ['description', 'quantity', 'category', 'mpn', 'manufacturer', 'package', 'location', 'unit_price', 'datasheet_url', 'notes'];
-      const filledCount = MEANINGFUL.filter(k => r[k] && String(r[k]).trim() !== '').length;
-      return filledCount >= 1;
-    });
+  return normalizeRowsCore(rows);
 }
 
 // Returns recognized headers for debug feedback
 function getMappedHeaderNames(rows) {
-  if (!rows || rows.length === 0) return { found: [], mapped: [] };
-  const found = Object.keys(rows[0]);
-  const mapped = found.filter(h => normalizeHeader(h) !== null);
-  return { found, mapped };
+  return getMappedHeaderNamesCore(rows);
 }
 
 // ============================================================
@@ -220,51 +186,7 @@ const WARN_LABELS = {
 };
 
 function validateRows(rows) {
-  let warnCount = 0;
-  let errorCount = 0;
-  const warnReasons = {};
-
-  const validated = rows.map(row => {
-    const warnings = [];
-    const errors   = [];
-
-    if (!row.part_code || row.part_code.length > 64) {
-      errors.push('part_code');
-    }
-
-    // Use locale-aware parser so Turkish "3,90" is treated as 3.90
-    const qty = parseLocaleNumber(row.quantity);
-    if (row.quantity && row.quantity !== '' && (qty === null || qty < 0 || qty > 999999)) {
-      warnings.push('quantity');
-    }
-
-    const vMax = parseLocaleNumber(row.voltage_max);
-    if (row.voltage_max && row.voltage_max !== '' && (vMax === null || vMax < 0 || vMax > 100000)) {
-      warnings.push('voltage_max');
-    }
-
-    const iMax = parseLocaleNumber(row.current_max);
-    if (row.current_max && row.current_max !== '' && (iMax === null || iMax < 0 || iMax > 10000)) {
-      warnings.push('current_max');
-    }
-
-    if (row.datasheet_url && !URL_RE.test(row.datasheet_url)) {
-      warnings.push('datasheet_url');
-    }
-
-    const price = parseLocaleNumber(row.unit_price);
-    if (row.unit_price && row.unit_price !== '' && (price === null || price < 0)) {
-      warnings.push('unit_price');
-    }
-
-    warnings.forEach(k => { warnReasons[k] = (warnReasons[k] || 0) + 1; });
-    warnCount  += warnings.length;
-    errorCount += errors.length;
-
-    return { ...row, _warnings: warnings, _errors: errors };
-  });
-
-  return { rows: validated, warnCount, errorCount, warnReasons };
+  return validateRowsCore(rows, parseLocaleNumber);
 }
 
 // ============================================================
@@ -336,9 +258,8 @@ function excelRowScore(row) {
 }
 
 function parseExcel(arrayBuffer) {
-  if (typeof XLSX === 'undefined') {
-    throw new Error('SheetJS library not loaded.');
-  }
+  if (!_xlsx) throw new Error('Excel parser is not loaded.');
+  const XLSX = _xlsx;
   const workbook  = XLSX.read(arrayBuffer, { type: 'array' });
   const sheetName = workbook.SheetNames[0];
   const sheet     = workbook.Sheets[sheetName];
@@ -382,14 +303,9 @@ function parseExcel(arrayBuffer) {
 // Uses position-based column detection for robust table parsing.
 // ============================================================
 async function parsePDF(arrayBuffer) {
-  if (!window.pdfjsLib) {
-    throw new Error('PDF.js is not loaded. Make sure you are connected to the internet on first launch.');
-  }
-
-  window.pdfjsLib.GlobalWorkerOptions.workerSrc =
-    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-
-  const loadingTask = window.pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) });
+  const { pdfjsLib, workerUrl } = await getPdfjs();
+  pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl;
+  const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) });
   const pdf = await loadingTask.promise;
   const maxPages = Math.min(pdf.numPages, 30);
 
@@ -723,6 +639,7 @@ async function handleFile(file) {
         normalized = rawRows.filter(r => r.part_code);
       }
     } else if (ext === 'xlsx' || ext === 'xls') {
+      await getXlsx();
       const buf  = await file.arrayBuffer();
       rawRows    = parseExcel(buf);
       normalized = normalizeRows(rawRows);
@@ -737,6 +654,7 @@ async function handleFile(file) {
         return;
       }
     } else if (ext === 'pdf') {
+      await getPdfjs();
       const buf  = await file.arrayBuffer();
       normalized = await parsePDF(buf);
       if (normalized.length === 0) {

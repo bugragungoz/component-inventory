@@ -1,4 +1,4 @@
-import { state, escHtml, deleteComponents, showToast } from '../app.js';
+import { state, escHtml, deleteComponents, showToast, listStockMovementsFor } from '../app.js';
 import { lookupComponent, applyDbData }                 from './hardcoded_datasheet.js';
 import { setLabelComponent }                             from './labels.js';
 import { readFile }                                      from '@tauri-apps/plugin-fs';
@@ -198,10 +198,30 @@ const CATEGORY_COL_OVERRIDES = {
 };
 
 function getActiveCols() {
-  const cat = state.filterCat || '';
+  const cat = String(state.filterCat || '').trim();
+  const sub = String(state.filterSub || '').trim();
+  const lcCat = cat.toLowerCase();
+  const lcSub = sub.toLowerCase();
+
+  // Canonical taxonomy is "Transistors". Keep backward compatibility with
+  // old filters / imported legacy categories that may still contain MOSFETs,
+  // BJTs, IGBTs as top-level values.
+  if (lcCat.includes('transistor') || lcCat.includes('mosfet') || lcCat.includes('bjt') || lcCat.includes('igbt')) {
+    const hint = `${lcCat} ${lcSub}`;
+    if (hint.includes('mosfet') || hint.includes('n-channel') || hint.includes('p-channel')) {
+      return CATEGORY_COL_OVERRIDES['MOSFETs'];
+    }
+    if (hint.includes('bjt') || hint.includes('npn') || hint.includes('pnp') || hint.includes('darlington')) {
+      return CATEGORY_COL_OVERRIDES['BJTs'];
+    }
+    if (hint.includes('igbt')) {
+      return CATEGORY_COL_OVERRIDES['IGBTs'];
+    }
+    return CATEGORY_COL_OVERRIDES.Transistors;
+  }
+
   for (const [key, cols] of Object.entries(CATEGORY_COL_OVERRIDES)) {
-    // Strip trailing 's' from key, match category prefix case-insensitively
-    // e.g. 'Transistors' key matches 'Transistor (MOSFET)', 'Transistor Array' etc.
+    if (key === 'MOSFETs' || key === 'BJTs' || key === 'IGBTs') continue;
     const base = key.replace(/s$/i, '');
     if (new RegExp(`^${base}`, 'i').test(cat)) return cols;
   }
@@ -676,10 +696,10 @@ function buildRow(c, cols) {
     ${cells}
     <td class="col-actions">
       <div class="row-actions">
-        <button class="row-action-btn btn-row-edit" title="Edit">
+        <button class="row-action-btn btn-row-edit" title="${escHtml(t('action.edit'))}">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         </button>
-        <button class="row-action-btn danger btn-row-delete" title="Delete">
+        <button class="row-action-btn danger btn-row-delete" title="${escHtml(t('action.delete'))}">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
         </button>
       </div>
@@ -807,6 +827,7 @@ async function showDetail(comp) {
     effective.category || comp.category,
     effective.subcategory || comp.subcategory
   );
+  const movementRows = await listStockMovementsFor(comp.id, 20);
 
   document.getElementById('detail-part-code').textContent = comp.part_code;
 
@@ -963,6 +984,29 @@ async function showDetail(comp) {
     } catch (_) { /* image not accessible */ }
   }
 
+  const movementHtml = movementRows.length > 0
+    ? `
+      <div class="detail-section-title">${t('detail.section.movements')}</div>
+      <div class="detail-grid">
+        ${movementRows.map(m => `
+          <div class="detail-field full">
+            <span class="detail-label mono" style="font-size:10px">${escHtml(String(m.created_at || '-'))}</span>
+            <span class="detail-value mono" style="display:flex;justify-content:space-between;gap:12px">
+              <span>${escHtml(m.reason || '-')}</span>
+              <span style="color:${Number(m.delta) >= 0 ? 'var(--accent-green)' : 'var(--danger)'}">
+                ${Number(m.delta) >= 0 ? '+' : ''}${Number(m.delta) || 0}
+              </span>
+              <span>${t('detail.movement.after')}: ${Number(m.quantity_after) || 0}</span>
+            </span>
+          </div>
+        `).join('')}
+      </div>`
+    : `
+      <div class="detail-section-title">${t('detail.section.movements')}</div>
+      <div class="detail-field full">
+        <span class="detail-value empty">${t('detail.movement.empty')}</span>
+      </div>`;
+
   body.innerHTML = `
     ${dbBanner}
     ${imageHtml}
@@ -1005,6 +1049,10 @@ async function showDetail(comp) {
         <span class="detail-label">${t('detail.field.mpn')}</span>
         ${val(comp.mpn, 'mono')}
       </div>
+      <div class="detail-field">
+        <span class="detail-label">${t('edit.preferredSupplier')}</span>
+        ${val(comp.preferred_supplier)}
+      </div>
       <div class="detail-field full">
         <span class="detail-label">${t('detail.field.description')}</span>
         ${val(effective.description || comp.description)}
@@ -1025,7 +1073,9 @@ async function showDetail(comp) {
         <span class="detail-label">${t('detail.field.updated')}</span>
         <span class="detail-value mono" style="font-size:11px">${comp.updated_at || '-'}</span>
       </div>
-    </div>`;
+    </div>
+
+    ${movementHtml}`;
 
   document.getElementById('overlay-detail').style.display = '';
 }

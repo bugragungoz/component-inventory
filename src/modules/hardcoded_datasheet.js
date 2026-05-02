@@ -478,8 +478,11 @@ const PATTERNS = [
   { pattern: /^IRF\d/,        result: { category:'Transistors', subcategory:'Power MOSFET',    package:'TO-220',  description:'N-Ch Power MOSFET' } },
   // MOSFET — IRFZ family
   { pattern: /^IRFZ\d/,       result: { category:'Transistors', subcategory:'Power MOSFET',    package:'TO-220',  description:'N-Ch Power MOSFET' } },
-  // MOSFET — STP family
-  { pattern: /^STP\d/,        result: { category:'Transistors', subcategory:'Power MOSFET',    package:'TO-220',  description:'N-Ch Power MOSFET' } },
+  // STMicro Schottky / rectifier families — MUST precede STP MOSFET rule (STPS… is not STP + digit)
+  { pattern: /^STPS/i,        result: { category:'Diodes',      subcategory:'Schottky',        package:'Various', description:'Power Schottky Rectifier (STMicro STPS)' } },
+  { pattern: /^STTH/i,        result: { category:'Diodes',      subcategory:'Fast Recovery',   package:'Various', description:'Ultrafast / High-Efficiency Rectifier (STMicro STTH)' } },
+  // MOSFET — STP… power FETs only (exclude STPS Schottky, STPSC, etc.)
+  { pattern: /^STP(?![A-Z])\d/, result: { category:'Transistors', subcategory:'Power MOSFET',  package:'TO-220',  description:'N-Ch Power MOSFET' } },
   // Gate Drivers — IR21xx
   { pattern: /^IR21\d{2}/,    result: { category:'ICs',         subcategory:'Gate Driver',     package:'DIP-14',  manufacturer:'Infineon/IR', description:'High/Low Side Gate Driver' } },
   // PWM Controllers — UC38xx / UC39xx

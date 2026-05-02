@@ -11,6 +11,9 @@ import { initI18n, t, setLocale, getLocale, applyTranslations } from './modules/
 import { initBackupDiff }        from './modules/backup_diff.js';
 import { initDriveSync, triggerDriveSync, triggerDriveSyncManual, getDriveStatus, onDriveStatusChange, DRIVE_DEFAULT_BASE_NAME } from './modules/drive_sync.js';
 import { initSidebarFuzzySearch } from './modules/fuzzy_search.js';
+import { initReorder } from './modules/reorder.js';
+import { initProjects } from './modules/projects.js';
+import { UNCATEGORIZED_CATEGORY, STORAGE_KEYS, DEFAULTS } from './modules/constants.js';
 
 // Rename pencil SVG (inline, reused in tree rendering)
 const RENAME_SVG = `<svg class="rename-icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`;
@@ -30,6 +33,8 @@ export const state = {
   filterLoc: '',
   filterLocSub: '',
   viewCompact: true,
+  mutationBatchDepth: 0,
+  mutationBatchDirty: false,
 };
 
 // ============================================================
@@ -49,6 +54,7 @@ async function initDB() {
       package       TEXT DEFAULT '',
       manufacturer  TEXT DEFAULT '',
       mpn           TEXT DEFAULT '',
+      preferred_supplier TEXT DEFAULT '',
       location      TEXT DEFAULT '',
       voltage_max   REAL,
       current_max   REAL,
@@ -62,12 +68,49 @@ async function initDB() {
     );
   `);
 
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS stock_movements (
+      id             INTEGER PRIMARY KEY AUTOINCREMENT,
+      component_id   INTEGER NOT NULL,
+      part_code      TEXT NOT NULL,
+      delta          INTEGER NOT NULL,
+      quantity_after INTEGER NOT NULL,
+      reason         TEXT DEFAULT '',
+      created_at     TEXT DEFAULT (datetime('now'))
+    );
+  `);
+
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS projects (
+      id             INTEGER PRIMARY KEY AUTOINCREMENT,
+      name           TEXT NOT NULL,
+      description    TEXT DEFAULT '',
+      schematic_path TEXT DEFAULT '',
+      created_at     TEXT DEFAULT (datetime('now')),
+      updated_at     TEXT DEFAULT (datetime('now'))
+    );
+  `);
+
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS project_components (
+      id           INTEGER PRIMARY KEY AUTOINCREMENT,
+      project_id   INTEGER NOT NULL,
+      component_id INTEGER NOT NULL,
+      required_qty INTEGER NOT NULL DEFAULT 1,
+      note         TEXT DEFAULT '',
+      created_at   TEXT DEFAULT (datetime('now')),
+      updated_at   TEXT DEFAULT (datetime('now')),
+      UNIQUE(project_id, component_id)
+    );
+  `);
+
   // Migrations — each wrapped in try/catch so they are idempotent
   const migrations = [
     `ALTER TABLE components ADD COLUMN image_path   TEXT DEFAULT ''`,
     `ALTER TABLE components ADD COLUMN resistance   TEXT DEFAULT ''`,
     `ALTER TABLE components ADD COLUMN tolerance    TEXT DEFAULT ''`,
     `ALTER TABLE components ADD COLUMN power_rating REAL`,
+    `ALTER TABLE components ADD COLUMN preferred_supplier TEXT DEFAULT ''`,
     // JSON attributes column — stores category-specific parameters
     // (e.g. rds_on/vgs_th for MOSFETs, hfe/vce_sat for BJTs).
     // Query example:
@@ -96,7 +139,7 @@ export async function loadComponents() {
 
 export async function addComponent(data) {
   const { part_code, category, subcategory, quantity, package: pkg,
-    manufacturer, mpn, location, voltage_max, current_max,
+    manufacturer, mpn, preferred_supplier, location, voltage_max, current_max,
     description, datasheet_url, unit_price, notes, image_path,
     resistance, tolerance, power_rating, attributes } = data;
 
@@ -107,23 +150,32 @@ export async function addComponent(data) {
   await state.db.execute(
     `INSERT INTO components
       (part_code, category, subcategory, quantity, package, manufacturer, mpn, location,
+       preferred_supplier,
        voltage_max, current_max, description, datasheet_url, unit_price, notes, image_path,
        resistance, tolerance, power_rating, attributes)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [part_code, category || '', subcategory || '', quantity || 0, pkg || '',
-     manufacturer || '', mpn || '', location || '',
+     manufacturer || '', mpn || '', location || '', preferred_supplier || '',
      voltage_max ?? null, current_max ?? null,
      description || '', datasheet_url || '', unit_price ?? null, notes || '',
      image_path || '', resistance || '', tolerance || '', power_rating ?? null,
      attrsJson]
   );
-  await triggerBackup();
-  await loadComponents();
+  const inserted = await state.db.select(
+    'SELECT id, quantity FROM components WHERE part_code = ? LIMIT 1',
+    [part_code]
+  );
+  const row = inserted && inserted[0];
+  if (row) {
+    const qty = Number(row.quantity) || 0;
+    await recordStockMovement(row.id, part_code, qty, qty, 'create');
+  }
+  await finalizeMutation();
 }
 
 export async function updateComponent(id, data) {
   const { part_code, category, subcategory, quantity, package: pkg,
-    manufacturer, mpn, location, voltage_max, current_max,
+    manufacturer, mpn, preferred_supplier, location, voltage_max, current_max,
     description, datasheet_url, unit_price, notes, image_path,
     resistance, tolerance, power_rating, attributes } = data;
 
@@ -131,23 +183,39 @@ export async function updateComponent(id, data) {
     ? JSON.stringify(attributes)
     : (typeof attributes === 'string' ? attributes : '{}');
 
+  const beforeRows = await state.db.select(
+    'SELECT quantity, part_code FROM components WHERE id = ? LIMIT 1',
+    [id]
+  );
+  const beforeQty = Number(beforeRows?.[0]?.quantity) || 0;
+  const beforePartCode = String(beforeRows?.[0]?.part_code || '');
+
   await state.db.execute(
     `UPDATE components SET
       part_code=?, category=?, subcategory=?, quantity=?, package=?,
-      manufacturer=?, mpn=?, location=?, voltage_max=?, current_max=?,
+      manufacturer=?, mpn=?, location=?, preferred_supplier=?, voltage_max=?, current_max=?,
       description=?, datasheet_url=?, unit_price=?, notes=?, image_path=?,
       resistance=?, tolerance=?, power_rating=?, attributes=?,
       updated_at=datetime('now')
      WHERE id=?`,
     [part_code, category || '', subcategory || '', quantity || 0, pkg || '',
-     manufacturer || '', mpn || '', location || '',
+     manufacturer || '', mpn || '', location || '', preferred_supplier || '',
      voltage_max ?? null, current_max ?? null,
      description || '', datasheet_url || '', unit_price ?? null, notes || '',
      image_path || '', resistance || '', tolerance || '', power_rating ?? null,
      attrsJson, id]
   );
-  await triggerBackup();
-  await loadComponents();
+  const afterQty = Number(quantity) || 0;
+  if (afterQty !== beforeQty) {
+    await recordStockMovement(
+      id,
+      part_code || beforePartCode,
+      afterQty - beforeQty,
+      afterQty,
+      'edit',
+    );
+  }
+  await finalizeMutation();
 }
 
 /**
@@ -170,22 +238,34 @@ export async function renameCategory(oldName, newName, isSubcategory = false, pa
       [trimmed, oldName]
     );
   }
-  await triggerBackup();
-  await loadComponents();
+  await finalizeMutation();
 }
 
 export async function deleteComponent(id) {
+  const rows = await state.db.select(
+    'SELECT part_code, quantity FROM components WHERE id = ? LIMIT 1',
+    [id]
+  );
+  const old = rows && rows[0];
+  if (old) {
+    await recordStockMovement(id, old.part_code, -(Number(old.quantity) || 0), 0, 'delete');
+  }
   await state.db.execute('DELETE FROM components WHERE id=?', [id]);
-  await triggerBackup();
-  await loadComponents();
+  await finalizeMutation();
 }
 
 export async function deleteComponents(ids) {
   if (!ids || ids.length === 0) return;
   const placeholders = ids.map(() => '?').join(',');
+  const rows = await state.db.select(
+    `SELECT id, part_code, quantity FROM components WHERE id IN (${placeholders})`,
+    ids
+  );
+  for (const r of rows) {
+    await recordStockMovement(r.id, r.part_code, -(Number(r.quantity) || 0), 0, 'bulk-delete');
+  }
   await state.db.execute(`DELETE FROM components WHERE id IN (${placeholders})`, ids);
-  await triggerBackup();
-  await loadComponents();
+  await finalizeMutation();
 }
 
 export async function upsertComponents(rows, mode = 'merge') {
@@ -195,27 +275,34 @@ export async function upsertComponents(rows, mode = 'merge') {
 
   for (const row of rows) {
     const { part_code, category, subcategory, quantity, package: pkg,
-      manufacturer, mpn, location, voltage_max, current_max,
+      manufacturer, mpn, preferred_supplier, location, voltage_max, current_max,
       description, datasheet_url, unit_price, notes } = row;
 
     if (!part_code) continue;
 
     // New components without a category land in Uncategorized.
     // In merge mode, never overwrite an existing category/subcategory with an empty value.
-    const catVal    = category    || 'Uncategorized';
+    const catVal    = category    || UNCATEGORIZED_CATEGORY;
     const subVal    = subcategory || '';
     const qtyVal    = parseLocaleNumber(quantity)   ?? 0;
     const vMaxVal   = parseLocaleNumber(voltage_max);
     const iMaxVal   = parseLocaleNumber(current_max);
     const priceVal  = parseLocaleNumber(unit_price);
 
+    const existingRows = await state.db.select(
+      'SELECT id, quantity FROM components WHERE part_code = ? LIMIT 1',
+      [part_code]
+    );
+    const existing = existingRows && existingRows[0];
+    const prevQty = Number(existing?.quantity) || 0;
+
     await state.db.execute(
       `INSERT INTO components
         (part_code, category, subcategory, quantity, package, manufacturer, mpn, location,
-         voltage_max, current_max, description, datasheet_url, unit_price, notes, image_path)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         preferred_supplier, voltage_max, current_max, description, datasheet_url, unit_price, notes, image_path)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
        ON CONFLICT(part_code) DO UPDATE SET
-         category    = CASE WHEN excluded.category    != '' AND excluded.category != 'Uncategorized'
+         category    = CASE WHEN excluded.category    != '' AND excluded.category != '${UNCATEGORIZED_CATEGORY}'
                             THEN excluded.category    ELSE components.category    END,
          subcategory = CASE WHEN excluded.subcategory != ''
                             THEN excluded.subcategory ELSE components.subcategory END,
@@ -224,6 +311,7 @@ export async function upsertComponents(rows, mode = 'merge') {
          manufacturer= CASE WHEN excluded.manufacturer != '' THEN excluded.manufacturer ELSE components.manufacturer END,
          mpn         = CASE WHEN excluded.mpn  != '' THEN excluded.mpn  ELSE components.mpn  END,
          location    = CASE WHEN excluded.location != '' THEN excluded.location ELSE components.location END,
+        preferred_supplier = CASE WHEN excluded.preferred_supplier != '' THEN excluded.preferred_supplier ELSE components.preferred_supplier END,
          voltage_max = CASE WHEN excluded.voltage_max IS NOT NULL THEN excluded.voltage_max ELSE components.voltage_max END,
          current_max = CASE WHEN excluded.current_max IS NOT NULL THEN excluded.current_max ELSE components.current_max END,
          description = CASE WHEN excluded.description != '' THEN excluded.description ELSE components.description END,
@@ -232,26 +320,78 @@ export async function upsertComponents(rows, mode = 'merge') {
          notes       = CASE WHEN excluded.notes != '' THEN excluded.notes ELSE components.notes END,
          updated_at  = datetime('now')`,
       [part_code, catVal, subVal, isNaN(qtyVal) ? 0 : qtyVal, pkg || '',
-       manufacturer || '', mpn || '', location || '',
+       manufacturer || '', mpn || '', location || '', preferred_supplier || '',
        (vMaxVal != null && !isNaN(vMaxVal)) ? vMaxVal : null,
        (iMaxVal != null && !isNaN(iMaxVal)) ? iMaxVal : null,
        description || '', datasheet_url || '',
        (priceVal != null && !isNaN(priceVal)) ? priceVal : null, notes || '', '']
     );
+
+    const finalRows = await state.db.select(
+      'SELECT id, quantity FROM components WHERE part_code = ? LIMIT 1',
+      [part_code]
+    );
+    const finalRow = finalRows && finalRows[0];
+    const newQty = Number(finalRow?.quantity) || 0;
+    if (finalRow && (!existing || newQty !== prevQty)) {
+      await recordStockMovement(
+        finalRow.id,
+        part_code,
+        existing ? (newQty - prevQty) : newQty,
+        newQty,
+        existing ? 'import-merge' : 'import-create',
+      );
+    }
   }
-  await triggerBackup();
-  await loadComponents();
+  await finalizeMutation();
 }
 
 async function triggerBackup() {
   try {
-    const retention = parseInt(localStorage.getItem('backupRetention') || '30', 10);
-    await invoke('create_backup', { retention: isNaN(retention) ? 30 : retention });
+    const retention = parseInt(localStorage.getItem(STORAGE_KEYS.BACKUP_RETENTION) || String(DEFAULTS.BACKUP_RETENTION), 10);
+    await invoke('create_backup', { retention: isNaN(retention) ? DEFAULTS.BACKUP_RETENTION : retention });
   } catch (_) {
     // Non-critical - backup failure must not block the UI
   }
   // Cloud sync (Drive / Dropbox / OneDrive) - fire-and-forget
   try { await triggerDriveSync(); } catch (_) { /* logged inside */ }
+}
+
+async function finalizeMutation() {
+  if (state.mutationBatchDepth > 0) {
+    state.mutationBatchDirty = true;
+    return;
+  }
+  await triggerBackup();
+  await loadComponents();
+}
+
+export function beginMutationBatch() {
+  state.mutationBatchDepth += 1;
+}
+
+export async function endMutationBatch() {
+  if (state.mutationBatchDepth > 0) state.mutationBatchDepth -= 1;
+  if (state.mutationBatchDepth === 0 && state.mutationBatchDirty) {
+    state.mutationBatchDirty = false;
+    await triggerBackup();
+    await loadComponents();
+  }
+}
+
+function getConfiguredBackupIntervalMinutes() {
+  const raw = parseInt(localStorage.getItem(STORAGE_KEYS.BACKUP_INTERVAL_MINUTES) || String(DEFAULTS.BACKUP_INTERVAL_MINUTES), 10);
+  if (isNaN(raw) || raw <= 0) return DEFAULTS.BACKUP_INTERVAL_MINUTES;
+  return raw;
+}
+
+async function applyBackupIntervalSetting() {
+  const minutes = getConfiguredBackupIntervalMinutes();
+  try {
+    await invoke('set_backup_interval_minutes', { minutes });
+  } catch (_) {
+    // Backend scheduler fallback uses default interval.
+  }
 }
 
 // ============================================================
@@ -532,8 +672,7 @@ export function applyLocationsVisibility() {
 
 function initSettings() {
   document.getElementById('btn-settings')?.addEventListener('click', () => {
-    populateSettings();
-    document.getElementById('overlay-settings').style.display = '';
+    openSettingsModal();
   });
 
   // ---- Language ----
@@ -576,7 +715,16 @@ function initSettings() {
   // ---- Backup retention ----
   document.getElementById('s-backup-retention')?.addEventListener('change', e => {
     const val = parseInt(e.target.value);
-    if (!isNaN(val) && val >= 0) localStorage.setItem('backupRetention', String(val));
+    if (!isNaN(val) && val >= 0) localStorage.setItem(STORAGE_KEYS.BACKUP_RETENTION, String(val));
+  });
+
+  // ---- Backup interval (functional) ----
+  document.getElementById('s-backup-interval')?.addEventListener('change', e => {
+    const val = parseInt(e.target.value, 10);
+    if (!isNaN(val) && val > 0) {
+      localStorage.setItem(STORAGE_KEYS.BACKUP_INTERVAL_MINUTES, String(val));
+      applyBackupIntervalSetting().catch(() => {});
+    }
   });
 
   // ---- Export folder ----
@@ -655,10 +803,16 @@ function initSettings() {
   document.getElementById('btn-check-update')?.addEventListener('click', checkForUpdates);
 }
 
+function openSettingsModal() {
+  populateSettings();
+  const overlay = document.getElementById('overlay-settings');
+  if (overlay) overlay.style.display = '';
+}
+
 // ============================================================
 // In-app update checker (GitHub Releases API)
 // ============================================================
-const CURRENT_VERSION_FALLBACK = '0.1.9';
+const CURRENT_VERSION_FALLBACK = '0.2.5';
 const GITHUB_RELEASES_API = 'https://api.github.com/repos/bugragungoz/component-inventory/releases/latest';
 
 async function getCurrentVersion() {
@@ -670,6 +824,47 @@ async function getCurrentVersion() {
   }
 }
 
+async function syncSettingsVersionLabel() {
+  const el = document.getElementById('settings-about-version');
+  if (!el) return;
+  const currentVersion = await getCurrentVersion();
+  el.textContent = `v${currentVersion}`;
+}
+
+function renderUpdateStatus(el, mode, payload = {}) {
+  if (!el) return;
+  el.style.display = '';
+
+  if (mode === 'available') {
+    const latestTag = payload.latestTag || '-';
+    const currentVersion = payload.currentVersion || '-';
+    const downloadLabel = t('update.download');
+    el.style.background = 'var(--accent-dim)';
+    el.style.color = 'var(--accent)';
+    el.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+        <span>${t('update.available', { latest: latestTag, current: currentVersion })}</span>
+        <a href="#" id="${payload.buttonId || 'btn-download-update'}" class="btn btn-add" style="font-size:0.74rem;padding:4px 12px;white-space:nowrap">${escHtml(downloadLabel)}</a>
+      </div>
+      ${payload.body ? `<div style="margin-top:6px;font-size:0.72rem;color:var(--text-muted);max-height:60px;overflow-y:auto;white-space:pre-wrap">${escHtml((payload.body || '').slice(0, 300))}</div>` : ''}
+    `;
+    return;
+  }
+
+  if (mode === 'latest') {
+    el.style.background = 'var(--bg-hover)';
+    el.style.color = 'var(--text-secondary)';
+    el.innerHTML = t('update.latest', { current: payload.currentVersion || '-' });
+    return;
+  }
+
+  if (mode === 'error') {
+    el.style.background = 'var(--bg-hover)';
+    el.style.color = 'var(--text-muted)';
+    el.innerHTML = t('update.failed', { err: payload.error || '' });
+  }
+}
+
 async function checkForUpdates() {
   const btn = document.getElementById('btn-check-update');
   const statusEl = document.getElementById('update-status');
@@ -678,7 +873,7 @@ async function checkForUpdates() {
   btn.disabled = true;
   btn.innerHTML = `
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="spin-icon"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-    Checking…`;
+    ${escHtml(t('update.checking'))}`;
 
   const currentVersion = await getCurrentVersion();
 
@@ -700,15 +895,12 @@ async function checkForUpdates() {
       const msiAsset = assets.find(a => a.name.endsWith('.msi'));
       const downloadUrl = exeAsset?.browser_download_url || msiAsset?.browser_download_url || data.html_url;
 
-      statusEl.style.background = 'var(--accent-dim)';
-      statusEl.style.color = 'var(--accent)';
-      statusEl.innerHTML = `
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
-          <span><strong>v${escHtml(latestTag)}</strong> is available! (current: v${currentVersion})</span>
-          <a href="#" id="btn-download-update" class="btn btn-add" style="font-size:0.74rem;padding:4px 12px;white-space:nowrap">Download</a>
-        </div>
-        ${data.body ? `<div style="margin-top:6px;font-size:0.72rem;color:var(--text-muted);max-height:60px;overflow-y:auto;white-space:pre-wrap">${escHtml((data.body || '').slice(0, 300))}</div>` : ''}
-      `;
+      renderUpdateStatus(statusEl, 'available', {
+        latestTag,
+        currentVersion,
+        body: data.body || '',
+        buttonId: 'btn-download-update',
+      });
 
       document.getElementById('btn-download-update')?.addEventListener('click', async (e) => {
         e.preventDefault();
@@ -720,20 +912,15 @@ async function checkForUpdates() {
         }
       });
     } else {
-      statusEl.style.background = 'var(--bg-hover)';
-      statusEl.style.color = 'var(--text-secondary)';
-      statusEl.innerHTML = `✓ You are on the latest version (v${currentVersion})`;
+      renderUpdateStatus(statusEl, 'latest', { currentVersion });
     }
   } catch (err) {
-    statusEl.style.display = '';
-    statusEl.style.background = 'var(--bg-hover)';
-    statusEl.style.color = 'var(--text-muted)';
-    statusEl.innerHTML = `Could not check for updates: ${escHtml(err.message || String(err))}`;
+    renderUpdateStatus(statusEl, 'error', { error: escHtml(err.message || String(err)) });
   } finally {
     btn.disabled = false;
     btn.innerHTML = `
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-      Check for Updates`;
+      ${escHtml(t('settings.updates.check'))}`;
   }
 }
 
@@ -767,21 +954,31 @@ async function autoCheckForUpdates() {
         || msiAsset?.browser_download_url
         || data.html_url;
       showToast(
-        `Update available: v${latestTag} (current: v${currentVersion}). Opening Settings to download…`,
+        t('update.toast', { latest: latestTag, current: currentVersion }),
         'info',
-        6000,
+        10000,
+        {
+          actionLabel: t('update.download'),
+          onAction: async () => {
+            try {
+              const { openUrl } = await import('@tauri-apps/plugin-opener');
+              await openUrl(downloadUrl);
+            } catch {
+              window.open(downloadUrl, '_blank');
+            }
+          },
+          onClick: () => openSettingsModal(),
+        },
       );
+      openSettingsModal();
       // Also populate the settings update-status area so the user can act
       const statusEl = document.getElementById('update-status');
       if (statusEl) {
-        statusEl.style.display = '';
-        statusEl.style.background = 'var(--accent-dim)';
-        statusEl.style.color = 'var(--accent)';
-        statusEl.innerHTML = `
-          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
-            <span><strong>v${escHtml(latestTag)}</strong> is available! (current: v${currentVersion})</span>
-            <a href="#" id="btn-download-update-auto" class="btn btn-add" style="font-size:0.74rem;padding:4px 12px;white-space:nowrap">Download</a>
-          </div>`;
+        renderUpdateStatus(statusEl, 'available', {
+          latestTag,
+          currentVersion,
+          buttonId: 'btn-download-update-auto',
+        });
         document.getElementById('btn-download-update-auto')?.addEventListener('click', async (e) => {
           e.preventDefault();
           try {
@@ -816,7 +1013,9 @@ function populateSettings() {
   if (dq) dq.value = localStorage.getItem('defaultQty') || '1';
 
   const br = document.getElementById('s-backup-retention');
-  if (br) br.value = localStorage.getItem('backupRetention') || '30';
+  if (br) br.value = localStorage.getItem(STORAGE_KEYS.BACKUP_RETENTION) || String(DEFAULTS.BACKUP_RETENTION);
+  const bi = document.getElementById('s-backup-interval');
+  if (bi) bi.value = String(getConfiguredBackupIntervalMinutes());
 
   const ef = document.getElementById('s-export-folder');
   if (ef) ef.value = localStorage.getItem('exportFolder') || '';
@@ -835,6 +1034,8 @@ function populateSettings() {
       if (el) el.textContent = dir + 'component_inventory.db';
     }).catch(() => {});
   } catch (_) {}
+
+  syncSettingsVersionLabel().catch(() => {});
 }
 
 /** Apply simple/detailed form mode to <body>. */
@@ -899,7 +1100,7 @@ function initDriveStatusPill() {
   btn.addEventListener('click', async () => {
     const status = getDriveStatus();
     if (status.state === 'off') {
-      document.getElementById('btn-settings')?.click();
+      openSettingsModal();
       return;
     }
     // Manual sync trigger - shows toast confirmation on success
@@ -978,16 +1179,79 @@ export function parseLocaleNumber(str) {
   return isNaN(n) ? null : n;
 }
 
-export function showToast(message, type = 'info', duration = 3000) {
+export function showToast(message, type = 'info', duration = 3000, opts = {}) {
   const container = document.getElementById('toast-container');
+  if (!container) return;
   const toast = document.createElement('div');
   toast.className = `toast ${type}`;
-  toast.textContent = message;
-  container.appendChild(toast);
-  setTimeout(() => {
+  const text = document.createElement('span');
+  text.textContent = message;
+  toast.appendChild(text);
+
+  const actionLabel = opts.actionLabel ? String(opts.actionLabel).trim() : '';
+  let removed = false;
+  const removeToast = () => {
+    if (removed) return;
+    removed = true;
     toast.classList.add('toast-out');
     setTimeout(() => toast.remove(), 200);
+  };
+
+  if (actionLabel) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn btn-add btn-sm';
+    btn.style.marginLeft = '10px';
+    btn.textContent = actionLabel;
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      if (typeof opts.onAction === 'function') {
+        try { await opts.onAction(); } catch (err) { console.warn('toast action failed:', err); }
+      }
+      removeToast();
+    });
+    toast.appendChild(btn);
+  }
+
+  if (typeof opts.onClick === 'function') {
+    toast.style.cursor = 'pointer';
+    toast.addEventListener('click', () => {
+      try { opts.onClick(); } catch (err) { console.warn('toast click failed:', err); }
+      removeToast();
+    });
+  }
+
+  container.appendChild(toast);
+  setTimeout(() => {
+    removeToast();
   }, duration);
+}
+
+async function recordStockMovement(componentId, partCode, delta, quantityAfter, reason = '') {
+  try {
+    const d = Number(delta);
+    const q = Number(quantityAfter);
+    if (!componentId || !partCode || isNaN(d) || isNaN(q) || d === 0) return;
+    await state.db.execute(
+      `INSERT INTO stock_movements (component_id, part_code, delta, quantity_after, reason)
+       VALUES (?, ?, ?, ?, ?)`,
+      [componentId, partCode, d, q, reason || '']
+    );
+  } catch (_) {
+    // Non-critical insert
+  }
+}
+
+export async function listStockMovementsFor(componentId, limit = 20) {
+  if (!componentId) return [];
+  return state.db.select(
+    `SELECT id, component_id, part_code, delta, quantity_after, reason, created_at
+       FROM stock_movements
+      WHERE component_id = ?
+      ORDER BY id DESC
+      LIMIT ?`,
+    [componentId, limit]
+  );
 }
 
 // ============================================================
@@ -1076,6 +1340,10 @@ async function main() {
     initDriveSync();
     initDriveStatusPill();
     initSidebarFuzzySearch();
+    initReorder();
+    initProjects();
+    syncSettingsVersionLabel().catch(() => {});
+    applyBackupIntervalSetting().catch(() => {});
 
     // Re-apply translations after dynamic content (datalists already rebuilt by loadComponents)
     applyTranslations();

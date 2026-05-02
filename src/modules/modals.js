@@ -9,6 +9,7 @@ import { open as openDialog } from '@tauri-apps/plugin-dialog';
 import { invoke } from '@tauri-apps/api/core';
 import { t } from './i18n.js';
 import { rankCandidates } from './fuzzy_search.js';
+import { UNCATEGORIZED_CATEGORY } from './constants.js';
 
 // ============================================================
 // Curated category -> subcategories map
@@ -260,6 +261,7 @@ function openEditModal(comp) {
     setField('edit-package',     comp.package);
     setField('edit-manufacturer',comp.manufacturer);
     setField('edit-mpn',         comp.mpn);
+    setField('edit-preferred-supplier', comp.preferred_supplier || '');
     setField('edit-location',    comp.location);
     setField('edit-voltage-max', comp.voltage_max ?? '');
     setField('edit-current-max', comp.current_max ?? '');
@@ -444,13 +446,13 @@ function initEditForm() {
     }
   });
 
-  // Auto-clear 'Uncategorized' on focus; restore on blur if empty
+  // Auto-clear canonical uncategorized value on focus; restore on blur if empty
   const catInput = document.getElementById('edit-category');
   catInput?.addEventListener('focus', function() {
-    if (this.value === 'Uncategorized') this.value = '';
+    if (this.value === UNCATEGORIZED_CATEGORY) this.value = '';
   });
   catInput?.addEventListener('blur', function() {
-    if (!this.value.trim()) this.value = 'Uncategorized';
+    if (!this.value.trim()) this.value = UNCATEGORIZED_CATEGORY;
   });
 
   // Dynamic type fields and subcategory list when category changes
@@ -537,6 +539,7 @@ function initEditForm() {
       { id: 'edit-package',       v: data.package },
       { id: 'edit-manufacturer',  v: data.manufacturer },
       { id: 'edit-mpn',           v: data.mpn },
+      { id: 'edit-preferred-supplier', v: data.preferred_supplier },
       { id: 'edit-description',   v: data.description },
       { id: 'edit-datasheet-url', v: data.datasheet_url },
       { id: 'edit-voltage-max',   v: data.voltage_max },
@@ -552,7 +555,7 @@ function initEditForm() {
       const el = document.getElementById(m.id);
       if (!el || m.v == null || m.v === '') continue;
       const cur = (el.value || '').trim();
-      const empty = !cur || (m.treatUncatAsEmpty && cur === 'Uncategorized');
+      const empty = !cur || (m.treatUncatAsEmpty && cur === UNCATEGORIZED_CATEGORY);
       if (empty) { setField(m.id, m.v); filled++; }
     }
 
@@ -601,6 +604,7 @@ async function handleSave() {
     package:      document.getElementById('edit-package').value.trim(),
     manufacturer: document.getElementById('edit-manufacturer').value.trim(),
     mpn:          document.getElementById('edit-mpn').value.trim(),
+    preferred_supplier: document.getElementById('edit-preferred-supplier').value.trim(),
     location:     document.getElementById('edit-location').value.trim(),
     voltage_max:  parseOptFloat('edit-voltage-max'),
     current_max:  parseOptFloat('edit-current-max'),
@@ -799,14 +803,14 @@ function initBuiltinSearch() {
     }
 
     results.style.display = '';
-    results.innerHTML = '<div class="builtin-dropdown-loading">Searching...</div>';
+    results.innerHTML = `<div class="builtin-dropdown-loading">${escHtmlLocal(t('builtin.searching'))}</div>`;
 
     _builtinDebounceTimer = setTimeout(async () => {
       try {
         const items = await invoke('search_builtin_library', { searchTerm: term });
         renderBuiltinResults(items, results);
       } catch (err) {
-        results.innerHTML = '<div class="builtin-dropdown-empty">Search error: ' + escHtmlLocal(String(err)) + '</div>';
+        results.innerHTML = `<div class="builtin-dropdown-empty">${escHtmlLocal(t('builtin.searchError', { err: String(err) }))}</div>`;
       }
     }, 300);
   });
@@ -828,7 +832,7 @@ function initBuiltinSearch() {
 
 function renderBuiltinResults(items, container) {
   if (!items || items.length === 0) {
-    container.innerHTML = '<div class="builtin-dropdown-empty">No matching components found</div>';
+    container.innerHTML = `<div class="builtin-dropdown-empty">${escHtmlLocal(t('builtin.noMatches'))}</div>`;
     return;
   }
 
@@ -895,7 +899,7 @@ function applyBuiltinComponent(comp) {
     }
   }
 
-  showToast(`Applied data from built-in library: "${comp.part_code}"`, 'success');
+  showToast(t('builtin.applied', { code: comp.part_code }), 'success');
 }
 
 /** Set a field only if it's currently empty */

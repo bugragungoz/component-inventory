@@ -1,27 +1,40 @@
 import { lookupComponent, lookupCanonical, categorizeByDescription } from './hardcoded_datasheet.js';
-import { state, updateComponent, deleteComponent, showToast, escHtml } from '../app.js';
-import { t }                                                    from './i18n.js';
+import { state, updateComponent, deleteComponent, showToast, escHtml, beginMutationBatch, endMutationBatch } from '../app.js';
+import { t, applyTranslations }                                 from './i18n.js';
 import { normaliseCategory }                                    from './modals.js';
+import { getSelectedIds }                                       from './table.js';
+import { UNCATEGORIZED_CATEGORY }                               from './constants.js';
+import {
+  isWeakDatasheetUrl as isWeakDatasheetUrlCore,
+  isControlledDbMatch as isControlledDbMatchCore,
+  normaliseSimple as normaliseSimpleCore,
+  isLikelyOptocoupler as isLikelyOptocouplerCore,
+} from './bulk_core.js';
 
 /**
  * Detect URLs that are NOT direct datasheet links but Google searches /
  * marketing pages. Used to know when we may safely overwrite the datasheet.
  */
 function isWeakDatasheetUrl(url) {
-  if (!url || typeof url !== 'string') return true;
-  const u = url.toLowerCase().trim();
-  if (!u) return true;
-  if (u.includes('google.com/search')) return true;
-  if (u.includes('duckduckgo.com'))    return true;
-  if (u.includes('?q=') && !u.includes('.pdf')) return true;
-  return false;
+  return isWeakDatasheetUrlCore(url);
 }
 
 /** Returns true when the lookup hit's category is consistent with the component. */
 function categoryConsistent(comp, hit) {
   if (!hit || !hit.category) return false;
-  if (!comp.category || comp.category === 'Uncategorized') return true;
+  if (!comp.category || comp.category === UNCATEGORIZED_CATEGORY) return true;
   return comp.category === hit.category;
+}
+
+/**
+ * Conservative matcher for DB enrichment to avoid wrong assignments.
+ * Accept:
+ *   - exact key matches, OR
+ *   - short alias matches with tiny length delta (e.g. LM7805 <-> 7805),
+ *     and only when category is already consistent (or uncategorized).
+ */
+function isControlledDbMatch(comp, found) {
+  return isControlledDbMatchCore(comp, found);
 }
 
 /**
@@ -29,20 +42,51 @@ function categoryConsistent(comp, hit) {
  * built-in DB has a confident match (exact or prefix DB key, never pattern-only)
  * AND the categories agree (or the component is uncategorized).
  */
-function findDatasheetBackfills() {
+function findDatasheetBackfills(components = state.components || []) {
   const out = [];
-  for (const comp of (state.components || [])) {
-    if (!isWeakDatasheetUrl(comp.datasheet_url)) continue;
+  for (const comp of components) {
     const found = lookupCanonical(comp.part_code);
-    if (!found || !found.data || !found.data.datasheet_url) continue;
-    if (found.match === 'pattern') continue;
-    if (!categoryConsistent(comp, found.data)) continue;
+    if (!isControlledDbMatch(comp, found)) continue;
+
+    const db = found.data;
+    const patch = {};
+    let fillCount = 0;
+
+    // Fill datasheet only if missing/weak and DB has direct URL
+    if (db.datasheet_url && isWeakDatasheetUrl(comp.datasheet_url)) {
+      patch.datasheet_url = db.datasheet_url;
+      fillCount++;
+    }
+    // Fill description/manufacturer/package/subcategory when missing
+    if ((!comp.description || !String(comp.description).trim()) && db.description) {
+      patch.description = db.description;
+      fillCount++;
+    }
+    if ((!comp.manufacturer || !String(comp.manufacturer).trim()) && db.manufacturer) {
+      patch.manufacturer = db.manufacturer;
+      fillCount++;
+    }
+    if ((!comp.package || !String(comp.package).trim()) && db.package) {
+      patch.package = db.package;
+      fillCount++;
+    }
+    if ((!comp.subcategory || !String(comp.subcategory).trim()) && db.subcategory) {
+      patch.subcategory = db.subcategory;
+      fillCount++;
+    }
+    if ((!comp.category || comp.category === UNCATEGORIZED_CATEGORY) && db.category) {
+      patch.category = db.category;
+      fillCount++;
+    }
+
+    if (fillCount === 0) continue;
     out.push({
       comp,
-      hit: { datasheet_url: found.data.datasheet_url },
-      source: 'datasheet-backfill',
+      hit: patch,
+      source: 'db-enrich',
       confidence: found.match === 'exact' ? 'high' : 'medium',
       action: 'datasheet',
+      fillCount,
     });
   }
   return out;
@@ -53,11 +97,11 @@ function findDatasheetBackfills() {
  * known main category (e.g. "Diode" -> "Diodes", "MOSFETs" -> "Transistors").
  * Returns suggestion rows that only rewrite the category field.
  */
-function findCategoryNormalizations() {
+function findCategoryNormalizations(components = state.components || []) {
   const out = [];
-  for (const comp of (state.components || [])) {
+  for (const comp of components) {
     if (!comp.category) continue;
-    if (comp.category === 'Uncategorized') continue;
+    if (comp.category === UNCATEGORIZED_CATEGORY) continue;
     const canonical = normaliseCategory(comp.category);
     if (!canonical || canonical === comp.category) continue;
     out.push({
@@ -79,9 +123,9 @@ function findCategoryNormalizations() {
  *   - all members share the same category (or uncategorized).
  * Returns merge proposals: { canonicalCode, members: [comp...], totalQty }
  */
-function findDuplicateGroups() {
+function findDuplicateGroups(components = state.components || []) {
   const groups = new Map();
-  for (const comp of (state.components || [])) {
+  for (const comp of components) {
     const found = lookupCanonical(comp.part_code);
     if (!found || !found.canonical) continue;
     if (found.match === 'pattern') continue;
@@ -111,7 +155,7 @@ function findDuplicateGroups() {
 /** Returns components that are in the Uncategorized bucket. */
 function getUncategorized() {
   return (state.components || []).filter(
-    c => !c.category || c.category === 'Uncategorized'
+    c => !c.category || c.category === UNCATEGORIZED_CATEGORY
   );
 }
 
@@ -129,31 +173,44 @@ function getUncategorized() {
  * Both `comp.category` and `hit.category` are compared after normalisation so
  * "Diode" / "Diodes", "MOSFETs" / "Transistors" etc. don't trip the alarm.
  */
-function getMisclassified() {
+/** Strong diode/rectifier signals in user text — used to suppress false MOSFET anomalies. */
+function isStrongDiodeEvidence(comp) {
+  const blob = [comp.part_code, comp.description, comp.package, comp.manufacturer]
+    .filter(Boolean).join(' ').toLocaleLowerCase('tr-TR');
+  return /\b(schottky|rectifier|fast\s*recovery|ultra[\s-]*fast|zener|bridge\s*rectifier|efficiency\s*rectifier|\btvs\b|diode\b|\bdiyod\b)/.test(blob);
+}
+
+function getMisclassified(components = state.components || []) {
   const out = [];
-  for (const comp of (state.components || [])) {
-    if (!comp.category || comp.category === 'Uncategorized') continue;
+  for (const comp of components) {
+    if (!comp.category || comp.category === UNCATEGORIZED_CATEGORY) continue;
     const currentCanonical = normaliseCategory(comp.category) || comp.category;
 
     const dbCanon = lookupCanonical(comp.part_code);
     if (dbCanon && dbCanon.match !== 'pattern' && dbCanon.data && dbCanon.data.category) {
       const hitCanonical = normaliseCategory(dbCanon.data.category) || dbCanon.data.category;
       if (hitCanonical !== currentCanonical) {
-        out.push({
-          comp,
-          hit: dbCanon.data,
-          source: 'part-code',
-          confidence: 'high',
-          anomaly: true,
-          reason: 'db-mismatch',
-        });
-        continue;
+        const dbIsTransistor = hitCanonical === 'Transistors';
+        if (dbIsTransistor && isStrongDiodeEvidence(comp)) {
+          // Ignore DB mismatch when free text clearly describes a diode (e.g. STPS… vs wrong DB hit).
+        } else {
+          out.push({
+            comp,
+            hit: dbCanon.data,
+            source: 'part-code',
+            confidence: 'high',
+            anomaly: true,
+            reason: 'db-mismatch',
+          });
+          continue;
+        }
       }
     }
 
     const heur = heuristicClassify(comp);
     if (heur && heur.confidence === 'high' && heur.partCodeBased) {
       const hitCanonical = normaliseCategory(heur.category) || heur.category;
+      if (hitCanonical === 'Transistors' && isStrongDiodeEvidence(comp)) continue;
       if (hitCanonical !== currentCanonical) {
         out.push({
           comp,
@@ -231,8 +288,15 @@ function heuristicClassify(comp) {
   if (/^1N(4148|914)/.test(partCodeKey)) {
     return { category: 'Diodes', subcategory: 'Small Signal', confidence: 'high', partCodeBased: true };
   }
-  // Common BJT/MOSFET prefixes used as a soft signal (medium confidence).
-  if (/^(IRF|IRL|IRFZ|STP|STF|FQP|FDP|FDS|BSS|BSP|AOD|AON|AOZ|2SK|2SJ|SI[A-Z]{1,2}\d)/.test(partCodeKey)) {
+  // STMicro power Schottky / ultrafast rectifier prefixes (before STP MOSFET heuristic).
+  if (/^STPS/i.test(partCodeKey)) {
+    return { category: 'Diodes', subcategory: 'Schottky', confidence: 'high', partCodeBased: true };
+  }
+  if (/^STTH/i.test(partCodeKey)) {
+    return { category: 'Diodes', subcategory: 'Fast Recovery', confidence: 'high', partCodeBased: true };
+  }
+  // Common MOSFET prefixes. STP(?!S) avoids classifying STPS… Schottky parts as MOSFETs.
+  if (/^(IRF|IRL|IRFZ|STP(?!S)|STF|FQP|FDP|FDS|BSS|BSP|AOD|AON|AOZ|2SK|2SJ|SI[A-Z]{1,2}\d)/.test(partCodeKey)) {
     return { category: 'Transistors', subcategory: 'Power MOSFET', confidence: 'high', partCodeBased: true };
   }
   if (/^(BC|BD|2N|MJE|TIP|2SA|2SB|2SC|2SD|S8\d{3}|S9\d{3})/.test(partCodeKey)) {
@@ -304,6 +368,11 @@ function buildSuggestions(components) {
   for (const comp of components) {
     const hitByCode = lookupComponent(comp.part_code);
     let source = null, hit = null, confidence = 'low';
+    if (isLikelyOptocoupler(comp)) {
+      hit = { category: 'ICs', subcategory: 'Optocoupler' };
+      source = 'opto-normalizer';
+      confidence = 'high';
+    }
     if (hitByCode) { hit = hitByCode; source = 'part-code'; confidence = 'high'; }
     if (!hit) {
       const hitByDesc = categorizeByDescription(comp.description);
@@ -313,11 +382,94 @@ function buildSuggestions(components) {
       const heur = heuristicClassify(comp);
       if (heur) { hit = heur; source = 'heuristic'; confidence = heur.confidence || 'low'; }
     }
-    if (hit && hit.category && hit.category !== 'Uncategorized') {
+    if (hit && hit.category && hit.category !== UNCATEGORIZED_CATEGORY) {
+      const currentCat = normaliseCategory(comp.category || '') || (comp.category || '');
+      const hitCat = normaliseCategory(hit.category || '') || (hit.category || '');
+      const currentSub = String(comp.subcategory || '').trim().toLowerCase();
+      const hitSub = String(hit.subcategory || '').trim().toLowerCase();
+      const shouldApply = !currentCat || currentCat === UNCATEGORIZED_CATEGORY
+        || currentCat !== hitCat
+        || (hitSub && currentSub !== hitSub);
+      if (!shouldApply) continue;
       suggestions.push({ comp, hit, source, confidence });
     }
   }
   return suggestions;
+}
+
+function readBulkActionOpts() {
+  return {
+    reclass: document.getElementById('bulk-opt-reclass')?.checked !== false,
+    datasheet: document.getElementById('bulk-opt-datasheet')?.checked !== false,
+    describe: document.getElementById('bulk-opt-describe')?.checked !== false,
+  };
+}
+
+function rowMatchesBulkOpts(s, o) {
+  if (s.action === 'merge' || s.action === 'normalize-cat') return o.reclass;
+  if (s.action === 'datasheet') {
+    const p = s.hit || {};
+    if (o.reclass && p.category) return true;
+    if (o.datasheet && p.datasheet_url) return true;
+    if (o.describe && (p.description || p.manufacturer || p.package || p.subcategory)) return true;
+    return false;
+  }
+  if (s.anomaly) return o.reclass;
+  if (!s.action || s.action === 'categorize' || s.action === 'anomaly') return o.reclass;
+  return o.reclass;
+}
+
+function filterBulkSuggestions(rows, o) {
+  return rows.filter(s => rowMatchesBulkOpts(s, o));
+}
+
+function buildPartialEnrichPatch(fullPatch, o) {
+  const out = {};
+  if (o.reclass && fullPatch.category) out.category = fullPatch.category;
+  if (o.datasheet && fullPatch.datasheet_url) out.datasheet_url = fullPatch.datasheet_url;
+  if (o.describe) {
+    if (fullPatch.description) out.description = fullPatch.description;
+    if (fullPatch.manufacturer) out.manufacturer = fullPatch.manufacturer;
+    if (fullPatch.package) out.package = fullPatch.package;
+    if (fullPatch.subcategory) out.subcategory = fullPatch.subcategory;
+  }
+  return out;
+}
+
+function dedupeSuggestions(rows) {
+  const seen = new Set();
+  const out = [];
+  for (const s of rows) {
+    if (s.action === 'merge') {
+      const key = `merge:${s.canonical || ''}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push(s);
+      continue;
+    }
+    const id = s.comp?.id;
+    if (id == null) { out.push(s); continue; }
+    const category = normaliseCategory(s.hit?.category || '') || (s.hit?.category || '');
+    const sub = String(s.hit?.subcategory || '').trim().toLowerCase();
+    const action = s.action || (s.anomaly ? 'anomaly' : 'categorize');
+    const key = `${action}:${id}:${category}:${sub}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(s);
+  }
+  return out;
+}
+
+function getScopeComponents(scope) {
+  const all = state.components || [];
+  if (scope === 'selected') {
+    const ids = getSelectedIds();
+    return all.filter(c => ids.has(c.id));
+  }
+  if (scope === 'uncategorized') {
+    return all.filter(c => !c.category || c.category === UNCATEGORIZED_CATEGORY);
+  }
+  return all;
 }
 
 function renderActionCell(s) {
@@ -334,7 +486,7 @@ function renderActionCell(s) {
       `<span class="badge" style="background:var(--accent-blue-dim,var(--accent-dim));color:var(--accent-blue,var(--accent))">` +
       t('bulk.action.datasheet') + `</span>` +
       `<span style="color:var(--text-muted);font-size:0.74rem;margin-left:6px;font-family:var(--font-mono)">` +
-      escHtml((s.hit.datasheet_url || '').slice(0, 60)) + `</span>` + tail
+      `${escHtml(t('bulk.enrich.summary', { n: Number(s.fillCount || 0) }))}</span>` + tail
     );
   }
   if (s.action === 'normalize-cat') {
@@ -413,19 +565,28 @@ function updateApplyButton(suggestions) {
 async function applySelected(suggestions) {
   const cbs      = document.querySelectorAll('.bulk-cb');
   const selected = suggestions.filter((_, i) => cbs[i]?.checked);
+  const opts     = readBulkActionOpts();
 
   if (selected.length === 0) return;
 
   const btn = document.getElementById('btn-bulk-apply');
-  if (btn) { btn.disabled = true; btn.textContent = 'Applying...'; }
+  if (btn) { btn.disabled = true; btn.textContent = t('bulk.applying', { done: 0, total: selected.length }); }
 
   let success = 0;
   let failed  = 0;
-
-  for (const s of selected) {
-    try {
+  beginMutationBatch();
+  try {
+    for (let i = 0; i < selected.length; i++) {
+      const s = selected[i];
+      if (btn) btn.textContent = t('bulk.applying', { done: i + 1, total: selected.length });
+      try {
       if (s.action === 'datasheet') {
-        await updateComponent(s.comp.id, { ...s.comp, datasheet_url: s.hit.datasheet_url });
+        const patch = buildPartialEnrichPatch(s.hit, opts);
+        if (Object.keys(patch).length === 0) {
+          success++;
+          continue;
+        }
+        await updateComponent(s.comp.id, { ...s.comp, ...patch });
         success++;
         continue;
       }
@@ -496,10 +657,13 @@ async function applySelected(suggestions) {
       };
       await updateComponent(comp.id, updated);
       success++;
-    } catch (err) {
-      console.error('bulk apply error:', s, err);
-      failed++;
+      } catch (err) {
+        console.error('bulk apply error:', s, err);
+        failed++;
+      }
     }
+  } finally {
+    await endMutationBatch();
   }
 
   closeOverlay();
@@ -511,7 +675,11 @@ async function applySelected(suggestions) {
 }
 
 function normaliseSimple(s) {
-  return String(s || '').toUpperCase().replace(/[\s\-_.]/g, '');
+  return normaliseSimpleCore(s);
+}
+
+function isLikelyOptocoupler(comp) {
+  return isLikelyOptocouplerCore(comp);
 }
 
 function closeOverlay() {
@@ -533,14 +701,26 @@ export function initBulkCategorize() {
 
   if (!btnOpen || !overlay) return;
 
+  let bulkAllSuggestions = [];
   let currentSuggestions = [];
 
+  const refreshBulkList = () => {
+    currentSuggestions = filterBulkSuggestions(bulkAllSuggestions, readBulkActionOpts());
+    renderList(currentSuggestions);
+  };
+
   btnOpen.addEventListener('click', () => {
-    const uncategorized    = getUncategorized();
-    const anomalies        = getMisclassified();
-    const taxonomyFixes    = findCategoryNormalizations();
-    const datasheetFills   = findDatasheetBackfills();
-    const dedupeGroups     = findDuplicateGroups();
+    const selectedScope = (document.querySelector('input[name="bulk-cat-scope"]:checked')?.value || 'selected');
+    const scopeComponents = getScopeComponents(selectedScope);
+    if (selectedScope === 'selected' && scopeComponents.length === 0) {
+      showToast(t('toast.bulkNoSelection'), 'info');
+      return;
+    }
+    const uncategorized    = scopeComponents.filter(c => !c.category || c.category === UNCATEGORIZED_CATEGORY);
+    const anomalies        = getMisclassified(scopeComponents);
+    const taxonomyFixes    = findCategoryNormalizations(scopeComponents);
+    const datasheetFills   = findDatasheetBackfills(scopeComponents);
+    const dedupeGroups     = findDuplicateGroups(scopeComponents);
 
     if (uncategorized.length === 0 && anomalies.length === 0 &&
         datasheetFills.length === 0 && dedupeGroups.length === 0 &&
@@ -549,20 +729,20 @@ export function initBulkCategorize() {
       return;
     }
 
-    const baseSuggestions = buildSuggestions(uncategorized);
+    const baseSuggestions = buildSuggestions(scopeComponents);
     // Order by user value: anomalies > taxonomy > duplicates > datasheet > categorize
-    currentSuggestions = [
+    bulkAllSuggestions = dedupeSuggestions([
       ...anomalies,
       ...taxonomyFixes,
       ...dedupeGroups,
       ...datasheetFills,
       ...baseSuggestions,
-    ];
+    ]);
 
     const subtitle = document.getElementById('bulk-cat-subtitle');
     if (subtitle) {
       const parts = [
-        t('bulk.subtitle', { total: uncategorized.length, match: baseSuggestions.length }),
+        t('bulk.subtitle.scope', { total: scopeComponents.length, match: bulkAllSuggestions.length }),
       ];
       if (anomalies.length      > 0) parts.push(t('anomaly.btn.open',     { n: anomalies.length }));
       if (taxonomyFixes.length  > 0) parts.push(t('bulk.taxonomy.found',  { n: taxonomyFixes.length }));
@@ -571,9 +751,24 @@ export function initBulkCategorize() {
       subtitle.textContent = parts.join('  -  ');
     }
 
-    renderList(currentSuggestions);
+    applyTranslations(overlay);
+    refreshBulkList();
     overlay.style.display = 'flex';
   });
+
+  ['bulk-opt-reclass', 'bulk-opt-datasheet', 'bulk-opt-describe'].forEach(id => {
+    document.getElementById(id)?.addEventListener('change', () => {
+      if (overlay.style.display === 'flex') refreshBulkList();
+    });
+  });
+
+  const updateScopeLabel = () => {
+    const selectedCount = getSelectedIds().size;
+    const label = document.querySelector('input[name="bulk-cat-scope"][value="selected"]')?.closest('label')?.querySelector('span');
+    if (label) label.textContent = t('bulk.scope.selected', { n: selectedCount });
+  };
+  updateScopeLabel();
+  btnOpen.addEventListener('click', updateScopeLabel);
 
   overlay.addEventListener('click', e => {
     if (e.target === overlay) closeOverlay();

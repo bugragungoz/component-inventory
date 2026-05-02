@@ -7,12 +7,7 @@ import Database from '@tauri-apps/plugin-sql';
 import { invoke } from '@tauri-apps/api/core';
 import { showToast, escHtml } from '../app.js';
 import { t } from './i18n.js';
-
-const FIELDS = [
-  'category', 'subcategory', 'quantity', 'package', 'manufacturer', 'mpn',
-  'location', 'voltage_max', 'current_max', 'description', 'datasheet_url',
-  'unit_price', 'notes', 'resistance', 'tolerance', 'power_rating',
-];
+import { computeDiffCore, DIFF_FIELDS } from './backup_diff_core.js';
 
 let _diffResult = null;
 let _activeTab  = 'changed';
@@ -43,29 +38,7 @@ async function readSnapshot(absPath) {
 }
 
 function computeDiff(mapA, mapB) {
-  const added = [];
-  const removed = [];
-  const changed = [];
-
-  for (const [pc, b] of mapB.entries()) {
-    if (!mapA.has(pc)) {
-      added.push(b);
-    } else {
-      const a = mapA.get(pc);
-      const fields = [];
-      for (const f of FIELDS) {
-        const va = a[f] ?? '';
-        const vb = b[f] ?? '';
-        if (String(va) !== String(vb)) fields.push({ field: f, before: va, after: vb });
-      }
-      if (fields.length > 0) changed.push({ part_code: pc, fields });
-    }
-  }
-  for (const [pc, a] of mapA.entries()) {
-    if (!mapB.has(pc)) removed.push(a);
-  }
-
-  return { added, removed, changed };
+  return computeDiffCore(mapA, mapB, DIFF_FIELDS);
 }
 
 function renderTabs() {

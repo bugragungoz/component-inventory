@@ -3,6 +3,28 @@ import { save as saveDialog }  from '@tauri-apps/plugin-dialog';
 import { writeFile }            from '@tauri-apps/plugin-fs';
 import { t } from './i18n.js';
 
+let _xlsx = null;
+let _jsPDF = null;
+let _autoTable = null;
+
+async function getXlsx() {
+  if (_xlsx) return _xlsx;
+  _xlsx = await import('xlsx');
+  return _xlsx;
+}
+
+async function getPdfDeps() {
+  if (!_jsPDF) {
+    const mod = await import('jspdf');
+    _jsPDF = mod.jsPDF;
+  }
+  if (!_autoTable) {
+    const mod = await import('jspdf-autotable');
+    _autoTable = mod.default;
+  }
+  return { jsPDF: _jsPDF, autoTable: _autoTable };
+}
+
 const EXPORT_COLUMNS = [
   { key: 'part_code',    label: 'Part Code' },
   { key: 'category',     label: 'Category' },
@@ -90,6 +112,7 @@ async function exportJSON() {
 // Excel export (SheetJS)
 // ============================================================
 async function exportExcel() {
+  const XLSX = await getXlsx();
   const rows = state.components.map(row => {
     const obj = {};
     EXPORT_COLUMNS.forEach(col => { obj[col.label] = row[col.key] ?? ''; });
@@ -109,8 +132,8 @@ async function exportExcel() {
 // ============================================================
 // PDF export (jsPDF + autoTable)
 // ============================================================
-function exportPDF() {
-  const { jsPDF } = window.jspdf;
+async function exportPDF() {
+  const { jsPDF, autoTable } = await getPdfDeps();
   const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a3' });
   const pageWidth = doc.internal.pageSize.getWidth();
 
@@ -169,7 +192,7 @@ function exportPDF() {
     })
   );
 
-  doc.autoTable({
+  autoTable(doc, {
     head,
     body,
     startY: 32,

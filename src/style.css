@@ -46,6 +46,13 @@
   --danger-dim:      rgba(248, 113, 113, 0.14);
   --low-stock:       #e05040;
 
+  /* KiCad schematic overlay (inline SVG uses these) */
+  --sch-wire:        rgba(240, 237, 229, 0.38);
+  --sch-marker-halo: rgba(20, 20, 19, 0.92);
+  --sch-grid-line:   rgba(240, 237, 229, 0.055);
+  --sch-canvas:      #161514;
+  --sch-label-stroke: rgba(22, 21, 20, 0.92);
+
   /* Surface layers (used for dropdowns, table rows, etc.) */
   --surface-2:       #1e1d1b;
   --surface-3:       #2a2826;
@@ -98,6 +105,12 @@ html.light {
   --danger-hover:    #e05050;
   --danger-dim:      rgba(248, 113, 113, 0.1);
   --low-stock:       #c0392b;
+
+  --sch-wire:        rgba(26, 25, 23, 0.32);
+  --sch-marker-halo: rgba(250, 249, 245, 0.95);
+  --sch-grid-line:   rgba(26, 25, 23, 0.06);
+  --sch-canvas:      #e0ddd4;
+  --sch-label-stroke: rgba(250, 249, 245, 0.95);
   --surface-2:       #eae7de;
   --surface-3:       #d8d4c8;
 }
@@ -953,6 +966,176 @@ tr:hover .row-actions { opacity: 1; }
 .modal-lg  { max-width: 860px; }
 .modal-sm  { max-width: 420px; }
 .modal-ai  { max-width: 740px; height: 78vh; }
+
+.modal.modal-projects {
+  max-width: min(1180px, 96vw);
+  max-height: 94vh;
+}
+.modal-projects .modal-body.modal-body-projects {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 16px;
+  max-height: min(82vh, calc(94vh - 110px));
+  align-items: start;
+  padding: 16px 18px;
+}
+.project-detail-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+.project-detail-header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.project-detail-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  word-break: break-word;
+  line-height: 1.35;
+}
+.project-detail-summary {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+}
+.project-section-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+.project-sch-view-root {
+  min-width: 0;
+}
+.project-sch-viewport {
+  min-height: min(52vh, 560px);
+  max-height: min(56vh, 600px);
+  overflow: auto;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  background: var(--bg-raised);
+}
+.project-sch-viewport--kicad {
+  min-height: min(58vh, 620px);
+  max-height: min(64vh, 720px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  background: var(--sch-canvas);
+  border-color: var(--border);
+}
+.project-sch-zoom-hint {
+  flex-shrink: 0;
+  padding: 6px 10px;
+  font-size: 0.68rem;
+  color: var(--text-tertiary);
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+}
+.project-sch-zoom-outer {
+  flex: 1;
+  min-height: 480px;
+  overflow: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+}
+.project-sch-zoom-inner {
+  transform-origin: center center;
+  transition: transform 80ms ease-out;
+  width: 100%;
+  max-width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.project-sch-zoom-inner svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: min(100%, 1400px);
+  min-height: 320px;
+  max-height: min(58vh, 640px);
+}
+.sch-legend-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  align-items: center;
+  padding: 8px 10px;
+  margin-bottom: 8px;
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+}
+.sch-legend-bar .sch-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.sch-legend-bar .sch-legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.project-sch-viewport img,
+.project-sch-viewport iframe {
+  display: block;
+  width: 100%;
+  min-height: min(48vh, 480px);
+  max-height: min(52vh, 540px);
+  border: 0;
+  border-radius: var(--radius-lg);
+}
+.project-meta-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+.project-bom-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.project-bom-toolbar-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+.project-bom-toolbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+.project-list-desc {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+  line-height: 1.3;
+}
+textarea.settings-input-path {
+  width: 100%;
+  min-height: 64px;
+  max-height: 140px;
+  line-height: 1.4;
+}
 
 @keyframes modal-in {
   from { opacity: 0; transform: scale(0.97) translateY(10px); }

@@ -6,59 +6,37 @@
 
 import { showToast } from '../app.js';
 
+let _jsPDF = null;
+let _qrcode = null;
+
+async function getJsPDF() {
+  if (_jsPDF) return _jsPDF;
+  const mod = await import('jspdf');
+  _jsPDF = mod.jsPDF;
+  return _jsPDF;
+}
+
+async function getQRCode() {
+  if (_qrcode) return _qrcode;
+  const mod = await import('qrcode');
+  _qrcode = mod.default;
+  return _qrcode;
+}
+
 let _labelComp = null;
 
 // ============================================================
-// QR code data URL generator (uses QRCode.js CDN global)
+// QR code data URL generator
 // ============================================================
 function generateQRDataUrl(text) {
-  return new Promise((resolve) => {
-    const canvas = document.getElementById('label-qr-canvas');
-    canvas.width  = 120;
-    canvas.height = 120;
-
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, 120, 120);
-
-    try {
-      // QRCode.js renders to a temporary div, we capture via canvas
-      const tmpDiv = document.createElement('div');
-      // Must be positioned off-screen (not display:none) for QRCode.js to render canvas
-      tmpDiv.style.cssText = 'position:absolute;left:-9999px;top:-9999px;width:120px;height:120px;';
-      document.body.appendChild(tmpDiv);
-
-      new window.QRCode(tmpDiv, {
-        text:          text,
-        width:         120,
-        height:        120,
-        colorDark:     '#000000',
-        colorLight:    '#ffffff',
-        correctLevel:  window.QRCode.CorrectLevel.M,
-      });
-
-      // QRCode renders synchronously in v1.0 — extract image from internal canvas or img
-      setTimeout(() => {
-        const inner = tmpDiv.querySelector('canvas') || tmpDiv.querySelector('img');
-        if (inner && inner.tagName === 'CANVAS') {
-          ctx.drawImage(inner, 0, 0, 120, 120);
-          resolve(canvas.toDataURL('image/png'));
-        } else if (inner && inner.tagName === 'IMG') {
-          const img = new Image();
-          img.onload = () => {
-            ctx.drawImage(img, 0, 0, 120, 120);
-            resolve(canvas.toDataURL('image/png'));
-          };
-          img.src = inner.src;
-        } else {
-          resolve(null);
-        }
-        document.body.removeChild(tmpDiv);
-      }, 80);
-    } catch (_) {
-      try { document.body.removeChild(tmpDiv); } catch (_2) {}
-      resolve(null);
-    }
-  });
+  return getQRCode()
+    .then(QRCode => QRCode.toDataURL(String(text || ''), {
+      width: 120,
+      margin: 1,
+      errorCorrectionLevel: 'M',
+      color: { dark: '#000000', light: '#ffffff' },
+    }))
+    .catch(() => null);
 }
 
 // ============================================================
@@ -96,9 +74,8 @@ function populateLabelPreview(comp) {
 // ============================================================
 async function generateLabelPDF(comp, copies) {
   const qrDataUrl = await generateQRDataUrl(comp.part_code);
-
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const JsPDF = await getJsPDF();
+  const doc = new JsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
   // Label dimensions (mm)
   const lW   = 90;

@@ -2,12 +2,8 @@ import { invoke } from '@tauri-apps/api/core';
 import { showToast, escHtml } from '../app.js';
 import { t } from './i18n.js';
 import { triggerDriveSync } from './drive_sync.js';
-
-function formatBytes(bytes) {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
-}
+import { STORAGE_KEYS, DEFAULTS } from './constants.js';
+import { formatBytes } from './backup_core.js';
 
 async function loadBackupList() {
   const list = document.getElementById('backup-list');
@@ -59,8 +55,8 @@ async function createManualBackup() {
   const btn = document.getElementById('btn-create-backup');
   btn.disabled = true;
   try {
-    const retention = parseInt(localStorage.getItem('backupRetention') || '30', 10);
-    const result = await invoke('create_backup', { retention: isNaN(retention) ? 30 : retention });
+    const retention = parseInt(localStorage.getItem(STORAGE_KEYS.BACKUP_RETENTION) || String(DEFAULTS.BACKUP_RETENTION), 10);
+    const result = await invoke('create_backup', { retention: isNaN(retention) ? DEFAULTS.BACKUP_RETENTION : retention });
     showToast(t('backup.created') + result.filename, 'success');
     await loadBackupList();
     // After a manual backup, push the latest snapshot to the cloud folder

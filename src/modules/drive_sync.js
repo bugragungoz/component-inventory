@@ -15,8 +15,13 @@
 import { invoke } from '@tauri-apps/api/core';
 import { state, showToast } from '../app.js';
 import { t } from './i18n.js';
-
-const DEFAULT_BASE_NAME = 'croxz';
+import {
+  DEFAULT_BASE_NAME,
+  sanitizeBaseName,
+  resolveBaseName,
+  getDriveStatusSnapshot,
+  formatCellValue,
+} from './drive_sync_core.js';
 
 // Columns for the Summary sheet (label + accessor key)
 const COLUMNS_FULL = [
@@ -57,24 +62,28 @@ let _writeInFlight = false;
 let _pendingWrite  = false;
 let _lastError     = null;
 const _statusListeners = new Set();
+let _xlsx = null;
+
+async function getXlsx() {
+  if (_xlsx) return _xlsx;
+  _xlsx = await import('xlsx');
+  return _xlsx;
+}
 
 export function getBaseName() {
   const raw = (localStorage.getItem('driveSyncBaseName') || '').trim();
-  return sanitizeBaseName(raw) || DEFAULT_BASE_NAME;
-}
-
-function sanitizeBaseName(name) {
-  // Strip path separators and anything Windows or POSIX would refuse.
-  return String(name || '').replace(/[\\\/:*?"<>|\s]+/g, '_').replace(/^\.+/, '').slice(0, 64);
+  return resolveBaseName(raw);
 }
 
 export function getDriveStatus() {
   const enabled = localStorage.getItem('driveSyncEnabled') === 'true';
   const folder  = localStorage.getItem('driveSyncFolder') || '';
-  if (!enabled || !folder) return { state: 'off',     folder: '' };
-  if (_lastError)           return { state: 'error',  folder, error: _lastError };
-  if (_writeInFlight)       return { state: 'syncing',folder };
-  return                          { state: 'ok',     folder };
+  return getDriveStatusSnapshot({
+    enabled,
+    folder,
+    writeInFlight: _writeInFlight,
+    lastError: _lastError,
+  });
 }
 
 export function onDriveStatusChange(fn) {
@@ -94,16 +103,10 @@ async function writeExternal(folder, name, bytes) {
 }
 
 function formatCell(key, value) {
-  if (value == null) return '';
-  if (key === 'unit_price' && typeof value === 'number') return value;
-  if (key === 'voltage_max' || key === 'current_max' || key === 'power_rating') {
-    return typeof value === 'number' ? value : (value === '' ? '' : value);
-  }
-  if (key === 'quantity') return Number(value) || 0;
-  return value;
+  return formatCellValue(key, value);
 }
 
-function buildSheet(rows, columnKeys, sheetTitle) {
+function buildSheet(XLSX, rows, columnKeys, sheetTitle) {
   const header = columnKeys.map(k => COLUMNS_FULL.find(c => c.key === k)?.label || k);
   const dataRows = rows.map(r => columnKeys.map(k => formatCell(k, r[k])));
 
@@ -141,11 +144,12 @@ async function writeSnapshot() {
   const baseName = getBaseName();
   const allRows  = state.components || [];
 
-  if (typeof XLSX !== 'undefined') {
+  {
+    const XLSX = await getXlsx();
     const wb = XLSX.utils.book_new();
 
     // 1. Summary sheet (all components, full columns)
-    const summary = buildSheet(allRows, COLUMNS_FULL.map(c => c.key), 'Summary');
+    const summary = buildSheet(XLSX, allRows, COLUMNS_FULL.map(c => c.key), 'Summary');
     XLSX.utils.book_append_sheet(wb, summary.ws, summary.name);
 
     // 2. Per-category sheets
@@ -158,7 +162,7 @@ async function writeSnapshot() {
     for (const cat of sortedCats) {
       const cols = COLUMNS_BY_CATEGORY[cat] || COLUMNS_FULL.map(c => c.key);
       const safeName = String(cat).replace(/[\\/?*\[\]:]/g, '_').slice(0, 31) || 'Uncategorized';
-      const built = buildSheet(grouped[cat], cols, safeName);
+      const built = buildSheet(XLSX, grouped[cat], cols, safeName);
       XLSX.utils.book_append_sheet(wb, built.ws, built.name);
     }
 

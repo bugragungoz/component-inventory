@@ -9,6 +9,7 @@ use rusqlite::Connection;
 use serde::{Deserialize, Serialize};
 
 pub struct AppDataDir(pub Arc<Mutex<PathBuf>>);
+pub struct BackupIntervalMinutes(pub Arc<Mutex<u64>>);
 
 /// Path to the bundled patched.db reference library
 pub struct BuiltinDbPath(pub PathBuf);
@@ -38,6 +39,16 @@ pub struct BuiltinComponent {
 fn create_backup(retention: Option<usize>, state: State<AppDataDir>) -> Result<BackupEntry, String> {
     let dir = state.0.lock().map_err(|e| e.to_string())?.clone();
     create_backup_file(&dir, retention.unwrap_or(30))
+}
+
+#[tauri::command]
+fn set_backup_interval_minutes(minutes: u64, state: State<BackupIntervalMinutes>) -> Result<(), String> {
+    if minutes == 0 {
+        return Err("Backup interval must be greater than 0 minutes".into());
+    }
+    let mut guard = state.0.lock().map_err(|e| e.to_string())?;
+    *guard = minutes;
+    Ok(())
 }
 
 #[tauri::command]
@@ -236,12 +247,17 @@ fn batch_lookup_builtin(
 
 
 // Use std::thread to avoid requiring a Tokio runtime context during setup.
-fn start_backup_scheduler(data_dir: Arc<Mutex<PathBuf>>) {
+fn start_backup_scheduler(data_dir: Arc<Mutex<PathBuf>>, interval_minutes: Arc<Mutex<u64>>) {
     std::thread::Builder::new()
         .name("backup-scheduler".into())
         .spawn(move || {
             loop {
-                std::thread::sleep(std::time::Duration::from_secs(900)); // 15 minutes
+                let mins = interval_minutes
+                    .lock()
+                    .map(|m| *m)
+                    .unwrap_or(15);
+                let safe_mins = if mins == 0 { 15 } else { mins };
+                std::thread::sleep(std::time::Duration::from_secs(safe_mins * 60));
                 if let Ok(dir) = data_dir.lock() {
                     // Scheduler uses default retention (30). Front-end overrides on
                     // explicit user-triggered backups via the `retention` param.
@@ -255,6 +271,13 @@ fn start_backup_scheduler(data_dir: Arc<Mutex<PathBuf>>) {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_single_instance::init(|app, _argv, _cwd| {
+            if let Some(window) = app.get_webview_window("main") {
+                let _ = window.unminimize();
+                let _ = window.show();
+                let _ = window.set_focus();
+            }
+        }))
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_sql::Builder::default().build())
         .plugin(tauri_plugin_fs::init())
@@ -293,13 +316,16 @@ pub fn run() {
             app.manage(BuiltinDbPath(resource_path));
 
             let data_arc = Arc::new(Mutex::new(data_dir));
+            let interval_arc = Arc::new(Mutex::new(15u64));
             app.manage(AppDataDir(Arc::clone(&data_arc)));
-            start_backup_scheduler(data_arc);
+            app.manage(BackupIntervalMinutes(Arc::clone(&interval_arc)));
+            start_backup_scheduler(data_arc, interval_arc);
 
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
             create_backup,
+            set_backup_interval_minutes,
             list_backups_cmd,
             restore_backup_cmd,
             get_app_data_dir,
