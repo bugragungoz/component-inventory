@@ -117,37 +117,53 @@ function getUncategorized() {
 
 /**
  * Detects components likely placed in the WRONG category.
- * Flags only when there is strong external evidence:
- *   - built-in DB part-code lookup returns a different category, OR
- *   - heuristic returns 'high' confidence and disagrees with current category.
- * The user can deselect any row before applying so false positives are cheap.
+ *
+ * Anomaly detection requires STRONG, UNAMBIGUOUS evidence to avoid annoying
+ * the user with false positives. We only flag a row when:
+ *   - built-in DB has a deterministic match (exact or prefix DB key, NOT a
+ *     pattern-only match) AND its category differs from the component, OR
+ *   - heuristic returns 'high' confidence AND the suggestion is part-code-based
+ *     (i.e. derived from the part number itself, not a fuzzy keyword in
+ *     free-text description / package text).
+ *
+ * Both `comp.category` and `hit.category` are compared after normalisation so
+ * "Diode" / "Diodes", "MOSFETs" / "Transistors" etc. don't trip the alarm.
  */
 function getMisclassified() {
   const out = [];
   for (const comp of (state.components || [])) {
     if (!comp.category || comp.category === 'Uncategorized') continue;
-    const dbHit = lookupComponent(comp.part_code);
-    if (dbHit && dbHit.category && dbHit.category !== comp.category) {
-      out.push({
-        comp,
-        hit: dbHit,
-        source: 'part-code',
-        confidence: 'high',
-        anomaly: true,
-        reason: 'db-mismatch',
-      });
-      continue;
+    const currentCanonical = normaliseCategory(comp.category) || comp.category;
+
+    const dbCanon = lookupCanonical(comp.part_code);
+    if (dbCanon && dbCanon.match !== 'pattern' && dbCanon.data && dbCanon.data.category) {
+      const hitCanonical = normaliseCategory(dbCanon.data.category) || dbCanon.data.category;
+      if (hitCanonical !== currentCanonical) {
+        out.push({
+          comp,
+          hit: dbCanon.data,
+          source: 'part-code',
+          confidence: 'high',
+          anomaly: true,
+          reason: 'db-mismatch',
+        });
+        continue;
+      }
     }
+
     const heur = heuristicClassify(comp);
-    if (heur && heur.confidence === 'high' && heur.category !== comp.category) {
-      out.push({
-        comp,
-        hit: heur,
-        source: 'heuristic',
-        confidence: 'high',
-        anomaly: true,
-        reason: 'heuristic-mismatch',
-      });
+    if (heur && heur.confidence === 'high' && heur.partCodeBased) {
+      const hitCanonical = normaliseCategory(heur.category) || heur.category;
+      if (hitCanonical !== currentCanonical) {
+        out.push({
+          comp,
+          hit: heur,
+          source: 'heuristic',
+          confidence: 'high',
+          anomaly: true,
+          reason: 'heuristic-mismatch',
+        });
+      }
     }
   }
   return out;
@@ -155,13 +171,82 @@ function getMisclassified() {
 
 /**
  * Heuristic classifier used as a tertiary fallback after the part-code DB
- * lookup and description rule engine. Examines the part code, description,
- * package, manufacturer and notes for shape patterns.
+ * lookup and description rule engine.
+ *
+ * Design rules (do not regress):
+ *   - The blob NEVER includes `subcategory`, `notes` or `category`. Including
+ *     them creates a self-poisoning loop where a previous bad classification
+ *     keeps re-confirming itself (e.g. 74LS04 stuck on "Schottky").
+ *   - Part-code prefix detection runs FIRST and is marked `partCodeBased: true`
+ *     so anomaly detection can require strong evidence.
+ *   - Description keywords use word boundaries to avoid matching corrective
+ *     notes such as "(also misplaced in MOSFET section)".
+ *   - Generic keyword matches return at most `medium` confidence.
+ *
+ * Returns: { category, subcategory, confidence, partCodeBased } | null
  */
 function heuristicClassify(comp) {
+  const partCodeKey = String(comp.part_code || '')
+    .toUpperCase()
+    .replace(/[\s\-_.]/g, '');
+
+  // ── Part-code prefix detection (high confidence, immune to description text)
+  // 74-series TTL/CMOS logic: 74LS04, 74HC595, 74HCT245, SN74LS00, MC74HC00 ...
+  if (/^(SN|MC|MM|HD|GD|TC|HEF|CD)?74[A-Z]{0,5}\d{2,4}[A-Z]{0,3}$/.test(partCodeKey) &&
+      /74[A-Z]{0,5}\d/.test(partCodeKey)) {
+    return { category: 'ICs', subcategory: 'Logic', confidence: 'high', partCodeBased: true };
+  }
+  // CD4000-series CMOS logic: CD4017, CD4060, CD4093 ...
+  if (/^CD4\d{3}[A-Z]{0,3}$/.test(partCodeKey)) {
+    return { category: 'ICs', subcategory: 'Logic', confidence: 'high', partCodeBased: true };
+  }
+  // HEF4xxx (Philips/NXP CMOS) and MC14xxx (Motorola CMOS)
+  if (/^HEF4\d{3}/.test(partCodeKey) || /^MC14\d{3}/.test(partCodeKey)) {
+    return { category: 'ICs', subcategory: 'Logic', confidence: 'high', partCodeBased: true };
+  }
+  // Common optocoupler families. 4N25..4N48 are opto, 4N60+ are MOSFETs, so
+  // we explicitly cap the digits to exclude MOSFET ranges.
+  if (/^6N(13[5-9]|14[0-9])$/.test(partCodeKey)) {
+    return { category: 'ICs', subcategory: 'Optocoupler', confidence: 'high', partCodeBased: true };
+  }
+  if (/^4N(2[5-9]|3[0-9]|4[0-9])$/.test(partCodeKey)) {
+    return { category: 'ICs', subcategory: 'Optocoupler', confidence: 'high', partCodeBased: true };
+  }
+  if (/^TLP\d{3,4}$/.test(partCodeKey) || /^PC(8[1-4]7|923)$/.test(partCodeKey) ||
+      /^EL(8\d{2}|3H7)$/.test(partCodeKey) || /^MOC30\d{2}/.test(partCodeKey)) {
+    return { category: 'ICs', subcategory: 'Optocoupler', confidence: 'high', partCodeBased: true };
+  }
+  // 1N40xx, 1N41xx (rectifier), 1N47xx (zener), 1N58xx (schottky) — already
+  // handled by DB patterns but kept here as a safety net for unknown variants.
+  if (/^1N40\d{2}/.test(partCodeKey)) {
+    return { category: 'Diodes', subcategory: 'Rectifier', confidence: 'high', partCodeBased: true };
+  }
+  if (/^1N47\d{2}/.test(partCodeKey)) {
+    return { category: 'Diodes', subcategory: 'Zener', confidence: 'high', partCodeBased: true };
+  }
+  if (/^1N58[12]\d/.test(partCodeKey)) {
+    return { category: 'Diodes', subcategory: 'Schottky', confidence: 'high', partCodeBased: true };
+  }
+  // 1N4148 / 1N914 small-signal
+  if (/^1N(4148|914)/.test(partCodeKey)) {
+    return { category: 'Diodes', subcategory: 'Small Signal', confidence: 'high', partCodeBased: true };
+  }
+  // Common BJT/MOSFET prefixes used as a soft signal (medium confidence).
+  if (/^(IRF|IRL|IRFZ|STP|STF|FQP|FDP|FDS|BSS|BSP|AOD|AON|AOZ|2SK|2SJ|SI[A-Z]{1,2}\d)/.test(partCodeKey)) {
+    return { category: 'Transistors', subcategory: 'Power MOSFET', confidence: 'high', partCodeBased: true };
+  }
+  if (/^(BC|BD|2N|MJE|TIP|2SA|2SB|2SC|2SD|S8\d{3}|S9\d{3})/.test(partCodeKey)) {
+    return { category: 'Transistors', subcategory: 'BJT', confidence: 'medium', partCodeBased: true };
+  }
+  // ESPxxxx, STM32xxxx, ATmega/ATtiny, PIC, nRFxxxxx — microcontrollers
+  if (/^(ESP(32|8266)|STM32|ATMEGA|ATTINY|PIC\d|NRF\d|RP\d{3,4})/.test(partCodeKey)) {
+    return { category: 'ICs', subcategory: 'Microcontroller', confidence: 'high', partCodeBased: true };
+  }
+
+  // ── Description-based heuristics (medium confidence; safer than part-code)
+  // Build blob from observable fields ONLY (never the existing classification).
   const blob = [
-    comp.part_code, comp.description, comp.subcategory,
-    comp.package, comp.manufacturer, comp.notes
+    comp.part_code, comp.description, comp.package, comp.manufacturer
   ].filter(Boolean).join(' ').toLocaleLowerCase('tr-TR');
 
   // Resistor: standard codes with kOhm/M/R suffix or starts with R-/RES
@@ -176,35 +261,39 @@ function heuristicClassify(comp) {
   if (/(\d+(\.\d+)?\s?(uh|mh|nh)\b)|inductor|bobin|choke/.test(blob)) {
     return { category: 'Inductors', subcategory: 'Inductor', confidence: 'medium' };
   }
-  // BJT NPN/PNP heuristics
-  if (/\bnpn\b/.test(blob)) return { category: 'Transistors', subcategory: 'BJT NPN', confidence: 'high' };
-  if (/\bpnp\b/.test(blob)) return { category: 'Transistors', subcategory: 'BJT PNP', confidence: 'high' };
-  if (/mosfet|n-?ch|p-?ch/.test(blob)) return { category: 'Transistors', subcategory: 'Power MOSFET', confidence: 'high' };
-  if (/igbt/.test(blob))    return { category: 'Transistors', subcategory: 'IGBT', confidence: 'high' };
-  // Diode patterns
-  if (/(^|\b)1n\d{3,4}/.test(blob))  return { category: 'Diodes', subcategory: 'Rectifier',  confidence: 'high' };
-  if (/zener/.test(blob))             return { category: 'Diodes', subcategory: 'Zener',      confidence: 'high' };
-  if (/schottky/.test(blob))          return { category: 'Diodes', subcategory: 'Schottky',   confidence: 'high' };
-  if (/diode|diyot/.test(blob))       return { category: 'Diodes', subcategory: 'Rectifier',  confidence: 'medium' };
+  // Logic descriptions (gates, flip-flops, counters, registers)
+  if (/\b(hex inverter|schmitt trigger|flip[- ]?flop|shift register|binary counter|decade counter|ripple[- ]?carry|nand gate|nor gate|xor gate|xnor gate|and gate|or gate|multiplexer|demultiplexer|\bmux\b|decoder|encoder|bus transceiver|octal buffer|line driver|latch ic)\b/.test(blob)) {
+    return { category: 'ICs', subcategory: 'Logic', confidence: 'medium' };
+  }
+  // Optocoupler descriptions (covers high-speed, photocoupler, opto-isolator)
+  if (/\b(optocoupler|opto-?isolator|photocoupler|optoisolator)\b/.test(blob)) {
+    return { category: 'ICs', subcategory: 'Optocoupler', confidence: 'medium' };
+  }
+  // BJT NPN/PNP heuristics — strict word boundaries
+  if (/\bnpn\b/.test(blob)) return { category: 'Transistors', subcategory: 'BJT NPN', confidence: 'medium' };
+  if (/\bpnp\b/.test(blob)) return { category: 'Transistors', subcategory: 'BJT PNP', confidence: 'medium' };
+  // MOSFET — only when paired with concrete channel marker (n-ch / p-ch / power)
+  // Naked "mosfet" matches were misclassifying notes like "misplaced in MOSFET section".
+  if (/\b(n-?ch(?:annel)?|p-?ch(?:annel)?|power|trench|logic[- ]level)\b.{0,20}\bmosfet\b/.test(blob) ||
+      /\bmosfet\b.{0,20}\b(n-?ch|p-?ch|\d+v|\d+a)\b/.test(blob)) {
+    return { category: 'Transistors', subcategory: 'Power MOSFET', confidence: 'medium' };
+  }
+  if (/\bigbt\b/.test(blob)) return { category: 'Transistors', subcategory: 'IGBT', confidence: 'medium' };
+  // Diode descriptions
+  if (/\bzener\b/.test(blob))    return { category: 'Diodes', subcategory: 'Zener',     confidence: 'medium' };
+  if (/\bschottky\b/.test(blob)) return { category: 'Diodes', subcategory: 'Schottky',  confidence: 'medium' };
+  if (/\b(rectifier diode|bridge rectifier|fast recovery|ultra fast)\b/.test(blob))
+                                  return { category: 'Diodes', subcategory: 'Rectifier', confidence: 'medium' };
   // LEDs
-  if (/\bled\b/.test(blob))           return { category: 'Diodes', subcategory: 'LED',        confidence: 'high' };
-  // Common ICs
-  if (/\b(stm32|atmega|attiny|esp32|esp8266|pic\d+|nrf\d+)\b/.test(blob))
-    return { category: 'ICs', subcategory: 'Microcontroller', confidence: 'high' };
-  if (/\b(lm78|lm79|lm317|ams1117|ld1117|mcp1700)\b/.test(blob))
-    return { category: 'ICs', subcategory: 'Linear Regulator', confidence: 'high' };
-  if (/\b(ne555|sa555)\b/.test(blob))
-    return { category: 'ICs', subcategory: 'Timer', confidence: 'high' };
-  if (/\b(lm358|lm324|tl08\d|tl07\d|op-?amp)\b/.test(blob))
-    return { category: 'ICs', subcategory: 'Op-Amp', confidence: 'high' };
+  if (/\bled\b/.test(blob))           return { category: 'Diodes', subcategory: 'LED',        confidence: 'medium' };
   // Connectors
-  if (/header|jst|molex|terminal|connector|konektor/.test(blob))
+  if (/\b(pin header|jst|molex|terminal block|connector|konektor)\b/.test(blob))
     return { category: 'Connectors', subcategory: 'Pin Header', confidence: 'medium' };
   // Crystals
-  if (/crystal|kristal|oscillat|mhz|khz/.test(blob))
+  if (/\b(crystal|kristal|oscillator|mhz|khz)\b/.test(blob))
     return { category: 'Crystals', subcategory: 'Crystal', confidence: 'medium' };
   // Sensors
-  if (/sensor|sensor|dht\d|ds18|bmp\d|mpu\d/.test(blob))
+  if (/\b(temperature sensor|humidity sensor|pressure sensor|hall sensor|dht\d{1,2}|ds18[bs]\d{0,2}|bmp\d{2,3}|mpu\d{4})\b/.test(blob))
     return { category: 'Sensors', subcategory: 'Temperature', confidence: 'medium' };
   return null;
 }

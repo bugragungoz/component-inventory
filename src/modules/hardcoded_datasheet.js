@@ -391,6 +391,48 @@ const DB = {
   'SN74HC08':  { category:'ICs', subcategory:'Logic / AND', package:'DIP-14', manufacturer:'Texas Instruments', voltage_max:7, current_max:null, description:'Quad 2-Input AND Gate', datasheet_url:'https://www.ti.com/lit/ds/symlink/sn74hc08.pdf' },
   'SN74HC32':  { category:'ICs', subcategory:'Logic / OR', package:'DIP-14', manufacturer:'Texas Instruments', voltage_max:7, current_max:null, description:'Quad 2-Input OR Gate', datasheet_url:'https://www.ti.com/lit/ds/symlink/sn74hc32.pdf' },
   'CD4053':    { category:'ICs', subcategory:'Logic / Mux', package:'DIP-16', manufacturer:'Various', voltage_max:15, current_max:null, description:'Triple 2-Channel Analog Mux/Demux', datasheet_url:'https://www.ti.com/lit/ds/symlink/cd4053b.pdf' },
+
+  // ── 74LSxx TTL Logic family (canonical entries; pattern lookup also handles
+  //     variants such as SN74LS04, MM74LS04, HD74LS04, GD74LS04, ...)
+  '74LS00':    { category:'ICs', subcategory:'Logic / NAND', package:'DIP-14', manufacturer:'Various', voltage_max:7, current_max:null, description:'Quad 2-Input NAND Gate', datasheet_url:'https://www.ti.com/lit/ds/symlink/sn74ls00.pdf' },
+  '74LS04':    { category:'ICs', subcategory:'Logic / Inverter', package:'DIP-14', manufacturer:'Various', voltage_max:7, current_max:null, description:'Hex Inverter', datasheet_url:'https://www.ti.com/lit/ds/symlink/sn74ls04.pdf' },
+  '74LS08':    { category:'ICs', subcategory:'Logic / AND', package:'DIP-14', manufacturer:'Various', voltage_max:7, current_max:null, description:'Quad 2-Input AND Gate', datasheet_url:'https://www.ti.com/lit/ds/symlink/sn74ls08.pdf' },
+  '74LS10':    { category:'ICs', subcategory:'Logic / NAND', package:'DIP-14', manufacturer:'Various', voltage_max:7, current_max:null, description:'Triple 3-Input NAND Gate', datasheet_url:'https://www.ti.com/lit/ds/symlink/sn74ls10.pdf' },
+  '74LS11':    { category:'ICs', subcategory:'Logic / AND', package:'DIP-14', manufacturer:'Various', voltage_max:7, current_max:null, description:'Triple 3-Input AND Gate', datasheet_url:'https://www.ti.com/lit/ds/symlink/sn74ls11.pdf' },
+  '74LS14':    { category:'ICs', subcategory:'Logic / Inverter', package:'DIP-14', manufacturer:'Various', voltage_max:7, current_max:null, description:'Hex Inverter Schmitt Trigger', datasheet_url:'https://www.ti.com/lit/ds/symlink/sn74ls14.pdf' },
+  '74LS32':    { category:'ICs', subcategory:'Logic / OR', package:'DIP-14', manufacturer:'Various', voltage_max:7, current_max:null, description:'Quad 2-Input OR Gate', datasheet_url:'https://www.ti.com/lit/ds/symlink/sn74ls32.pdf' },
+  '74LS74':    { category:'ICs', subcategory:'Logic / Flip-Flop', package:'DIP-14', manufacturer:'Various', voltage_max:7, current_max:null, description:'Dual D-Type Flip-Flop with Preset and Clear', datasheet_url:'https://www.ti.com/lit/ds/symlink/sn74ls74a.pdf' },
+  '74LS86':    { category:'ICs', subcategory:'Logic / XOR', package:'DIP-14', manufacturer:'Various', voltage_max:7, current_max:null, description:'Quad 2-Input XOR Gate', datasheet_url:'https://www.ti.com/lit/ds/symlink/sn74ls86a.pdf' },
+  '74LS90':    { category:'ICs', subcategory:'Logic / Counter', package:'DIP-14', manufacturer:'Various', voltage_max:7, current_max:null, description:'Decade Counter', datasheet_url:'https://www.ti.com/lit/ds/symlink/sn74ls90.pdf' },
+  '74LS92':    { category:'ICs', subcategory:'Logic / Counter', package:'DIP-14', manufacturer:'Various', voltage_max:7, current_max:null, description:'Divide-by-Twelve Counter', datasheet_url:'https://www.ti.com/lit/ds/symlink/sn74ls92.pdf' },
+  '74LS93':    { category:'ICs', subcategory:'Logic / Counter', package:'DIP-14', manufacturer:'Various', voltage_max:7, current_max:null, description:'4-Bit Binary Counter', datasheet_url:'https://www.ti.com/lit/ds/symlink/sn74ls93.pdf' },
+  '74LS138':   { category:'ICs', subcategory:'Logic / Decoder', package:'DIP-16', manufacturer:'Various', voltage_max:7, current_max:null, description:'3-to-8 Line Decoder/Demultiplexer', datasheet_url:'https://www.ti.com/lit/ds/symlink/sn74ls138.pdf' },
+  '74LS139':   { category:'ICs', subcategory:'Logic / Decoder', package:'DIP-16', manufacturer:'Various', voltage_max:7, current_max:null, description:'Dual 2-to-4 Line Decoder/Demultiplexer', datasheet_url:'https://www.ti.com/lit/ds/symlink/sn74ls139a.pdf' },
+  '74LS164':   { category:'ICs', subcategory:'Logic / Shift Register', package:'DIP-14', manufacturer:'Various', voltage_max:7, current_max:null, description:'8-Bit Serial-In/Parallel-Out Shift Register', datasheet_url:'https://www.ti.com/lit/ds/symlink/sn74ls164.pdf' },
+  '74LS165':   { category:'ICs', subcategory:'Logic / Shift Register', package:'DIP-16', manufacturer:'Various', voltage_max:7, current_max:null, description:'8-Bit Parallel-In/Serial-Out Shift Register', datasheet_url:'https://www.ti.com/lit/ds/symlink/sn74ls165a.pdf' },
+  '74LS244':   { category:'ICs', subcategory:'Logic / Buffer', package:'DIP-20', manufacturer:'Various', voltage_max:7, current_max:null, description:'Octal Buffer/Line Driver 3-State', datasheet_url:'https://www.ti.com/lit/ds/symlink/sn74ls244.pdf' },
+  '74LS245':   { category:'ICs', subcategory:'Logic / Transceiver', package:'DIP-20', manufacturer:'Various', voltage_max:7, current_max:null, description:'Octal Bus Transceiver 3-State', datasheet_url:'https://www.ti.com/lit/ds/symlink/sn74ls245.pdf' },
+  '74LS373':   { category:'ICs', subcategory:'Logic / Latch', package:'DIP-20', manufacturer:'Various', voltage_max:7, current_max:null, description:'Octal D-Type Transparent Latch', datasheet_url:'https://www.ti.com/lit/ds/symlink/sn74ls373.pdf' },
+  '74LS374':   { category:'ICs', subcategory:'Logic / Flip-Flop', package:'DIP-20', manufacturer:'Various', voltage_max:7, current_max:null, description:'Octal D-Type Flip-Flop with 3-State Outputs', datasheet_url:'https://www.ti.com/lit/ds/symlink/sn74ls374.pdf' },
+
+  // ── Optocouplers (high-speed and standard)
+  '6N135':     { category:'ICs', subcategory:'Optocoupler', package:'DIP-8', manufacturer:'Various', voltage_max:7, current_max:0.06, description:'High-Speed Optocoupler 1MBd Single Channel', datasheet_url:'https://docs.broadcom.com/doc/AV02-0344EN' },
+  '6N136':     { category:'ICs', subcategory:'Optocoupler', package:'DIP-8', manufacturer:'Various', voltage_max:7, current_max:0.06, description:'High-Speed Optocoupler 1MBd Single Channel', datasheet_url:'https://docs.broadcom.com/doc/AV02-0344EN' },
+  '6N137':     { category:'ICs', subcategory:'Optocoupler', package:'DIP-8', manufacturer:'Various', voltage_max:7, current_max:0.06, description:'High-Speed Optocoupler 10MBd Logic Gate Output', datasheet_url:'https://docs.broadcom.com/doc/AV02-0780EN' },
+  '6N138':     { category:'ICs', subcategory:'Optocoupler', package:'DIP-8', manufacturer:'Various', voltage_max:7, current_max:0.05, description:'Low-Input-Current High-Gain Split-Darlington Optocoupler', datasheet_url:'https://docs.broadcom.com/doc/AV02-0344EN' },
+  '6N139':     { category:'ICs', subcategory:'Optocoupler', package:'DIP-8', manufacturer:'Various', voltage_max:7, current_max:0.05, description:'Low-Input-Current High-Gain Optocoupler', datasheet_url:'https://docs.broadcom.com/doc/AV02-0344EN' },
+  '4N25':      { category:'ICs', subcategory:'Optocoupler', package:'DIP-6', manufacturer:'Various', voltage_max:30, current_max:0.05, description:'Phototransistor Output Optocoupler', datasheet_url:'https://www.vishay.com/docs/83725/4n25.pdf' },
+  '4N26':      { category:'ICs', subcategory:'Optocoupler', package:'DIP-6', manufacturer:'Various', voltage_max:30, current_max:0.05, description:'Phototransistor Output Optocoupler', datasheet_url:'https://www.vishay.com/docs/83725/4n25.pdf' },
+  '4N27':      { category:'ICs', subcategory:'Optocoupler', package:'DIP-6', manufacturer:'Various', voltage_max:30, current_max:0.05, description:'Phototransistor Output Optocoupler', datasheet_url:'https://www.vishay.com/docs/83725/4n25.pdf' },
+  '4N28':      { category:'ICs', subcategory:'Optocoupler', package:'DIP-6', manufacturer:'Various', voltage_max:30, current_max:0.05, description:'Phototransistor Output Optocoupler', datasheet_url:'https://www.vishay.com/docs/83725/4n25.pdf' },
+  '4N35':      { category:'ICs', subcategory:'Optocoupler', package:'DIP-6', manufacturer:'Various', voltage_max:30, current_max:0.05, description:'Phototransistor Output Optocoupler 7.5kV', datasheet_url:'https://www.vishay.com/docs/81181/4n35.pdf' },
+  '4N37':      { category:'ICs', subcategory:'Optocoupler', package:'DIP-6', manufacturer:'Various', voltage_max:30, current_max:0.05, description:'Phototransistor Output Optocoupler', datasheet_url:'https://www.vishay.com/docs/81181/4n35.pdf' },
+  'PC817':     { category:'ICs', subcategory:'Optocoupler', package:'DIP-4', manufacturer:'Sharp/Various', voltage_max:35, current_max:0.05, description:'High-Density-Mounting Phototransistor Optocoupler', datasheet_url:'https://www.sharpsma.com/documents/27069/127947/PC817_Datasheet.pdf' },
+  'PC827':     { category:'ICs', subcategory:'Optocoupler', package:'DIP-8', manufacturer:'Sharp/Various', voltage_max:35, current_max:0.05, description:'2-Channel Phototransistor Optocoupler', datasheet_url:'https://www.sharpsma.com/documents/27069/127947/PC827_Datasheet.pdf' },
+  'PC847':     { category:'ICs', subcategory:'Optocoupler', package:'DIP-16', manufacturer:'Sharp/Various', voltage_max:35, current_max:0.05, description:'4-Channel Phototransistor Optocoupler', datasheet_url:'https://www.sharpsma.com/documents/27069/127947/PC847_Datasheet.pdf' },
+  'TLP521':    { category:'ICs', subcategory:'Optocoupler', package:'DIP-4', manufacturer:'Toshiba', voltage_max:55, current_max:0.05, description:'Phototransistor Output Optocoupler', datasheet_url:'https://toshiba.semicon-storage.com/info/TLP521-1_datasheet_en.pdf' },
+  'TLP627':    { category:'ICs', subcategory:'Optocoupler', package:'DIP-4', manufacturer:'Toshiba', voltage_max:55, current_max:0.15, description:'Darlington Output Optocoupler', datasheet_url:'https://toshiba.semicon-storage.com/info/TLP627_datasheet_en.pdf' },
+  'TLP785':    { category:'ICs', subcategory:'Optocoupler', package:'DIP-4', manufacturer:'Toshiba', voltage_max:80, current_max:0.05, description:'Phototransistor Output Optocoupler', datasheet_url:'https://toshiba.semicon-storage.com/info/TLP785_datasheet_en.pdf' },
   'ATTINY13':  { category:'ICs', subcategory:'Microcontroller', package:'DIP-8', manufacturer:'Microchip/Atmel', voltage_max:5.5, current_max:0.2, description:'8-bit AVR MCU 1KB Flash', datasheet_url:'https://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-2535-8-bit-AVR-Microcontroller-ATtiny13A_Datasheet.pdf' },
   'PIC12F675': { category:'ICs', subcategory:'Microcontroller', package:'DIP-8', manufacturer:'Microchip', voltage_max:5.5, current_max:null, description:'PIC MCU 1.75KB Flash, 64B SRAM', datasheet_url:'https://ww1.microchip.com/downloads/en/DeviceDoc/41190G.pdf' },
 
@@ -451,6 +493,28 @@ const PATTERNS = [
   { pattern: /^LM79\d{2}/,    result: { category:'ICs',         subcategory:'Linear Regulator',package:'TO-220',  description:'Fixed Negative Voltage Regulator' } },
   // Optocouplers — MOC30xx
   { pattern: /^MOC30\d{2}/,   result: { category:'ICs',         subcategory:'Optocoupler',     package:'DIP-6',   description:'Optoisolator Triac Driver Output' } },
+  // Optocouplers — TLPxxx (Toshiba)
+  { pattern: /^TLP\d{3,4}/,   result: { category:'ICs',         subcategory:'Optocoupler',     package:'DIP-4',   manufacturer:'Toshiba', description:'Phototransistor Output Optocoupler' } },
+  // Optocouplers — Sharp PC8x7 family
+  { pattern: /^PC(8[1-4]7|923)/, result: { category:'ICs',     subcategory:'Optocoupler',     package:'DIP',     manufacturer:'Sharp/Various', description:'Phototransistor Output Optocoupler' } },
+  // Optocouplers — EL series (Everlight)
+  { pattern: /^EL(8\d{2}|3H7)/,  result: { category:'ICs',     subcategory:'Optocoupler',     package:'DIP-4',   manufacturer:'Everlight', description:'Phototransistor Output Optocoupler' } },
+  // Optocouplers — 6Nxxx high-speed family (limited to known opto digit ranges)
+  { pattern: /^6N(13[5-9]|14[0-9])$/, result: { category:'ICs', subcategory:'Optocoupler',    package:'DIP-8',   description:'High-Speed Optocoupler' } },
+  // Optocouplers — 4Nxx standard phototransistor (4N25..4N48; 4N60+ are MOSFETs)
+  { pattern: /^4N(2[5-9]|3[0-9]|4[0-8])$/, result: { category:'ICs', subcategory:'Optocoupler', package:'DIP-6', description:'Phototransistor Output Optocoupler' } },
+  // 74-series TTL/CMOS Logic family
+  // Matches 74LS04, 74HC595, SN74LS245, MC74HC00, HD74LS04, GD74HC04, ...
+  // Subfamily letters covered: L, S, LS, HC, HCT, AC, ACT, AHC, AHCT, F, AS,
+  // ALS, LV, LVC, VHC, VHCT, ABT, BCT, FCT.
+  { pattern: /^(SN|MC|MM|HD|GD|TC|TI|HEF|CD|DM|MM|NE|JM)?74(L|S|LS|HC|HCT|AC|ACT|AHC|AHCT|F|AS|ALS|LV|LVC|VHC|VHCT|ABT|BCT|FCT)?\d{2,4}[A-Z]{0,3}$/,
+    result: { category:'ICs', subcategory:'Logic', package:'DIP', description:'74-Series Logic IC' } },
+  // CD4xxx CMOS Logic family (Texas Instruments / RCA)
+  { pattern: /^CD4\d{3}[A-Z]{0,3}$/, result: { category:'ICs', subcategory:'Logic', package:'DIP', description:'CD4000-Series CMOS Logic IC' } },
+  // HEF4xxx (NXP / Philips CMOS)
+  { pattern: /^HEF4\d{3}/, result: { category:'ICs', subcategory:'Logic', package:'DIP', manufacturer:'NXP', description:'HEF4000-Series CMOS Logic IC' } },
+  // MC14xxx (Motorola/ON Semi CMOS)
+  { pattern: /^MC14\d{3}/, result: { category:'ICs', subcategory:'Logic', package:'DIP', manufacturer:'ON Semi', description:'MC14000-Series CMOS Logic IC' } },
   // VIPER family — offline switcher ICs
   { pattern: /^VIPER/,        result: { category:'ICs',         subcategory:'Power Switch',    package:'DIP-8',   manufacturer:'STMicroelectronics', description:'Off-Line SMPS Primary Switch' } },
   // Schottky SMD M7 / SxYY pattern
@@ -532,7 +596,10 @@ const DESC_RULES = [
   [/N[-\s]?CH(?:ANNEL)?.{0,15}MOSFET/i,         { category:'Transistors', subcategory:'N-Channel MOSFET' }],
   [/P[-\s]?CH(?:ANNEL)?.{0,15}MOSFET/i,         { category:'Transistors', subcategory:'P-Channel MOSFET' }],
   [/SMD.{0,10}MOSFET|MOSFET.{0,10}SMD/i,        { category:'Transistors', subcategory:'Power MOSFET' }],
-  [/POWER MOSFET|MOSFET/i,                        { category:'Transistors', subcategory:'Power MOSFET' }],
+  // Restricted MOSFET keyword — must be paired with a power-electronics
+  // signal so that corrective notes like "(also misplaced in MOSFET section)"
+  // do NOT promote 6N135 (an optocoupler) to a MOSFET.
+  [/POWER\s+MOSFET|MOSFET\s+(DRIVER|GATE|TRANSISTOR|TR\b)/i, { category:'Transistors', subcategory:'Power MOSFET' }],
   [/IGBT/i,                                       { category:'Transistors', subcategory:'IGBT' }],
   [/DARLINGTON.{0,6}NPN|NPN.{0,6}DARLINGTON/i,  { category:'Transistors', subcategory:'Darlington NPN' }],
   [/DARLINGTON.{0,6}PNP|PNP.{0,6}DARLINGTON/i,  { category:'Transistors', subcategory:'Darlington PNP' }],
@@ -592,6 +659,22 @@ const DESC_RULES = [
   [/MICROCONTROLLER|8.?BIT AVR|ARM CORTEX|PIC MCU/i, { category:'ICs', subcategory:'Microcontroller' }],
   [/SHIFT REGISTER/i,                              { category:'ICs', subcategory:'Logic / Shift Register' }],
   [/NAND GATE/i,                                   { category:'ICs', subcategory:'Logic / NAND' }],
+  [/NOR GATE/i,                                    { category:'ICs', subcategory:'Logic / NOR' }],
+  [/XOR GATE|EXCLUSIVE.?OR/i,                     { category:'ICs', subcategory:'Logic / XOR' }],
+  [/XNOR GATE/i,                                   { category:'ICs', subcategory:'Logic / XNOR' }],
+  [/AND GATE/i,                                    { category:'ICs', subcategory:'Logic / AND' }],
+  [/OR GATE/i,                                     { category:'ICs', subcategory:'Logic / OR' }],
+  [/HEX INVERTER|SCHMITT TRIGGER/i,                { category:'ICs', subcategory:'Logic / Inverter' }],
+  [/FLIP[\s-]?FLOP|D[\s-]?TYPE LATCH|JK FLIP/i,    { category:'ICs', subcategory:'Logic / Flip-Flop' }],
+  [/BINARY COUNTER|DECADE COUNTER|RIPPLE[\s-]?CARRY|DIVIDE[\s-]?BY[\s-]?\d+ COUNTER/i,
+                                                    { category:'ICs', subcategory:'Logic / Counter' }],
+  [/MULTIPLEXER|\bMUX\b|DEMULTIPLEXER|\bDEMUX\b/i,{ category:'ICs', subcategory:'Logic / Mux' }],
+  [/DECODER|ENCODER/i,                             { category:'ICs', subcategory:'Logic / Decoder' }],
+  [/OCTAL BUFFER|LINE DRIVER|3[-\s]?STATE BUFFER/i,{ category:'ICs', subcategory:'Logic / Buffer' }],
+  [/BUS TRANSCEIVER|OCTAL TRANSCEIVER/i,           { category:'ICs', subcategory:'Logic / Transceiver' }],
+  [/TRANSPARENT LATCH|D[\s-]?TYPE.{0,15}LATCH/i,   { category:'ICs', subcategory:'Logic / Latch' }],
+  [/HIGH[\s-]?SPEED OPTOCOUPLER|PHOTOCOUPLER|OPTOISOLATOR/i,
+                                                    { category:'ICs', subcategory:'Optocoupler' }],
   [/HALL EFFECT|CURRENT SENSOR|POWER MONITOR/i,   { category:'Sensors', subcategory:'Current Sensor' }],
   // ── Sensors ───────────────────────────────────────────────────
   [/TEMPERATURE SENSOR|THERMOMETER/i,             { category:'Sensors', subcategory:'Temperature' }],
