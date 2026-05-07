@@ -1,6 +1,6 @@
 [package]
 name = "component-inventory"
-version = "0.2.5"
+version = "0.3.0"
 description = "Electronic component inventory manager"
 authors = ["bugragungoz"]
 edition = "2021"

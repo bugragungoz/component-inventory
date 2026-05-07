@@ -201,10 +201,6 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16"/><path d="M4 12h16"/><path d="M4 4h16"/><circle cx="20" cy="4" r="2" fill="currentColor" stroke="none"/><circle cx="20" cy="12" r="2" fill="currentColor" stroke="none"/><circle cx="20" cy="20" r="2" fill="currentColor" stroke="none"/></svg>
           <span data-i18n="topbar.btn.autocat">Auto-Categorize</span>
         </button>
-        <button class="btn btn-ghost" id="btn-reorder" title="Reorder suggestions">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l3-3 3 2 4-5"/></svg>
-          <span data-i18n="topbar.btn.reorder">Reorder</span>
-        </button>
         <button class="btn btn-ghost" id="btn-projects" title="Projects and BOM">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg>
           <span data-i18n="topbar.btn.projects">Projects</span>
@@ -462,6 +458,10 @@
           <button class="btn btn-ghost btn-sm" id="btn-print-label" data-i18n-title="detail.btn.label.title" title="Print component label with QR code">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
             <span data-i18n="detail.btn.label">Print Label</span>
+          </button>
+          <button class="btn btn-ghost btn-sm" id="btn-detail-assign-project" data-i18n-title="assign.title" title="Assign to project">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg>
+            <span data-i18n="detail.btn.assign">Assign</span>
           </button>
           <button class="btn btn-ghost btn-sm" id="btn-detail-edit">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -1032,68 +1032,6 @@
     </div>
   </div>
 
-  <!-- Reorder Suggestions Modal -->
-  <div class="modal-overlay" id="overlay-reorder" style="display:none">
-    <div class="modal modal-lg">
-      <div class="modal-header">
-        <h2 data-i18n="reorder.title">Reorder Suggestions</h2>
-        <button class="modal-close" data-close="overlay-reorder">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>
-      <div class="modal-body">
-        <div id="reorder-subtitle" style="margin-bottom:10px;font-size:0.82rem;color:var(--text-muted)"></div>
-        <div style="font-size:0.78rem;font-weight:600;margin-bottom:6px;color:var(--text-secondary)" data-i18n="reorder.section.lowStock">Low stock</div>
-        <div class="diff-table-wrap">
-          <table class="diff-table">
-            <thead>
-              <tr>
-                <th data-i18n="reorder.col.partCode">Part Code</th>
-                <th data-i18n="reorder.col.stock">Current Stock</th>
-                <th data-i18n="reorder.col.threshold">Threshold</th>
-                <th data-i18n="reorder.col.suggestedQty">Suggested Order Qty</th>
-                <th data-i18n="reorder.col.supplier">Preferred Supplier</th>
-                <th data-i18n="reorder.col.actions">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="reorder-tbody">
-              <tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:22px" data-i18n="reorder.empty">No low-stock components found.</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--border-subtle)">
-          <div style="font-size:0.78rem;font-weight:600;margin-bottom:8px;color:var(--text-secondary)" data-i18n="reorder.section.manual">Manual list and notes</div>
-          <div class="settings-hint" style="margin-bottom:10px;font-size:0.74rem" data-i18n="reorder.manual.hint">Add parts or reminders that are not in the low-stock table. Stored on this device only.</div>
-          <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px">
-            <input type="text" id="reorder-wish-part" class="settings-input-path" style="min-width:140px;flex:1" data-i18n-placeholder="reorder.manual.partPlaceholder" placeholder="Part code or description" autocomplete="off" />
-            <input type="number" id="reorder-wish-qty" class="settings-input-sm" min="1" style="width:72px" value="1" data-i18n-title="reorder.manual.qtyTitle" title="Quantity" />
-            <input type="text" id="reorder-wish-note" class="settings-input-path" style="min-width:160px;flex:2" data-i18n-placeholder="reorder.manual.notePlaceholder" placeholder="Note (supplier, URL, ...)" autocomplete="off" />
-            <button type="button" class="btn btn-primary btn-sm" id="btn-reorder-wish-add" data-i18n="reorder.btn.addManual">Add</button>
-          </div>
-          <div class="diff-table-wrap">
-            <table class="diff-table">
-              <thead>
-                <tr>
-                  <th data-i18n="reorder.col.partCode">Part</th>
-                  <th data-i18n="reorder.col.suggestedQty">Qty</th>
-                  <th data-i18n="reorder.col.note">Note</th>
-                  <th data-i18n="reorder.col.actions">Actions</th>
-                </tr>
-              </thead>
-              <tbody id="reorder-wish-tbody">
-                <tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:16px" data-i18n="reorder.wish.empty">No manual entries yet.</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-ghost" data-close="overlay-reorder" data-i18n="reorder.btn.close">Close</button>
-      </div>
-    </div>
-  </div>
-
-
   <!-- Projects & BOM Modal -->
   <div class="modal-overlay" id="overlay-projects" style="display:none">
     <div class="modal modal-lg modal-projects">
@@ -1104,9 +1042,12 @@
         </button>
       </div>
       <div class="modal-body modal-body-projects">
-        <aside style="display:flex;flex-direction:column;gap:10px">
-          <button type="button" class="btn btn-add btn-sm" id="btn-project-create" data-i18n="project.btn.new">New Project</button>
-          <div id="projects-list" style="display:flex;flex-direction:column;gap:6px"></div>
+        <aside class="projects-sidebar">
+          <button type="button" class="btn btn-add btn-new-project" id="btn-project-create">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span data-i18n="project.btn.new">New Project</span>
+          </button>
+          <div id="projects-list" class="projects-list"></div>
         </aside>
         <section id="project-detail-panel" class="project-detail-stack" style="display:none">
           <div class="project-detail-header">
@@ -1120,66 +1061,102 @@
           </div>
 
           <div class="form-grid" style="margin-bottom:0">
-            <div class="form-group">
-              <label for="project-name" data-i18n="project.field.name">Project Name</label>
-              <input id="project-name" type="text" class="settings-input-path" />
-            </div>
             <div class="form-group col-span-2">
               <label for="project-desc" data-i18n="project.field.desc">Description</label>
-              <textarea id="project-desc" class="settings-input-path" rows="3" spellcheck="false"></textarea>
+              <textarea id="project-desc" class="settings-input-path" rows="2" spellcheck="false"></textarea>
             </div>
             <div class="form-group col-span-2">
-              <label for="project-sch-path" data-i18n="project.field.schematic">Schematic File</label>
+              <label for="project-notes" data-i18n="project.field.notes">Notes</label>
+              <textarea id="project-notes" class="settings-input-path" rows="3" spellcheck="false" data-i18n-placeholder="project.field.notes.placeholder" placeholder="Free-form notes (revisions, suppliers, build remarks)"></textarea>
+            </div>
+            <div class="form-group col-span-2">
+              <label for="project-sch-path" data-i18n="project.field.schematic">Schematic PDF</label>
               <div style="display:flex;gap:8px;flex-wrap:wrap">
                 <input id="project-sch-path" type="text" class="settings-input-path" style="flex:1;min-width:160px" readonly />
-                <button type="button" class="btn btn-ghost btn-sm" id="btn-project-pick-sch" data-i18n="project.btn.pickSchematic">Browse</button>
+                <button type="button" class="btn btn-ghost btn-sm" id="btn-project-pick-sch" data-i18n="project.btn.pickSchematic">Browse PDF</button>
                 <button type="button" class="btn btn-ghost btn-sm" id="btn-project-refresh-sch" data-i18n="project.btn.refresh">Refresh</button>
               </div>
             </div>
           </div>
-          <div class="project-meta-actions">
-            <button type="button" class="btn btn-ghost btn-sm" id="btn-project-delete" data-i18n="project.btn.delete">Delete Project</button>
-          </div>
 
           <div class="project-bom-toolbar">
             <span class="project-bom-toolbar-title" data-i18n="project.bom.title">BOM (without reducing stock)</span>
-            <div class="project-bom-toolbar-actions">
-              <button type="button" class="btn btn-ghost btn-sm" id="btn-project-match-sch" data-i18n="project.btn.matchSch">Add from schematic</button>
-              <button type="button" class="btn btn-ghost btn-sm" id="btn-project-sync-order" data-i18n="project.btn.syncOrder">Sync missing items to Reorder notes</button>
-            </div>
           </div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px">
-            <input type="text" id="project-add-part" class="settings-input-path" style="min-width:160px;flex:1" list="list-project-part-code" data-i18n-placeholder="project.part.placeholder" placeholder="Part code" />
-            <datalist id="list-project-part-code"></datalist>
-            <input type="number" id="project-add-qty" class="settings-input-sm" min="1" value="1" style="width:74px" />
-            <input type="text" id="project-add-note" class="settings-input-path" style="min-width:160px;flex:1.2" data-i18n-placeholder="project.part.note.placeholder" placeholder="BOM note" />
-            <button type="button" class="btn btn-primary btn-sm" id="btn-project-add-part" data-i18n="project.btn.addPart">Add to BOM</button>
+          <div class="project-bom-add-row">
+            <div class="project-bom-add-row__main">
+              <select id="project-add-category" class="settings-input-path project-bom-cat-select" data-i18n-title="project.cat.title" title="Filter by category">
+                <option value="" data-i18n="project.cat.all">All categories</option>
+              </select>
+              <input type="text" id="project-add-part" class="settings-input-path" list="list-project-part-code" data-i18n-placeholder="project.part.placeholder" placeholder="Part code" autocomplete="off" />
+              <datalist id="list-project-part-code"></datalist>
+              <input type="number" id="project-add-qty" class="settings-input-sm" min="1" value="1" data-i18n-title="project.col.required" title="Required" />
+              <input type="text" id="project-add-note" class="settings-input-path" data-i18n-placeholder="project.part.note.placeholder" placeholder="BOM note" />
+              <button type="button" class="btn btn-primary btn-sm" id="btn-project-add-part" data-i18n="project.btn.addPart">Add to BOM</button>
+            </div>
+            <div id="project-inventory-search-results" class="project-inv-results"></div>
           </div>
           <div class="diff-table-wrap">
-            <table class="diff-table">
+            <table class="diff-table project-bom-table">
               <thead>
                 <tr>
                   <th data-i18n="project.col.part">Part</th>
                   <th data-i18n="project.col.desc">Description</th>
                   <th data-i18n="project.col.required">Required</th>
+                  <th data-i18n="project.col.missing">Missing</th>
                   <th data-i18n="project.col.stock">In Stock</th>
-                  <th data-i18n="project.col.status">Status</th>
+                  <th data-i18n="project.col.note">Note</th>
                   <th data-i18n="project.col.actions">Actions</th>
                 </tr>
               </thead>
               <tbody id="project-bom-tbody">
-                <tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:16px">-</td></tr>
+                <tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:16px">-</td></tr>
               </tbody>
             </table>
           </div>
         </section>
-        <section id="projects-empty-state" style="display:none;color:var(--text-muted);font-size:0.82rem">
+        <section id="projects-empty-state" style="display:none">
           <span data-i18n="project.empty">No project yet. Create your first project.</span>
         </section>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-ghost" data-close="overlay-projects" data-i18n="project.btn.close">Close</button>
         <button type="button" class="btn btn-add" id="btn-project-save-meta" data-i18n="project.btn.save">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail-modal: Assign current component to a project -->
+  <div class="modal-overlay" id="overlay-assign-project" style="display:none">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h2 data-i18n="assign.title">Assign to project</h2>
+        <button class="modal-close" data-close="overlay-assign-project">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-grid" style="margin-bottom:0">
+          <div class="form-group col-span-2">
+            <label data-i18n="assign.partLabel">Component</label>
+            <div id="assign-part-label" class="assign-part-label">-</div>
+          </div>
+          <div class="form-group col-span-2">
+            <label for="assign-project" data-i18n="assign.project">Project</label>
+            <select id="assign-project" class="settings-input-path"></select>
+          </div>
+          <div class="form-group">
+            <label for="assign-qty" data-i18n="assign.qty">Required quantity</label>
+            <input id="assign-qty" type="number" min="1" value="1" class="settings-input-sm" />
+          </div>
+          <div class="form-group col-span-2">
+            <label for="assign-note" data-i18n="assign.note">BOM note (optional)</label>
+            <input id="assign-note" type="text" class="settings-input-path" />
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" data-close="overlay-assign-project" data-i18n="assign.btn.cancel">Cancel</button>
+        <button type="button" class="btn btn-add" id="btn-assign-project-save" data-i18n="assign.btn.save">Save</button>
       </div>
     </div>
   </div>

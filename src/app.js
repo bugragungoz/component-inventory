@@ -11,7 +11,6 @@ import { initI18n, t, setLocale, getLocale, applyTranslations } from './modules/
 import { initBackupDiff }        from './modules/backup_diff.js';
 import { initDriveSync, triggerDriveSync, triggerDriveSyncManual, getDriveStatus, onDriveStatusChange, DRIVE_DEFAULT_BASE_NAME } from './modules/drive_sync.js';
 import { initSidebarFuzzySearch } from './modules/fuzzy_search.js';
-import { initReorder } from './modules/reorder.js';
 import { initProjects } from './modules/projects.js';
 import { UNCATEGORIZED_CATEGORY, STORAGE_KEYS, DEFAULTS } from './modules/constants.js';
 
@@ -85,7 +84,9 @@ async function initDB() {
       id             INTEGER PRIMARY KEY AUTOINCREMENT,
       name           TEXT NOT NULL,
       description    TEXT DEFAULT '',
+      notes          TEXT DEFAULT '',
       schematic_path TEXT DEFAULT '',
+      order_index    INTEGER NOT NULL DEFAULT 0,
       created_at     TEXT DEFAULT (datetime('now')),
       updated_at     TEXT DEFAULT (datetime('now'))
     );
@@ -97,6 +98,7 @@ async function initDB() {
       project_id   INTEGER NOT NULL,
       component_id INTEGER NOT NULL,
       required_qty INTEGER NOT NULL DEFAULT 1,
+      missing_qty  INTEGER NOT NULL DEFAULT 0,
       note         TEXT DEFAULT '',
       created_at   TEXT DEFAULT (datetime('now')),
       updated_at   TEXT DEFAULT (datetime('now')),
@@ -104,20 +106,25 @@ async function initDB() {
     );
   `);
 
-  // Migrations — each wrapped in try/catch so they are idempotent
+  // Migrations - each wrapped in try/catch so they are idempotent.
+  // SQLite ALTER TABLE only supports ADD COLUMN, so each migration is a
+  // single column add. Failures (column already exists) are swallowed.
   const migrations = [
     `ALTER TABLE components ADD COLUMN image_path   TEXT DEFAULT ''`,
     `ALTER TABLE components ADD COLUMN resistance   TEXT DEFAULT ''`,
     `ALTER TABLE components ADD COLUMN tolerance    TEXT DEFAULT ''`,
     `ALTER TABLE components ADD COLUMN power_rating REAL`,
     `ALTER TABLE components ADD COLUMN preferred_supplier TEXT DEFAULT ''`,
-    // JSON attributes column — stores category-specific parameters
+    // JSON attributes column - stores category-specific parameters
     // (e.g. rds_on/vgs_th for MOSFETs, hfe/vce_sat for BJTs).
-    // Query example:
-    //   SELECT * FROM components
-    //    WHERE category LIKE '%MOSFET%'
-    //      AND CAST(json_extract(attributes, '$.rds_on') AS REAL) < 50;
     `ALTER TABLE components ADD COLUMN attributes   TEXT DEFAULT '{}'`,
+    // Projects: notes (long-form free text in addition to description) and
+    // order_index (manual sort order driven by the sidebar drag handles).
+    `ALTER TABLE projects ADD COLUMN notes        TEXT DEFAULT ''`,
+    `ALTER TABLE projects ADD COLUMN order_index  INTEGER NOT NULL DEFAULT 0`,
+    // BOM: missing_qty captures a user-entered shortage value so the
+    // missing column can stay manual instead of being derived from stock.
+    `ALTER TABLE project_components ADD COLUMN missing_qty INTEGER NOT NULL DEFAULT 0`,
   ];
   for (const sql of migrations) {
     try { await db.execute(sql); } catch (_) { /* column already exists */ }
@@ -812,7 +819,7 @@ function openSettingsModal() {
 // ============================================================
 // In-app update checker (GitHub Releases API)
 // ============================================================
-const CURRENT_VERSION_FALLBACK = '0.2.5';
+const CURRENT_VERSION_FALLBACK = '0.3.0';
 const GITHUB_RELEASES_API = 'https://api.github.com/repos/bugragungoz/component-inventory/releases/latest';
 
 async function getCurrentVersion() {
@@ -1340,7 +1347,6 @@ async function main() {
     initDriveSync();
     initDriveStatusPill();
     initSidebarFuzzySearch();
-    initReorder();
     initProjects();
     syncSettingsVersionLabel().catch(() => {});
     applyBackupIntervalSetting().catch(() => {});

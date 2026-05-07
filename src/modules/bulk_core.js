@@ -14,10 +14,20 @@ export function normaliseSimple(s) {
   return String(s || '').toUpperCase().replace(/[\s\-_.]/g, '');
 }
 
+/**
+ * Normalise a category string for comparison — strips trailing s, lowercases.
+ * "Diodes" → "diode", "Transistors" → "transistor", etc.
+ */
+export function normaliseCatForCompare(cat) {
+  if (!cat) return '';
+  return String(cat).toLowerCase().replace(/s$/, '').trim();
+}
+
 export function categoryConsistent(comp, hit) {
   if (!hit || !hit.category) return false;
   if (!comp.category || comp.category === UNCATEGORIZED_CATEGORY) return true;
-  return comp.category === hit.category;
+  // Compare after normalising to avoid "Diode" vs "Diodes" mismatches
+  return normaliseCatForCompare(comp.category) === normaliseCatForCompare(hit.category);
 }
 
 export function isControlledDbMatch(comp, found) {
@@ -26,14 +36,15 @@ export function isControlledDbMatch(comp, found) {
   if (found.match === 'exact') return true;
   if (found.match !== 'prefix' && found.match !== 'extends') return false;
 
-  const src = normaliseSimple(comp.part_code || '');
+  const src   = normaliseSimple(comp.part_code || '');
   const canon = normaliseSimple(found.canonical || '');
   if (!src || !canon) return false;
 
   const minLen = Math.min(src.length, canon.length);
-  const delta = Math.abs(src.length - canon.length);
-  if (minLen < 4) return false;
-  if (delta > 2) return false;
+  const delta  = Math.abs(src.length - canon.length);
+  if (minLen < 3) return false;
+  // Allow up to 4-char delta for common alias patterns (LM7805 ↔ 7805, IRLZ44 ↔ IRLZ44N)
+  if (delta > 4) return false;
   return src.startsWith(canon) || canon.startsWith(src);
 }
 

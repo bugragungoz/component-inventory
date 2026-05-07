@@ -47,10 +47,11 @@
   --low-stock:       #e05040;
 
   /* KiCad schematic overlay (inline SVG uses these) */
-  --sch-wire:        rgba(240, 237, 229, 0.38);
+  --sch-wire:        rgba(240, 237, 229, 0.52);
+  --sch-symbol:      rgba(236, 233, 225, 0.78);
   --sch-marker-halo: rgba(20, 20, 19, 0.92);
-  --sch-grid-line:   rgba(240, 237, 229, 0.055);
-  --sch-canvas:      #161514;
+  --sch-grid-line:   rgba(240, 237, 229, 0.03);
+  --sch-canvas:      #141413;
   --sch-label-stroke: rgba(22, 21, 20, 0.92);
 
   /* Surface layers (used for dropdowns, table rows, etc.) */
@@ -75,6 +76,14 @@
 
   /* Motion */
   --t: 120ms ease;
+
+  /* Alias tokens used in code — keep consistent */
+  --text-muted:    #65635e;   /* same as --text-tertiary */
+  --bg-elevated:   #1e1d1b;   /* same as --bg-raised */
+  --border-strong: #3e3c38;   /* slightly stronger than --border */
+  --accent-color:  #d97757;   /* alias for --accent */
+  --warning:       #f59e0b;
+  --danger-bg:     rgba(248, 113, 113, 0.14); /* same as --danger-dim */
 }
 
 html.light {
@@ -106,13 +115,22 @@ html.light {
   --danger-dim:      rgba(248, 113, 113, 0.1);
   --low-stock:       #c0392b;
 
-  --sch-wire:        rgba(26, 25, 23, 0.32);
+  --sch-wire:        rgba(26, 25, 23, 0.56);
+  --sch-symbol:      rgba(26, 25, 23, 0.82);
   --sch-marker-halo: rgba(250, 249, 245, 0.95);
-  --sch-grid-line:   rgba(26, 25, 23, 0.06);
-  --sch-canvas:      #e0ddd4;
+  --sch-grid-line:   rgba(26, 25, 23, 0.028);
+  --sch-canvas:      #ebe8df;
   --sch-label-stroke: rgba(250, 249, 245, 0.95);
   --surface-2:       #eae7de;
   --surface-3:       #d8d4c8;
+
+  /* Alias tokens — light mode overrides */
+  --text-muted:    #88867e;
+  --bg-elevated:   #eae7de;
+  --border-strong: #b0ad9e;
+  --accent-color:  #c06040;
+  --warning:       #d97706;
+  --danger-bg:     rgba(248, 113, 113, 0.1);
 }
 
 /* ================================================================
@@ -967,169 +985,8 @@ tr:hover .row-actions { opacity: 1; }
 .modal-sm  { max-width: 420px; }
 .modal-ai  { max-width: 740px; height: 78vh; }
 
-.modal.modal-projects {
-  max-width: min(1180px, 96vw);
-  max-height: 94vh;
-}
-.modal-projects .modal-body.modal-body-projects {
-  display: grid;
-  grid-template-columns: 220px minmax(0, 1fr);
-  gap: 16px;
-  max-height: min(82vh, calc(94vh - 110px));
-  align-items: start;
-  padding: 16px 18px;
-}
-.project-detail-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  min-width: 0;
-}
-.project-detail-header {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-width: 0;
-}
-.project-detail-title {
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  word-break: break-word;
-  line-height: 1.35;
-}
-.project-detail-summary {
-  font-size: 0.76rem;
-  color: var(--text-muted);
-}
-.project-section-label {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-  margin-bottom: 8px;
-}
-.project-sch-view-root {
-  min-width: 0;
-}
-.project-sch-viewport {
-  min-height: min(52vh, 560px);
-  max-height: min(56vh, 600px);
-  overflow: auto;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  background: var(--bg-raised);
-}
-.project-sch-viewport--kicad {
-  min-height: min(58vh, 620px);
-  max-height: min(64vh, 720px);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  padding: 0;
-  background: var(--sch-canvas);
-  border-color: var(--border);
-}
-.project-sch-zoom-hint {
-  flex-shrink: 0;
-  padding: 6px 10px;
-  font-size: 0.68rem;
-  color: var(--text-tertiary);
-  border-bottom: 1px solid var(--border-subtle);
-  background: var(--bg-surface);
-}
-.project-sch-zoom-outer {
-  flex: 1;
-  min-height: 480px;
-  overflow: auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 12px;
-}
-.project-sch-zoom-inner {
-  transform-origin: center center;
-  transition: transform 80ms ease-out;
-  width: 100%;
-  max-width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.project-sch-zoom-inner svg {
-  display: block;
-  width: 100%;
-  height: auto;
-  max-width: min(100%, 1400px);
-  min-height: 320px;
-  max-height: min(58vh, 640px);
-}
-.sch-legend-bar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 14px;
-  align-items: center;
-  padding: 8px 10px;
-  margin-bottom: 8px;
-  font-size: 0.68rem;
-  color: var(--text-muted);
-  background: var(--bg-surface);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-}
-.sch-legend-bar .sch-legend-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  white-space: nowrap;
-}
-.sch-legend-bar .sch-legend-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-.project-sch-viewport img,
-.project-sch-viewport iframe {
-  display: block;
-  width: 100%;
-  min-height: min(48vh, 480px);
-  max-height: min(52vh, 540px);
-  border: 0;
-  border-radius: var(--radius-lg);
-}
-.project-meta-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: flex-end;
-}
-.project-bom-toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-.project-bom-toolbar-title {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-}
-.project-bom-toolbar-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: flex-end;
-}
-.project-list-desc {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  word-break: break-word;
-  line-height: 1.3;
-}
+/* Projects modal styling lives in the FEATURE block further below to keep
+   one source of truth. Generic textarea sizing for path-style inputs only. */
 textarea.settings-input-path {
   width: 100%;
   min-height: 64px;
@@ -2657,4 +2514,746 @@ button:focus-visible,
     animation-duration: 0.001ms !important;
     transition-duration: 0.001ms !important;
   }
+}
+
+/* ================================================================
+   FEATURE: Projects & BOM Modal
+   ================================================================ */
+
+/* Modal sizing override for Projects */
+.modal-projects {
+  width: min(95vw, 1100px);
+  max-width: 1100px;
+  height: min(90vh, 820px);
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-body-projects {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 0;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  padding: 0;
+}
+
+/* ---- Left sidebar: project list ---- */
+.modal-body-projects > aside.projects-sidebar {
+  border-right: 1px solid var(--border);
+  padding: 12px 10px;
+  overflow-y: auto;
+  background: var(--bg-surface);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.btn-new-project {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 11px 14px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.projects-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.projects-list-empty {
+  padding: 12px 10px;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  text-align: center;
+}
+
+/* ---- Right panel: project detail ---- */
+.project-detail-stack {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 16px 20px;
+  gap: 14px;
+}
+
+/* ---- Project list item (inline rename + hover icon controls) ---- */
+.project-list-item {
+  position: relative;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: transparent;
+  transition: background var(--t), border-color var(--t), box-shadow var(--t);
+  cursor: pointer;
+}
+.project-list-item:hover {
+  background: var(--bg-overlay);
+  border-color: var(--border-subtle);
+}
+.project-list-item.active {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.project-list-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+}
+
+.project-list-order {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex-shrink: 0;
+  opacity: 0.55;
+  transition: opacity var(--t);
+}
+.project-list-item:hover .project-list-order,
+.project-list-item.active .project-list-order {
+  opacity: 1;
+}
+
+.project-list-icon-btn {
+  width: 22px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  padding: 0;
+  transition: background var(--t), color var(--t), border-color var(--t);
+}
+.project-list-icon-btn:hover:not(:disabled) {
+  background: var(--bg-hover);
+  border-color: var(--border-subtle);
+  color: var(--text-primary);
+}
+.project-list-icon-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+.project-list-delete {
+  margin-left: auto;
+  width: 26px;
+  height: 24px;
+  opacity: 0;
+  pointer-events: none;
+  color: var(--danger);
+}
+.project-list-item:hover .project-list-delete,
+.project-list-item.active .project-list-delete {
+  opacity: 1;
+  pointer-events: auto;
+}
+.project-list-delete:hover:not(:disabled) {
+  background: var(--danger-bg);
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.project-list-name-input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-primary);
+  font-family: var(--font-heading);
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 4px 6px;
+  border-radius: var(--radius-sm);
+  outline: none;
+  transition: border-color var(--t), background var(--t);
+}
+.project-list-name-input:hover {
+  border-color: var(--border-subtle);
+}
+.project-list-name-input:focus {
+  border-color: var(--accent);
+  background: var(--bg-input);
+}
+
+/* ---- Project detail header ---- */
+.project-detail-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.project-detail-title {
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.project-detail-summary {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  font-family: var(--font-heading);
+  white-space: nowrap;
+}
+
+/* ---- Project section labels ---- */
+.project-section-label {
+  font-family: var(--font-heading);
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-tertiary);
+  margin-bottom: 8px;
+}
+
+/* ---- Schematic section ---- */
+.project-sch-section {
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 12px 14px 10px;
+}
+
+.project-sch-view-root {
+  flex: 0 0 auto;
+  min-height: 200px;
+  max-height: min(46vh, 460px);
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius);
+}
+
+/* ---- Legend bar ---- */
+.sch-legend-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin-bottom: 8px;
+  padding: 6px 10px;
+  background: var(--bg-overlay);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+}
+.sch-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-heading);
+  font-size: 0.68rem;
+  color: var(--text-secondary);
+}
+.sch-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ---- Schematic viewport with pan+zoom ---- */
+.project-sch-viewport {
+  position: relative;
+  width: 100%;
+  background: var(--sch-canvas);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+/* Raster preview fallback (non-KiCad image files) */
+.project-sch-viewport img {
+  display: block;
+  width: 100%;
+  min-height: min(40vh, 380px);
+  max-height: min(48vh, 460px);
+  object-fit: contain;
+  border: 0;
+  border-radius: var(--radius);
+  background: var(--sch-canvas);
+}
+
+/* PDF viewer hosted inside the schematic viewport */
+.project-sch-viewport--pdf {
+  min-height: min(46vh, 460px);
+  max-height: min(56vh, 560px);
+  display: flex;
+  flex-direction: column;
+}
+
+.project-sch-empty,
+.project-sch-error {
+  padding: 12px;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  background: var(--bg-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+}
+.project-sch-error {
+  color: var(--danger);
+}
+.project-sch-source-pre {
+  margin: 0;
+  padding: 10px;
+  max-height: 360px;
+  overflow: auto;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  background: var(--bg-raised);
+  font-size: 11px;
+  font-family: var(--font-mono);
+}
+
+/* ---- PDF viewer (pdfjs canvas) ---- */
+.pdf-viewer {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: min(46vh, 460px);
+  background: var(--sch-canvas);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.pdf-viewer__toolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--bg-surface) 80%, transparent);
+  flex-shrink: 0;
+}
+.pdf-viewer__toolbar .pdf-btn {
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-raised);
+  color: var(--text-secondary);
+  font-family: var(--font-heading);
+  font-size: 0.72rem;
+  padding: 3px 9px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background var(--t), color var(--t), border-color var(--t);
+  min-width: 28px;
+  text-align: center;
+}
+.pdf-viewer__toolbar .pdf-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  border-color: var(--border);
+}
+.pdf-viewer__toolbar .pdf-btn:active {
+  background: var(--bg-overlay);
+}
+.pdf-viewer__page,
+.pdf-viewer__zoom {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  min-width: 56px;
+  text-align: center;
+}
+.pdf-viewer__sep {
+  width: 1px;
+  height: 18px;
+  background: var(--border-subtle);
+  margin: 0 4px;
+}
+.pdf-viewer__hint {
+  margin-left: auto;
+  font-size: 0.66rem;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+}
+.pdf-viewer__stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  cursor: grab;
+  background: var(--sch-canvas);
+}
+.pdf-viewer__stage--dragging,
+.pdf-viewer__stage--dragging * {
+  cursor: grabbing !important;
+  user-select: none;
+}
+.pdf-viewer__inner {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  transform-origin: top left;
+  will-change: transform;
+}
+.pdf-viewer__canvas {
+  display: block;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  border-radius: 2px;
+}
+.pdf-viewer__loading,
+.pdf-viewer__error {
+  padding: 20px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+.pdf-viewer__error {
+  color: var(--danger);
+}
+
+.project-sch-viewport--kicad {
+  cursor: grab;
+  min-height: 260px;
+  max-height: min(42vh, 420px);
+  display: flex;
+  flex-direction: column;
+}
+.project-sch-viewport--kicad:active { cursor: grabbing; }
+
+.project-sch-zoom-hint {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  font-family: var(--font-heading);
+  font-size: 0.64rem;
+  color: var(--text-tertiary);
+  background: var(--bg-overlay);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  padding: 2px 7px;
+  pointer-events: none;
+  z-index: 5;
+  opacity: 0.85;
+}
+
+.project-sch-zoom-outer {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.project-sch-zoom-inner {
+  transform-origin: top left;
+  position: absolute;
+  top: 0;
+  left: 0;
+  will-change: transform;
+}
+
+/* ---- BOM toolbar ---- */
+.project-bom-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 8px 0 4px;
+  border-top: 1px solid var(--border-subtle);
+}
+.project-bom-toolbar-title {
+  font-family: var(--font-heading);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+.project-bom-toolbar-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* ---- BOM add row + inline inventory finder ---- */
+.project-bom-add-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.project-bom-add-row__main {
+  display: grid;
+  grid-template-columns: 170px minmax(140px, 1.2fr) 80px minmax(120px, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+.project-bom-add-row__main .settings-input-path,
+.project-bom-add-row__main .settings-input-sm {
+  width: 100%;
+  min-width: 0;
+}
+.project-bom-cat-select {
+  height: 32px;
+  font-size: 0.78rem;
+}
+@media (max-width: 980px) {
+  .project-bom-add-row__main {
+    grid-template-columns: 1fr 1fr;
+  }
+  .project-bom-add-row__main button {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ---- BOM table (override diff-table for project context) ---- */
+.project-detail-stack .diff-table-wrap {
+  max-height: 320px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow-y: auto;
+}
+.project-detail-stack .diff-table {
+  font-size: 0.8rem;
+}
+.project-detail-stack .diff-table th {
+  background: var(--bg-overlay);
+  font-size: 0.72rem;
+  padding: 7px 10px;
+  white-space: nowrap;
+}
+.project-detail-stack .diff-table td {
+  padding: 6px 10px;
+  vertical-align: middle;
+}
+.project-bom-table .bom-part {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  white-space: nowrap;
+}
+.project-bom-table .bom-desc {
+  color: var(--text-muted);
+  max-width: 220px;
+  word-break: break-word;
+}
+.project-bom-table .bom-stock {
+  font-family: var(--font-mono);
+  text-align: center;
+}
+.project-bom-table .project-req-input,
+.project-bom-table .project-missing-input {
+  width: 64px;
+  text-align: right;
+}
+.project-bom-table .project-note-input {
+  min-width: 140px;
+}
+.project-detail-stack .badge {
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border-radius: 100px;
+  font-family: var(--font-heading);
+  font-weight: 600;
+}
+
+/* ---- Usage badge (inventory table + detail) ---- */
+.qty-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.usage-badge {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-heading);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 1px 6px;
+  border-radius: 100px;
+  background: var(--accent-dim);
+  color: var(--accent);
+  border: 1px solid var(--accent-dim);
+  white-space: nowrap;
+}
+
+/* ---- Detail modal: project usage block ---- */
+.usage-summary {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+.usage-empty {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+.usage-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.usage-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  background: var(--bg-raised);
+  font-size: 0.78rem;
+}
+.usage-name {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  color: var(--text-primary);
+  min-width: 120px;
+}
+.usage-qty,
+.usage-miss,
+.usage-note {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+}
+.usage-miss {
+  color: var(--danger);
+}
+.usage-note {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* ---- Assign-to-project modal (compact) ---- */
+.assign-part-label {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  background: var(--bg-raised);
+  padding: 8px 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  word-break: break-word;
+}
+
+/* ---- Project form inputs reuse settings-input-path style ---- */
+.project-detail-stack .settings-input-path {
+  cursor: text;
+  color: var(--text-primary);
+}
+.project-detail-stack textarea.settings-input-path {
+  resize: vertical;
+  min-height: 56px;
+}
+
+/* ---- Empty state ---- */
+#projects-empty-state {
+  grid-column: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  padding: 40px;
+}
+
+/* ---- Inventory quick-pick results inside Project modal ---- */
+.project-inv-results {
+  max-height: 180px;
+  overflow: auto;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  background: var(--bg-raised);
+  padding: 4px;
+}
+.project-inv-results:empty {
+  display: none;
+}
+.project-inv-sub {
+  font-size: 0.66rem;
+  color: var(--text-tertiary);
+  margin-top: 2px;
+}
+.project-inv-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  width: 100%;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+.project-inv-item + .project-inv-item {
+  border-top: 1px solid var(--border-subtle);
+}
+.project-inv-item:hover {
+  background: var(--bg-hover);
+}
+.project-inv-meta {
+  min-width: 0;
+}
+.project-inv-code {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-primary);
+}
+.project-inv-desc {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.project-inv-qty {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+}
+.project-inv-empty {
+  padding: 8px;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+/* ---- Schematic SVG sizing inside the zoom layer ---- */
+.project-sch-zoom-inner svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: min(100%, 1400px);
+  min-height: 240px;
+  max-height: min(40vh, 400px);
+}
+
+/* ---- Raw source disclosure under the schematic ---- */
+.project-sch-source {
+  margin-top: 8px;
+}
+.project-sch-source > summary {
+  cursor: pointer;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+.project-sch-source > pre {
+  margin: 8px 0 0;
+  padding: 10px;
+  max-height: 240px;
+  overflow: auto;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  background: var(--bg-raised);
+  font-size: 11px;
+  font-family: var(--font-mono);
 }

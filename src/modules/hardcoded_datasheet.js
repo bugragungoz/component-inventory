@@ -541,7 +541,7 @@ function normaliseKey(partCode) {
 
 /**
  * Lookup a component by part code.
- * Priority: exact DB match → prefix/suffix DB match → pattern match.
+ * Priority: exact DB match → safe prefix/suffix DB match → pattern match.
  */
 export function lookupComponent(partCode) {
   if (!partCode) return null;
@@ -552,7 +552,14 @@ export function lookupComponent(partCode) {
 
   for (const [dbKey, val] of Object.entries(DB)) {
     if (key === dbKey) return val;
-    if (key.startsWith(dbKey) || dbKey.startsWith(key)) return val;
+    
+    // Safe prefix matching: user input has extra suffix (e.g. IRF540N matches DB IRF540)
+    // Only allow if the base dbKey is reasonably long
+    if (key.startsWith(dbKey) && dbKey.length >= 4) return val;
+    
+    // Safe suffix matching: DB has extra suffix (e.g. user types IRF540, DB has IRF540N)
+    // Only allow if user input is reasonably long and delta is small
+    if (dbKey.startsWith(key) && key.length >= 4 && (dbKey.length - key.length) <= 3) return val;
   }
 
   for (const { pattern, result } of PATTERNS) {
@@ -575,9 +582,15 @@ export function lookupCanonical(partCode) {
   if (DB[key]) return { canonical: key, data: DB[key], match: 'exact' };
 
   for (const [dbKey, val] of Object.entries(DB)) {
-    if (key === dbKey)            return { canonical: dbKey, data: val, match: 'exact' };
-    if (key.startsWith(dbKey))    return { canonical: dbKey, data: val, match: 'prefix' };
-    if (dbKey.startsWith(key))    return { canonical: dbKey, data: val, match: 'extends' };
+    if (key === dbKey) return { canonical: dbKey, data: val, match: 'exact' };
+    
+    if (key.startsWith(dbKey) && dbKey.length >= 4) {
+      return { canonical: dbKey, data: val, match: 'prefix' };
+    }
+    
+    if (dbKey.startsWith(key) && key.length >= 4 && (dbKey.length - key.length) <= 3) {
+      return { canonical: dbKey, data: val, match: 'extends' };
+    }
   }
 
   for (const { pattern, result } of PATTERNS) {

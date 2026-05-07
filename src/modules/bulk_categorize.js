@@ -7,8 +7,8 @@ import { UNCATEGORIZED_CATEGORY }                               from './constant
 import {
   isWeakDatasheetUrl as isWeakDatasheetUrlCore,
   isControlledDbMatch as isControlledDbMatchCore,
-  normaliseSimple as normaliseSimpleCore,
   isLikelyOptocoupler as isLikelyOptocouplerCore,
+  categoryConsistent as categoryConsistentCore,
 } from './bulk_core.js';
 
 /**
@@ -19,11 +19,10 @@ function isWeakDatasheetUrl(url) {
   return isWeakDatasheetUrlCore(url);
 }
 
-/** Returns true when the lookup hit's category is consistent with the component. */
+/** Returns true when the lookup hit's category is consistent with the component.
+ *  Delegates to bulk_core which normalises category strings (Diodes vs Diode etc.) */
 function categoryConsistent(comp, hit) {
-  if (!hit || !hit.category) return false;
-  if (!comp.category || comp.category === UNCATEGORIZED_CATEGORY) return true;
-  return comp.category === hit.category;
+  return categoryConsistentCore(comp, hit);
 }
 
 /**
@@ -35,6 +34,11 @@ function categoryConsistent(comp, hit) {
  */
 function isControlledDbMatch(comp, found) {
   return isControlledDbMatchCore(comp, found);
+}
+
+/** Detect optocoupler components by part-code pattern or description keywords. */
+function isLikelyOptocoupler(comp) {
+  return isLikelyOptocouplerCore(comp);
 }
 
 /**
@@ -368,12 +372,22 @@ function buildSuggestions(components) {
   for (const comp of components) {
     const hitByCode = lookupComponent(comp.part_code);
     let source = null, hit = null, confidence = 'low';
-    if (isLikelyOptocoupler(comp)) {
+
+    // DB part-code lookup has highest priority
+    if (hitByCode) {
+      hit = hitByCode;
+      source = 'part-code';
+      confidence = 'high';
+    }
+
+    // Opto-normalizer: apply only when DB missed it, or DB gave a non-IC category
+    const optoDetected = isLikelyOptocoupler(comp);
+    if (optoDetected && (!hit || hit.category !== 'ICs')) {
       hit = { category: 'ICs', subcategory: 'Optocoupler' };
       source = 'opto-normalizer';
       confidence = 'high';
     }
-    if (hitByCode) { hit = hitByCode; source = 'part-code'; confidence = 'high'; }
+
     if (!hit) {
       const hitByDesc = categorizeByDescription(comp.description);
       if (hitByDesc) { hit = hitByDesc; source = 'description'; confidence = 'medium'; }
@@ -674,13 +688,6 @@ async function applySelected(suggestions) {
   }
 }
 
-function normaliseSimple(s) {
-  return normaliseSimpleCore(s);
-}
-
-function isLikelyOptocoupler(comp) {
-  return isLikelyOptocouplerCore(comp);
-}
 
 function closeOverlay() {
   const overlay = document.getElementById('overlay-bulk-cat');

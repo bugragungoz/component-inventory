@@ -6,15 +6,26 @@ import {
   classifyPlacement,
   parseKicadSchForOverlay,
   aggregateSchematicInventoryMatches,
+  parseLibSymbolDrawMap,
+  resolveLibSegments,
+  buildSchOverlaySvg,
 } from '../kicad_sch_core.js';
 
 const MINIMAL_SCH = `(kicad_sch (version 20231120) (generator eeschema)
-  (symbol (lib_id "Device:R") (at 10 20 0)
+  (lib_symbols
+    (symbol "Device:R" (pin_numbers hide)
+      (symbol "Device:R_1_0"
+        (polyline (pts (xy -3.81 0) (xy -2.54 0)) (stroke (width 0) (type default)))
+        (polyline (pts (xy 2.54 0) (xy 3.81 0)) (stroke (width 0) (type default)))
+      )
+    )
+  )
+  (symbol (lib_id "Device:R") (at 10 20 0) (unit 1)
     (property "Reference" "R1" (at 11 19 0) (effects (font (size 1.27 1.27))))
     (property "Value" "10K" (at 12 21 0) (effects (font (size 1.27 1.27))))
     (property "Footprint" "Resistor_SMD:R_0805_2012Metric" (at 0 0 0))
   )
-  (wire (pts (xy 5 5) (xy 15 5)) (stroke (width 0) (type default)))
+  (wire (pts (xy 5 5) (xy 15 5)) (stroke (width 0) (type default)) (uuid "w-1"))
 )`;
 
 describe('kicad_sch_core', () => {
@@ -66,6 +77,22 @@ describe('kicad_sch_core', () => {
     expect(bounds.maxY).toBeGreaterThan(bounds.minY);
   });
 
+  it('parses unit and resolves nested lib symbol segments by unit', () => {
+    const placements = parseKicadPlacements(MINIMAL_SCH);
+    expect(placements[0].unit).toBe(1);
+    const map = parseLibSymbolDrawMap(MINIMAL_SCH);
+    expect(map.has('Device:R_1_0')).toBe(true);
+    const segs = resolveLibSegments(map, 'Device:R', 1);
+    expect(segs.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('buildSchOverlaySvg draws lib geometry with sch-symbol stroke', () => {
+    const { placements, wires, bounds, libDrawMap } = parseKicadSchForOverlay(MINIMAL_SCH);
+    const svg = buildSchOverlaySvg(placements, wires, bounds, new Map(), new Set(), libDrawMap);
+    expect(svg).toContain('class="sch-symbols"');
+    expect(svg).toContain('var(--sch-symbol)');
+  });
+
   it('aggregateSchematicInventoryMatches counts by inventory part_code', () => {
     const placements = parseKicadPlacements(MINIMAL_SCH);
     const components = [{ id: 7, part_code: '10K' }];
@@ -74,5 +101,15 @@ describe('kicad_sch_core', () => {
     expect(agg[0].component_id).toBe(7);
     expect(agg[0].qty).toBe(1);
     expect(agg[0].refs).toContain('R1');
+  });
+
+  it('ignores non-instance wire blocks without uuid', () => {
+    const src = `(kicad_sch
+      (wire (pts (xy 0 0) (xy 100 0)) (stroke (width 0) (type default)))
+      (wire (pts (xy 1 1) (xy 2 2)) (stroke (width 0) (type default)) (uuid "inst-1"))
+    )`;
+    const wires = extractWireSegments(src);
+    expect(wires).toHaveLength(1);
+    expect(wires[0]).toEqual({ x1: 1, y1: 1, x2: 2, y2: 2 });
   });
 });

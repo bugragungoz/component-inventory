@@ -3,6 +3,58 @@ import { lookupComponent, applyDbData }                 from './hardcoded_datash
 import { setLabelComponent }                             from './labels.js';
 import { readFile }                                      from '@tauri-apps/plugin-fs';
 import { t }                                             from './i18n.js';
+import { listProjectUsage, listProjectsUsingComponent }  from './projects.js';
+
+// ============================================================
+// Project usage cache - keyed by component id, refreshed on every
+// renderTable() call and whenever a project mutation event fires.
+// ============================================================
+const projectUsageMap = new Map();
+
+async function refreshProjectUsage() {
+  if (!state.db) return;
+  try {
+    const rows = await listProjectUsage();
+    projectUsageMap.clear();
+    for (const r of rows || []) {
+      projectUsageMap.set(Number(r.component_id), {
+        projectCount: Number(r.project_count) || 0,
+        totalRequired: Number(r.total_required) || 0,
+      });
+    }
+  } catch (e) {
+    console.debug('project usage refresh failed:', e);
+  }
+}
+
+function getUsageBadgeHtml(componentId) {
+  const usage = projectUsageMap.get(Number(componentId));
+  if (!usage || usage.projectCount === 0) return '';
+  const label = t('usage.badge', { n: usage.projectCount, total: usage.totalRequired });
+  return `<span class="usage-badge" title="${escHtml(label)}">${escHtml(label)}</span>`;
+}
+
+/**
+ * After the asynchronous refresh of the usage map completes we patch the
+ * existing rows in place rather than re-running the heavyweight renderer.
+ * This avoids resetting scroll position or selection state.
+ */
+function _refreshUsageBadgesInPlace() {
+  const tbody = document.getElementById('table-body');
+  if (!tbody) return;
+  tbody.querySelectorAll('tr[data-id]').forEach(row => {
+    const id = Number(row.dataset.id);
+    const cell = row.querySelector('.col-qty');
+    if (!cell) return;
+    const comp = state.components.find(c => c.id === id);
+    if (!comp) return;
+    cell.innerHTML = qtyWithUsage(comp);
+  });
+}
+
+document.addEventListener('project-usage-changed', () => {
+  refreshProjectUsage().then(() => _refreshUsageBadgesInPlace()).catch(() => {});
+});
 
 // ============================================================
 // Multi-select state
@@ -76,6 +128,18 @@ function qtyBadge(q) {
 }
 
 /**
+ * Combined quantity badge that pairs the stock pill with a small usage
+ * indicator when the component is on at least one project's BOM.
+ */
+function qtyWithUsage(comp) {
+  const q = Number(comp.quantity) || 0;
+  const badge = qtyBadge(q);
+  const usage = getUsageBadgeHtml(comp.id);
+  if (!usage) return badge;
+  return `<span class="qty-cell">${badge}${usage}</span>`;
+}
+
+/**
  * Safely read a value from the `attributes` JSON column of a component row.
  * Returns `defaultVal` when the key is absent or the JSON is invalid.
  */
@@ -102,7 +166,7 @@ const DEFAULT_COLS = [
   { key:'part_code',   label:'Part Code',    sort:'part_code',   width:'col-pc',  render: c => `<span class="td-truncate mono" style="font-size:12px;font-weight:500" title="${escHtml(c.part_code)}">${escHtml(c.part_code)}</span>` },
   { key:'category',    label:'Category',     sort:'category',    width:'col-cat', render: c => c.category ? `<span class="badge badge-cat">${escHtml(c.category)}</span>` : '' },
   { key:'subcategory', label:'Subcategory',  sort:'subcategory', width:'col-sub', render: c => c.subcategory ? `<span class="badge badge-sub">${escHtml(c.subcategory)}</span>` : '' },
-  { key:'quantity',    label:'Qty',          sort:'quantity',    width:'num col-qty', render: c => { const q=Number(c.quantity)||0; return qtyBadge(q); } },
+  { key:'quantity',    label:'Qty',          sort:'quantity',    width:'num col-qty', render: c => qtyWithUsage(c) },
   { key:'voltage_max', label:'V Max',        sort:'voltage_max', width:'num col-vmax', render: c => c.voltage_max != null ? `<span class="mono" style="font-size:11px">${c.voltage_max}V</span>` : '' },
   { key:'current_max', label:'I Max',        sort:'current_max', width:'num col-imax', render: c => c.current_max != null ? `<span class="mono" style="font-size:11px">${c.current_max}A</span>` : '' },
   { key:'description', label:'Description',  sort:'description', width:'col-desc', render: c => `<span class="td-truncate" style="font-size:12px;color:var(--text-secondary)" title="${escHtml(c.description)}">${escHtml(c.description)}</span>` },
@@ -115,7 +179,7 @@ const CATEGORY_COL_OVERRIDES = {
       const ch = getAttr(c, 'channel') || c.subcategory;
       return ch ? `<span class="badge badge-sub">${escHtml(ch)}</span>` : '';
     }},
-    { key:'quantity',    label:'Qty',         sort:'quantity',    width:'num col-qty',  render: c => { const q=Number(c.quantity)||0; return qtyBadge(q); } },
+    { key:'quantity',    label:'Qty',         sort:'quantity',    width:'num col-qty',  render: c => qtyWithUsage(c) },
     { key:'voltage_max', label:'V_DS (V)',    sort:'voltage_max', width:'num col-vmax', render: c => c.voltage_max != null ? `<span class="mono" style="font-size:11px">${c.voltage_max}V</span>` : '' },
     { key:'current_max', label:'I_D (A)',     sort:'current_max', width:'num col-imax', render: c => c.current_max != null ? `<span class="mono" style="font-size:11px">${c.current_max}A</span>` : '' },
     { key:'_rds_on',     label:'R_DS(on)',    sort:'',            width:'num col-vmax', render: c => { const v=getAttr(c,'rds_on'); return v != null ? `<span class="mono" style="font-size:11px">${v}mΩ</span>` : ''; } },
@@ -129,7 +193,7 @@ const CATEGORY_COL_OVERRIDES = {
       const t = getAttr(c, 'bjt_type') || c.subcategory;
       return t ? `<span class="badge badge-sub">${escHtml(t)}</span>` : '';
     }},
-    { key:'quantity',    label:'Qty',         sort:'quantity',    width:'num col-qty',  render: c => { const q=Number(c.quantity)||0; return qtyBadge(q); } },
+    { key:'quantity',    label:'Qty',         sort:'quantity',    width:'num col-qty',  render: c => qtyWithUsage(c) },
     { key:'_hfe',        label:'h_FE (β)',    sort:'',            width:'num col-vmax', render: c => { const v=getAttr(c,'hfe'); return v != null ? `<span class="mono" style="font-size:11px">${v}</span>` : ''; } },
     { key:'voltage_max', label:'V_CEO (V)',   sort:'voltage_max', width:'num col-vmax', render: c => c.voltage_max != null ? `<span class="mono" style="font-size:11px">${c.voltage_max}V</span>` : '' },
     { key:'current_max', label:'I_C (A)',     sort:'current_max', width:'num col-imax', render: c => c.current_max != null ? `<span class="mono" style="font-size:11px">${c.current_max}A</span>` : '' },
@@ -140,7 +204,7 @@ const CATEGORY_COL_OVERRIDES = {
   'IGBTs': [
     { key:'part_code',   label:'Part Code',   sort:'part_code',   width:'col-pc',      render: c => `<span class="td-truncate mono" style="font-size:12px;font-weight:500" title="${escHtml(c.part_code)}">${escHtml(c.part_code)}</span>` },
     { key:'subcategory', label:'Type',        sort:'subcategory', width:'col-sub',      render: c => c.subcategory ? `<span class="badge badge-sub">${escHtml(c.subcategory)}</span>` : '' },
-    { key:'quantity',    label:'Qty',         sort:'quantity',    width:'num col-qty',  render: c => { const q=Number(c.quantity)||0; return qtyBadge(q); } },
+    { key:'quantity',    label:'Qty',         sort:'quantity',    width:'num col-qty',  render: c => qtyWithUsage(c) },
     { key:'voltage_max', label:'V_CES (V)',   sort:'voltage_max', width:'num col-vmax', render: c => c.voltage_max != null ? `<span class="mono" style="font-size:11px">${c.voltage_max}V</span>` : '' },
     { key:'current_max', label:'I_C (A)',     sort:'current_max', width:'num col-imax', render: c => c.current_max != null ? `<span class="mono" style="font-size:11px">${c.current_max}A</span>` : '' },
     { key:'_vce_sat',    label:'V_CE(sat)',   sort:'',            width:'num col-imax', render: c => { const v=getAttr(c,'vce_sat'); return v != null ? `<span class="mono" style="font-size:11px">${v}V</span>` : ''; } },
@@ -150,7 +214,7 @@ const CATEGORY_COL_OVERRIDES = {
   'Transistors': [
     { key:'part_code',   label:'Part Code',  sort:'part_code',   width:'col-pc',   render: c => `<span class="td-truncate mono" style="font-size:12px;font-weight:500" title="${escHtml(c.part_code)}">${escHtml(c.part_code)}</span>` },
     { key:'subcategory', label:'Type',       sort:'subcategory', width:'col-sub',   render: c => c.subcategory ? `<span class="badge badge-sub">${escHtml(c.subcategory)}</span>` : '' },
-    { key:'quantity',    label:'Qty',        sort:'quantity',    width:'num col-qty', render: c => { const q=Number(c.quantity)||0; return qtyBadge(q); } },
+    { key:'quantity',    label:'Qty',        sort:'quantity',    width:'num col-qty', render: c => qtyWithUsage(c) },
     { key:'voltage_max', label:'VGS / VCE',  sort:'voltage_max', width:'num col-vmax', render: c => c.voltage_max != null ? `<span class="mono" style="font-size:11px">${c.voltage_max}V</span>` : '' },
     { key:'current_max', label:'ID / IC',    sort:'current_max', width:'num col-imax', render: c => c.current_max != null ? `<span class="mono" style="font-size:11px">${c.current_max}A</span>` : '' },
     { key:'package',     label:'Package',    sort:'package',     width:'col-pkg',   render: c => `<span class="td-truncate mono" style="font-size:11px">${escHtml(c.package)}</span>` },
@@ -160,7 +224,7 @@ const CATEGORY_COL_OVERRIDES = {
   'Diodes': [
     { key:'part_code',   label:'Part Code',  sort:'part_code',   width:'col-pc',   render: c => `<span class="td-truncate mono" style="font-size:12px;font-weight:500" title="${escHtml(c.part_code)}">${escHtml(c.part_code)}</span>` },
     { key:'subcategory', label:'Type',       sort:'subcategory', width:'col-sub',   render: c => c.subcategory ? `<span class="badge badge-sub">${escHtml(c.subcategory)}</span>` : '' },
-    { key:'quantity',    label:'Qty',        sort:'quantity',    width:'num col-qty', render: c => { const q=Number(c.quantity)||0; return qtyBadge(q); } },
+    { key:'quantity',    label:'Qty',        sort:'quantity',    width:'num col-qty', render: c => qtyWithUsage(c) },
     { key:'voltage_max', label:'VR (V)',     sort:'voltage_max', width:'num col-vmax', render: c => c.voltage_max != null ? `<span class="mono" style="font-size:11px">${c.voltage_max}V</span>` : '' },
     { key:'current_max', label:'IF (A)',     sort:'current_max', width:'num col-imax', render: c => c.current_max != null ? `<span class="mono" style="font-size:11px">${c.current_max}A</span>` : '' },
     { key:'package',     label:'Package',    sort:'package',     width:'col-pkg',   render: c => `<span class="td-truncate mono" style="font-size:11px">${escHtml(c.package)}</span>` },
@@ -169,7 +233,7 @@ const CATEGORY_COL_OVERRIDES = {
   'Resistors': [
     { key:'part_code',   label:'Part Code',  sort:'part_code',   width:'col-pc',   render: c => `<span class="td-truncate mono" style="font-size:12px;font-weight:500" title="${escHtml(c.part_code)}">${escHtml(c.part_code)}</span>` },
     { key:'subcategory', label:'Type',       sort:'subcategory', width:'col-sub',   render: c => c.subcategory ? `<span class="badge badge-sub">${escHtml(c.subcategory)}</span>` : '' },
-    { key:'quantity',    label:'Qty',        sort:'quantity',    width:'num col-qty', render: c => { const q=Number(c.quantity)||0; return qtyBadge(q); } },
+    { key:'quantity',    label:'Qty',        sort:'quantity',    width:'num col-qty', render: c => qtyWithUsage(c) },
     { key:'resistance',  label:'Resistance', sort:'resistance',  width:'col-pkg',   render: c => c.resistance ? `<span class="mono" style="font-size:11px">${escHtml(c.resistance)}</span>` : '' },
     { key:'tolerance',   label:'Tolerance',  sort:'tolerance',   width:'col-pkg',   render: c => c.tolerance  ? `<span class="mono" style="font-size:11px">${escHtml(c.tolerance)}</span>` : '' },
     { key:'power_rating',label:'Power (W)',  sort:'power_rating',width:'num col-vmax', render: c => c.power_rating != null ? `<span class="mono" style="font-size:11px">${c.power_rating}W</span>` : '' },
@@ -179,7 +243,7 @@ const CATEGORY_COL_OVERRIDES = {
   'Capacitors': [
     { key:'part_code',   label:'Part Code',  sort:'part_code',   width:'col-pc',   render: c => `<span class="td-truncate mono" style="font-size:12px;font-weight:500" title="${escHtml(c.part_code)}">${escHtml(c.part_code)}</span>` },
     { key:'subcategory', label:'Type',       sort:'subcategory', width:'col-sub',   render: c => c.subcategory ? `<span class="badge badge-sub">${escHtml(c.subcategory)}</span>` : '' },
-    { key:'quantity',    label:'Qty',        sort:'quantity',    width:'num col-qty', render: c => { const q=Number(c.quantity)||0; return qtyBadge(q); } },
+    { key:'quantity',    label:'Qty',        sort:'quantity',    width:'num col-qty', render: c => qtyWithUsage(c) },
     { key:'resistance',  label:'Capacitance',sort:'resistance',  width:'col-pkg',   render: c => c.resistance ? `<span class="mono" style="font-size:11px">${escHtml(c.resistance)}</span>` : '' },
     { key:'tolerance',   label:'Tolerance',  sort:'tolerance',   width:'col-pkg',   render: c => c.tolerance  ? `<span class="mono" style="font-size:11px">${escHtml(c.tolerance)}</span>` : '' },
     { key:'voltage_max', label:'Rated V',    sort:'voltage_max', width:'num col-vmax', render: c => c.voltage_max != null ? `<span class="mono" style="font-size:11px">${c.voltage_max}V</span>` : '' },
@@ -189,7 +253,7 @@ const CATEGORY_COL_OVERRIDES = {
   'Thyristors': [
     { key:'part_code',   label:'Part Code',  sort:'part_code',   width:'col-pc',   render: c => `<span class="td-truncate mono" style="font-size:12px;font-weight:500" title="${escHtml(c.part_code)}">${escHtml(c.part_code)}</span>` },
     { key:'subcategory', label:'Type',       sort:'subcategory', width:'col-sub',   render: c => c.subcategory ? `<span class="badge badge-sub">${escHtml(c.subcategory)}</span>` : '' },
-    { key:'quantity',    label:'Qty',        sort:'quantity',    width:'num col-qty', render: c => { const q=Number(c.quantity)||0; return qtyBadge(q); } },
+    { key:'quantity',    label:'Qty',        sort:'quantity',    width:'num col-qty', render: c => qtyWithUsage(c) },
     { key:'voltage_max', label:'VR (V)',     sort:'voltage_max', width:'num col-vmax', render: c => c.voltage_max != null ? `<span class="mono" style="font-size:11px">${c.voltage_max}V</span>` : '' },
     { key:'current_max', label:'IT (A)',     sort:'current_max', width:'num col-imax', render: c => c.current_max != null ? `<span class="mono" style="font-size:11px">${c.current_max}A</span>` : '' },
     { key:'package',     label:'Package',    sort:'package',     width:'col-pkg',   render: c => `<span class="td-truncate mono" style="font-size:11px">${escHtml(c.package)}</span>` },
@@ -600,6 +664,15 @@ export function renderTable() {
   const empty       = document.getElementById('empty-state');
   const tableScroll = document.getElementById('table-scroll');
 
+  // Refresh project usage in the background; once complete the table is
+  // re-rendered so the usage badges update without forcing the caller to
+  // await an async render path.
+  refreshProjectUsage().then(() => {
+    if (state.filtered && state.filtered.length > 0) {
+      _refreshUsageBadgesInPlace();
+    }
+  }).catch(() => {});
+
   updateSortHeaders();
   updateBreadcrumb();
 
@@ -910,20 +983,32 @@ async function showDetail(comp) {
     core: 'CPU Core', freq_max: 'Max Freq.', flash: 'Flash', ram: 'RAM', io_pins: 'I/O Pins',
   };
   const ATTR_UNITS = {
-    vgs_th: 'V', vgs_max: 'V', rds_on: 'mΩ', qg: 'nC', ciss: 'pF',
+    vgs_th: 'V', vgs_max: 'V', rds_on: 'mOhm', qg: 'nC', ciss: 'pF',
     vce_sat: 'V', vceo: 'V', ft: 'MHz',
     vces: 'V', vge_th: 'V',
-    vdrm: 'V', it_av: 'A', igt: 'mA', vgt: 'V', tq: 'µs',
-    vf: 'V', trr: 'ns', ir: 'µA',
+    vdrm: 'V', it_av: 'A', igt: 'mA', vgt: 'V', tq: 'us',
+    vf: 'V', trr: 'ns', ir: 'uA',
     vz: 'V', iz_max: 'mA', pz: 'W', ztol: '%',
     if_max: 'mA', wavelength: 'nm', luminosity: 'mcd',
-    gbw: 'MHz', slew_rate: 'V/µs', vos: 'mV',
+    gbw: 'MHz', slew_rate: 'V/us', vos: 'mV',
     v_out: 'V', v_in_max: 'V', i_out: 'A', dropout: 'V',
     frequency: 'MHz', load_cap: 'pF', freq_tol: 'ppm',
-    inductance: 'µH', isat: 'A', dcr: 'mΩ', srf: 'MHz',
+    inductance: 'uH', isat: 'A', dcr: 'mOhm', srf: 'MHz',
     power_va: 'VA',
     freq_max: 'MHz', flash: 'KB', ram: 'KB',
   };
+
+  let parsedAttrs = {};
+  try {
+    if (typeof comp.attributes === 'string') {
+      parsedAttrs = comp.attributes ? JSON.parse(comp.attributes) : {};
+    } else if (comp.attributes && typeof comp.attributes === 'object') {
+      parsedAttrs = comp.attributes;
+    }
+  } catch (_) {
+    parsedAttrs = {};
+  }
+
   const attrCards = Object.entries(parsedAttrs)
     .filter(([, v]) => v !== '' && v !== null && v !== undefined)
     .map(([k, v]) => {
@@ -982,6 +1067,36 @@ async function showDetail(comp) {
       _detailObjectUrl = URL.createObjectURL(blob);
       imageHtml = `<div class="detail-image-wrap"><img src="${_detailObjectUrl}" alt="${escHtml(comp.part_code)}" /></div>`;
     } catch (_) { /* image not accessible */ }
+  }
+
+  // Project usage section - lists every project that includes this component
+  let usageHtml = '';
+  try {
+    const usageRows = await listProjectsUsingComponent(comp.id);
+    if (usageRows && usageRows.length > 0) {
+      const totalReq = usageRows.reduce((s, r) => s + (Number(r.required_qty) || 0), 0);
+      const lines = usageRows.map(r => {
+        const req = Number(r.required_qty) || 0;
+        const miss = Number(r.missing_qty) || 0;
+        const note = r.note ? `<span class="usage-note">${escHtml(r.note)}</span>` : '';
+        return `<div class="usage-row">
+          <span class="usage-name">${escHtml(r.name || '-')}</span>
+          <span class="usage-qty">${t('project.col.required')}: <strong>${req}</strong></span>
+          ${miss > 0 ? `<span class="usage-miss">${t('project.col.missing')}: <strong>${miss}</strong></span>` : ''}
+          ${note}
+        </div>`;
+      }).join('');
+      usageHtml = `
+        <div class="detail-section-title">${t('detail.usage.title')}</div>
+        <div class="usage-summary">${escHtml(t('detail.usage.summary', { n: usageRows.length, total: totalReq }))}</div>
+        <div class="usage-list">${lines}</div>`;
+    } else {
+      usageHtml = `
+        <div class="detail-section-title">${t('detail.usage.title')}</div>
+        <div class="usage-empty">${escHtml(t('detail.usage.empty'))}</div>`;
+    }
+  } catch (e) {
+    console.debug('usage lookup failed:', e);
   }
 
   const movementHtml = movementRows.length > 0
@@ -1075,9 +1190,18 @@ async function showDetail(comp) {
       </div>
     </div>
 
+    ${usageHtml}
     ${movementHtml}`;
 
   document.getElementById('overlay-detail').style.display = '';
+
+  // Wire the Assign button to dispatch the projects modal flow
+  const assignBtn = document.getElementById('btn-detail-assign-project');
+  if (assignBtn) {
+    assignBtn.onclick = () => {
+      document.dispatchEvent(new CustomEvent('open-assign-project', { detail: comp }));
+    };
+  }
 }
 
 function openEditModal(comp) {
