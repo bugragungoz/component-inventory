@@ -64,6 +64,38 @@ fn restore_backup_cmd(backup_path: String, state: State<AppDataDir>) -> Result<(
 }
 
 #[tauri::command]
+fn fetch_url(url: String) -> Result<String, String> {
+    let url = url.trim();
+    if url.is_empty() {
+        return Err("URL is empty".into());
+    }
+    if !url.starts_with("https://") && !url.starts_with("http://") {
+        return Err("Only http(s) URLs are allowed".into());
+    }
+    let host = url
+        .split('/')
+        .nth(2)
+        .unwrap_or("")
+        .to_ascii_lowercase();
+    let allowed = ["www.ozdisan.com", "ozdisan.com"];
+    if !allowed.iter().any(|h| host == *h) {
+        return Err("URL host is not allowed".into());
+    }
+
+    let client = reqwest::blocking::Client::builder()
+        .user_agent("ComponentInventory/0.3 (inventory lookup)")
+        .timeout(std::time::Duration::from_secs(20))
+        .build()
+        .map_err(|e| e.to_string())?;
+
+    let resp = client.get(url).send().map_err(|e| e.to_string())?;
+    if !resp.status().is_success() {
+        return Err(format!("HTTP {}", resp.status()));
+    }
+    resp.text().map_err(|e| e.to_string())
+}
+
+#[tauri::command]
 fn get_app_data_dir(state: State<AppDataDir>) -> Result<String, String> {
     let dir = state.0.lock().map_err(|e| e.to_string())?.clone();
     Ok(dir.to_string_lossy().to_string())
@@ -334,6 +366,7 @@ pub fn run() {
             read_external_file,
             search_builtin_library,
             batch_lookup_builtin,
+            fetch_url,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

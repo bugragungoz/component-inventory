@@ -128,6 +128,11 @@ const HEADER_MAP = {
   'malzeme tanimi': 'description', 'malzeme_tanimi': 'description',
   'urun tanimi': 'description', 'urun_tanimi': 'description',
   'stok tanimi': 'description', 'stok_tanimi': 'description',
+  'stok adi': 'description', 'stok_adi': 'description',
+  'urun bilgisi': 'description', 'urun_bilgisi': 'description',
+  'malzeme cinsi': 'category', 'urun grubu': 'category', 'urun tipi': 'category',
+  'cins': 'category', 'tip': 'category',
+  'olcu': 'package', 'olculer': 'package', 'boyut': 'package', 'kilif': 'package',
   'parcaaciklamasi': 'description', 'parca aciklamasi': 'description',
   'urun aciklamasi': 'description', 'malzeme aciklamasi': 'description',
 

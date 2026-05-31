@@ -8,6 +8,11 @@
  *   current_max (A), description, datasheet_url
  */
 
+import { SMD_PART_PATTERNS } from './smd_part_patterns.js';
+import { COMMON_PART_PATTERNS } from './common_part_patterns.js';
+import { OZDISAN_PART_PATTERNS } from './ozdisan_patterns.js';
+import { UNCATEGORIZED_CATEGORY } from './constants.js';
+
 const DB = {
   // ================================================================
   // MOSFETs — N-Channel Power
@@ -450,6 +455,9 @@ const DB = {
 // Each entry: { pattern: RegExp, result: {...fields} }
 // ================================================================
 const PATTERNS = [
+  ...OZDISAN_PART_PATTERNS,
+  ...SMD_PART_PATTERNS,
+  ...COMMON_PART_PATTERNS,
   // Resistors — Carbon Film (CFRxxSJT-xxx, CFRxxJ-xxx)
   { pattern: /^CFR\d/,        result: { category:'Resistors',   subcategory:'Carbon Film',     package:'0207',    description:'Carbon Film Resistor' } },
   // Resistors — Metal Film (MFxx)
@@ -563,7 +571,11 @@ export function lookupComponent(partCode) {
   }
 
   for (const { pattern, result } of PATTERNS) {
-    if (pattern.test(key)) return result;
+    const m = pattern.exec(key);
+    if (!m) continue;
+    const out = { ...result };
+    if (!out.package && m[1] && /^\d{4}$/.test(m[1])) out.package = m[1];
+    return out;
   }
 
   return null;
@@ -608,6 +620,51 @@ export function lookupCanonical(partCode) {
 
 // Rules evaluated in order — first match wins.
 const DESC_RULES = [
+  // ── Turkish supplier / BOM text (Ozdisan, local stock lists) ───
+  [/SMD.{0,12}(DIRENC|RESISTOR)|CIP DIRENC|DIRENC.{0,8}SMD/i, { category:'Resistors', subcategory:'SMD' }],
+  [/THICK FILM|THIN FILM/i,                              { category:'Resistors', subcategory:'SMD' }],
+  [/\bDIRENC\b/i,                                        { category:'Resistors', subcategory:'SMD' }],
+  [/MLCC|CERAMIK KONDANS|SERAMIK KONDANS/i,              { category:'Capacitors', subcategory:'MLCC' }],
+  [/\bKONDANSAT/i,                                       { category:'Capacitors', subcategory:'Ceramic' }],
+  [/ZENER DIYOT|ZENER DIODE/i,                           { category:'Diodes', subcategory:'Zener' }],
+  [/BAKIR PLAKET|BAKIR KAPLAMA|PERTINAK|PERTINAX/i,      { category:'Mechanical', subcategory:'PCB / Board' }],
+  [/HALL ETKI|HALL SENSOR|HALL SWITCH/i,                 { category:'Sensors', subcategory:'Hall Effect' }],
+  [/BOBIN|BOBINAJ|SMD BOBIN/i,                           { category:'Inductors', subcategory:'SMD' }],
+  [/TANJANS|POLIMER KONDANS/i,                           { category:'Capacitors', subcategory:'Tantalum' }],
+  [/ELEKTROLITIK|ALUMINYUM KONDANS/i,                    { category:'Capacitors', subcategory:'Electrolytic' }],
+  [/FILM KONDANS|POLYESTER KONDANS/i,                     { category:'Capacitors', subcategory:'Film' }],
+  [/DIYOT|SILIS DIYOT/i,                                 { category:'Diodes', subcategory:'Rectifier' }],
+  [/SCHOTTKY DIYOT/i,                                    { category:'Diodes', subcategory:'Schottky' }],
+  [/LED|ISIK YAYICI/i,                                   { category:'Diodes', subcategory:'LED' }],
+  [/MIKRODENETLEYICI|MCU\b/i,                            { category:'ICs', subcategory:'Microcontroller' }],
+  [/OPERASYONEL|OP-AMP|OPAMP/i,                          { category:'ICs', subcategory:'Op-Amp' }],
+  [/KARSILASTIRICI|KOMPARATOR/i,                         { category:'ICs', subcategory:'Comparator' }],
+  [/REGULATOR|REGULAT/i,                                 { category:'ICs', subcategory:'Linear Regulator' }],
+  [/LDO\b/i,                                             { category:'ICs', subcategory:'LDO Regulator' }],
+  [/ROLE\b|RÖLE/i,                                       { category:'Relays', subcategory:'Relay' }],
+  [/KRISTAL|REZONATOR/i,                                 { category:'Crystals', subcategory:'Crystal' }],
+  [/BASLIK|PIN HEADER|KONNEKTOR/i,                       { category:'Connectors', subcategory:'Pin Header' }],
+  [/KLEMENS|TERMINAL BLOK/i,                             { category:'Connectors', subcategory:'Terminal Block' }],
+  [/USB[- ]?(A|B|C|MICRO|MINI)/i,                        { category:'Connectors', subcategory:'USB' }],
+  [/DC JACK|DC SOKET|POWER JACK/i,                       { category:'Connectors', subcategory:'DC Jack' }],
+  [/TACT|BUTON|TUS\b|PUSH BUTTON/i,                      { category:'Switches', subcategory:'Tactile' }],
+  [/KAYDIRMALI|SLIDE SWITCH/i,                           { category:'Switches', subcategory:'Slide' }],
+  [/ISI EMICI|HEATSINK/i,                                { category:'Mechanical', subcategory:'Heat Sink' }],
+  [/LEHIM TELI|SOLDER WIRE/i,                            { category:'Consumables', subcategory:'Solder' }],
+  [/FLUX|AKI/i,                                          { category:'Consumables', subcategory:'Flux' }],
+  [/STEP MOTOR SURUCU|STEPPER DRIVER/i,                  { category:'ICs', subcategory:'Stepper Driver' }],
+  [/MOTOR SURUCU|H-BRIDGE|H BRIDGE/i,                    { category:'ICs', subcategory:'Motor Driver' }],
+  [/EEPROM|FLASH BELLEK|SPI FLASH/i,                     { category:'ICs', subcategory:'EEPROM' }],
+  [/RTC|GERCEK ZAMAN/i,                                  { category:'ICs', subcategory:'RTC' }],
+  [/USB-UART|USB SERIAL|USB SERI/i,                      { category:'ICs', subcategory:'USB-UART' }],
+  [/ETHERNET|W5500|ENC28/i,                              { category:'ICs', subcategory:'Ethernet' }],
+  [/IMU|JIROSKOP|ACCELEROMETER|IVMEOLCER/i,              { category:'Sensors', subcategory:'IMU' }],
+  [/BASINC SENSOR|BAROMETRE|BMP280|BME280/i,             { category:'Sensors', subcategory:'Pressure' }],
+  [/NEM SENSOR|HUMIDITY/i,                               { category:'Sensors', subcategory:'Humidity / Temp' }],
+  [/SICAKLIK SENSOR|TEMPERATURE/i,                       { category:'Sensors', subcategory:'Temperature' }],
+  [/ULTRASONIK|HC-SR04/i,                                { category:'Sensors', subcategory:'Ultrasonic' }],
+  [/ADRESLI LED|WS2812|SK6812/i,                         { category:'Diodes', subcategory:'LED' }],
+  [/MODUL\b|MODULE/i,                                    { category:'Modules', subcategory:'Module' }],
   // ── Transistors / MOSFETs ──────────────────────────────────────
   [/N[-\s]?CH(?:ANNEL)?.{0,15}MOSFET/i,         { category:'Transistors', subcategory:'N-Channel MOSFET' }],
   [/P[-\s]?CH(?:ANNEL)?.{0,15}MOSFET/i,         { category:'Transistors', subcategory:'P-Channel MOSFET' }],
@@ -637,6 +694,9 @@ const DESC_RULES = [
   [/TANTALUM/i,                                   { category:'Capacitors', subcategory:'Tantalum' }],
   [/CERAMIC|MLCC/i,                               { category:'Capacitors', subcategory:'Ceramic' }],
   [/FILM CAP|POLYESTER|POLYPROPYLENE/i,           { category:'Capacitors', subcategory:'Film' }],
+  [/SUPERCAP|SUPER CAP|FARAD/i,                   { category:'Capacitors', subcategory:'Supercapacitor' }],
+  [/CHIP RESISTOR|SMD RESISTOR|RESISTOR ARRAY/i,  { category:'Resistors', subcategory:'SMD' }],
+  [/POTENTIOMETER|TRIMPOT|POTANSIYOMETRE/i,       { category:'Potentiometers', subcategory:'Trimpot' }],
   // ── Resistors ─────────────────────────────────────────────────
   [/PTC.{0,10}RESET|SELF.?RESET/i,               { category:'Sensors', subcategory:'PTC Thermistor' }],
   [/\bPTC\b.{0,15}THERMISTOR/i,                  { category:'Sensors', subcategory:'PTC Thermistor' }],
@@ -728,9 +788,10 @@ export function categorizeByDescription(description) {
  */
 export function applyDbData(comp, dbRecord) {
   if (!dbRecord) return comp;
+  const catEmpty = !comp.category || comp.category === UNCATEGORIZED_CATEGORY;
   return {
     ...comp,
-    category:     comp.category     || dbRecord.category     || '',
+    category:     catEmpty ? (dbRecord.category || '') : comp.category,
     subcategory:  comp.subcategory  || dbRecord.subcategory  || '',
     package:      comp.package      || dbRecord.package      || '',
     manufacturer: comp.manufacturer || dbRecord.manufacturer || '',

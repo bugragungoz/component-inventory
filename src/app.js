@@ -13,6 +13,8 @@ import { initDriveSync, triggerDriveSync, triggerDriveSyncManual, getDriveStatus
 import { initSidebarFuzzySearch } from './modules/fuzzy_search.js';
 import { initProjects } from './modules/projects.js';
 import { UNCATEGORIZED_CATEGORY, STORAGE_KEYS, DEFAULTS } from './modules/constants.js';
+import { inferImportRow } from './modules/component_inference.js';
+import { repairPlaceholderComponents } from './modules/import_repair.js';
 
 // Rename pencil SVG (inline, reused in tree rendering)
 const RENAME_SVG = `<svg class="rename-icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`;
@@ -281,9 +283,10 @@ export async function upsertComponents(rows, mode = 'merge') {
   }
 
   for (const row of rows) {
+    const inferred = inferImportRow(row);
     const { part_code, category, subcategory, quantity, package: pkg,
       manufacturer, mpn, preferred_supplier, location, voltage_max, current_max,
-      description, datasheet_url, unit_price, notes } = row;
+      description, datasheet_url, unit_price, notes } = inferred;
 
     if (!part_code) continue;
 
@@ -1317,6 +1320,23 @@ export function refreshDatalistsGlobal() {
   populateDatalist('list-location',     getAutocompleteValues('location'));
 }
 
+async function runImportPlaceholderRepair() {
+  try {
+    const { deleted, fixed } = await repairPlaceholderComponents({
+      components: state.components,
+      updateComponent,
+      deleteComponent,
+      useOzdisan: false,
+    });
+    if (deleted > 0 || fixed > 0) {
+      await loadComponents();
+      showToast(t('toast.importRepair', { deleted, fixed }), 'success', 6000);
+    }
+  } catch (err) {
+    console.warn('import placeholder repair:', err);
+  }
+}
+
 // ============================================================
 // Bootstrap
 // ============================================================
@@ -1333,6 +1353,7 @@ async function main() {
     initModalCloseHandlers();
     await initDB();
     await loadComponents();
+    await runImportPlaceholderRepair();
     initModals();
     initLabels();
     initSearch();

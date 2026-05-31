@@ -1,3 +1,9 @@
+import {
+  resolvePartCodeFromRow,
+  isDiscardableImportRow,
+  isPlaceholderPartCode,
+} from './import_fixup.js';
+
 const HEADER_MAP = {
   'part_code': 'part_code', 'part code': 'part_code', 'partcode': 'part_code',
   'part': 'part_code', 'code': 'part_code', 'sku': 'part_code', 'item': 'part_code',
@@ -32,6 +38,10 @@ const HEADER_MAP = {
   'uretici': 'manufacturer', 'marka': 'manufacturer', 'firma': 'manufacturer',
   'tedarikci': 'manufacturer', 'tedarikçi': 'manufacturer',
   'mpn': 'mpn', 'manufacturer part number': 'mpn', 'part number': 'mpn', 'model': 'mpn',
+  'model no': 'mpn', 'model number': 'mpn', 'mfr part number': 'mpn', 'mfr pn': 'mpn',
+  'uretici parca no': 'mpn', 'uretici parca kodu': 'mpn', 'uretici kodu': 'mpn',
+  'manufacturer code': 'mpn', 'vendor pn': 'mpn', 'supplier pn': 'mpn',
+  'parca numarasi': 'mpn', 'parca no': 'mpn',
   'location': 'location', 'bin': 'location', 'storage': 'location', 'shelf': 'location',
   'drawer': 'location', 'slot': 'location', 'rack': 'location', 'warehouse': 'location',
   'konum': 'location', 'depo': 'location', 'raf': 'location', 'kutu': 'location',
@@ -43,7 +53,14 @@ const HEADER_MAP = {
   'akim': 'current_max', 'akim_max': 'current_max', 'akim max': 'current_max',
   'description': 'description', 'desc': 'description', 'info': 'description', 'details': 'description',
   'specification': 'description', 'spec': 'description', 'product name': 'description',
+  'product description': 'description', 'product_name': 'description',
   'name': 'description', 'aciklama': 'description', 'tanim': 'description', 'bilgi': 'description',
+  'urun adi': 'description', 'urun_adi': 'description', 'urun tanimi': 'description', 'urun_tanimi': 'description',
+  'malzeme adi': 'description', 'malzeme_adi': 'description', 'malzeme tanimi': 'description', 'malzeme_tanimi': 'description',
+  'stok adi': 'description', 'stok_adi': 'description', 'stok tanimi': 'description', 'stok_tanimi': 'description',
+  'urun bilgisi': 'description', 'urun_bilgisi': 'description', 'malzeme cinsi': 'category', 'urun grubu': 'category',
+  'urun tipi': 'category', 'cins': 'category', 'tip': 'category',
+  'olcu': 'package', 'olculer': 'package', 'boyut': 'package', 'kilif': 'package',
   'notes': 'notes', 'note': 'notes', 'comment': 'notes', 'comments': 'notes', 'remarks': 'notes',
   'not': 'notes', 'notlar': 'notes', 'yorum': 'notes',
   'datasheet_url': 'datasheet_url', 'datasheet': 'datasheet_url', 'datasheet url': 'datasheet_url',
@@ -91,15 +108,34 @@ export function normalizeRowsCore(rows) {
   });
   if (Object.keys(mapped).length === 0) return [];
   const hasPartCode = Object.values(mapped).includes('part_code');
+  const mappedOrigKeys = Object.keys(mapped);
+
   return rows.map((row, idx) => {
     const out = {};
     Object.entries(mapped).forEach(([orig, norm]) => {
       const val = row[orig];
       out[norm] = val !== undefined && val !== null ? String(val).trim() : '';
     });
-    if (!hasPartCode || !out.part_code) out.part_code = `IMP-${String(idx + 1).padStart(4, '0')}`;
+
+    const resolved = resolvePartCodeFromRow(out, row, mappedOrigKeys);
+    if (resolved) {
+      out.part_code = resolved;
+    } else if (!hasPartCode) {
+      out.part_code = `IMP-${String(idx + 1).padStart(4, '0')}`;
+    } else if (!out.part_code) {
+      out.part_code = `IMP-${String(idx + 1).padStart(4, '0')}`;
+    }
+
+    if (out.mpn && isPlaceholderPartCode(out.part_code) && !isPlaceholderPartCode(out.mpn)) {
+      out.part_code = out.mpn;
+    }
+
     return out;
-  }).filter(r => r.part_code && String(r.part_code).trim().length > 0);
+  }).filter(r => {
+    if (!r.part_code || !String(r.part_code).trim().length) return false;
+    if (isDiscardableImportRow(r)) return false;
+    return true;
+  });
 }
 
 export function getMappedHeaderNamesCore(rows) {

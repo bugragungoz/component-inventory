@@ -4,6 +4,8 @@ import { t, applyTranslations }                                 from './i18n.js'
 import { normaliseCategory }                                    from './modals.js';
 import { getSelectedIds }                                       from './table.js';
 import { UNCATEGORIZED_CATEGORY }                               from './constants.js';
+import { findInvalidImpImports } from './import_repair.js';
+import { inferImportRow } from './component_inference.js';
 import {
   isWeakDatasheetUrl as isWeakDatasheetUrlCore,
   isControlledDbMatch as isControlledDbMatchCore,
@@ -247,68 +249,15 @@ function getMisclassified(components = state.components || []) {
  * Returns: { category, subcategory, confidence, partCodeBased } | null
  */
 function heuristicClassify(comp) {
-  const partCodeKey = String(comp.part_code || '')
-    .toUpperCase()
-    .replace(/[\s\-_.]/g, '');
-
-  // ── Part-code prefix detection (high confidence, immune to description text)
-  // 74-series TTL/CMOS logic: 74LS04, 74HC595, 74HCT245, SN74LS00, MC74HC00 ...
-  if (/^(SN|MC|MM|HD|GD|TC|HEF|CD)?74[A-Z]{0,5}\d{2,4}[A-Z]{0,3}$/.test(partCodeKey) &&
-      /74[A-Z]{0,5}\d/.test(partCodeKey)) {
-    return { category: 'ICs', subcategory: 'Logic', confidence: 'high', partCodeBased: true };
-  }
-  // CD4000-series CMOS logic: CD4017, CD4060, CD4093 ...
-  if (/^CD4\d{3}[A-Z]{0,3}$/.test(partCodeKey)) {
-    return { category: 'ICs', subcategory: 'Logic', confidence: 'high', partCodeBased: true };
-  }
-  // HEF4xxx (Philips/NXP CMOS) and MC14xxx (Motorola CMOS)
-  if (/^HEF4\d{3}/.test(partCodeKey) || /^MC14\d{3}/.test(partCodeKey)) {
-    return { category: 'ICs', subcategory: 'Logic', confidence: 'high', partCodeBased: true };
-  }
-  // Common optocoupler families. 4N25..4N48 are opto, 4N60+ are MOSFETs, so
-  // we explicitly cap the digits to exclude MOSFET ranges.
-  if (/^6N(13[5-9]|14[0-9])$/.test(partCodeKey)) {
-    return { category: 'ICs', subcategory: 'Optocoupler', confidence: 'high', partCodeBased: true };
-  }
-  if (/^4N(2[5-9]|3[0-9]|4[0-9])$/.test(partCodeKey)) {
-    return { category: 'ICs', subcategory: 'Optocoupler', confidence: 'high', partCodeBased: true };
-  }
-  if (/^TLP\d{3,4}$/.test(partCodeKey) || /^PC(8[1-4]7|923)$/.test(partCodeKey) ||
-      /^EL(8\d{2}|3H7)$/.test(partCodeKey) || /^MOC30\d{2}/.test(partCodeKey)) {
-    return { category: 'ICs', subcategory: 'Optocoupler', confidence: 'high', partCodeBased: true };
-  }
-  // 1N40xx, 1N41xx (rectifier), 1N47xx (zener), 1N58xx (schottky) — already
-  // handled by DB patterns but kept here as a safety net for unknown variants.
-  if (/^1N40\d{2}/.test(partCodeKey)) {
-    return { category: 'Diodes', subcategory: 'Rectifier', confidence: 'high', partCodeBased: true };
-  }
-  if (/^1N47\d{2}/.test(partCodeKey)) {
-    return { category: 'Diodes', subcategory: 'Zener', confidence: 'high', partCodeBased: true };
-  }
-  if (/^1N58[12]\d/.test(partCodeKey)) {
-    return { category: 'Diodes', subcategory: 'Schottky', confidence: 'high', partCodeBased: true };
-  }
-  // 1N4148 / 1N914 small-signal
-  if (/^1N(4148|914)/.test(partCodeKey)) {
-    return { category: 'Diodes', subcategory: 'Small Signal', confidence: 'high', partCodeBased: true };
-  }
-  // STMicro power Schottky / ultrafast rectifier prefixes (before STP MOSFET heuristic).
-  if (/^STPS/i.test(partCodeKey)) {
-    return { category: 'Diodes', subcategory: 'Schottky', confidence: 'high', partCodeBased: true };
-  }
-  if (/^STTH/i.test(partCodeKey)) {
-    return { category: 'Diodes', subcategory: 'Fast Recovery', confidence: 'high', partCodeBased: true };
-  }
-  // Common MOSFET prefixes. STP(?!S) avoids classifying STPS… Schottky parts as MOSFETs.
-  if (/^(IRF|IRL|IRFZ|STP(?!S)|STF|FQP|FDP|FDS|BSS|BSP|AOD|AON|AOZ|2SK|2SJ|SI[A-Z]{1,2}\d)/.test(partCodeKey)) {
-    return { category: 'Transistors', subcategory: 'Power MOSFET', confidence: 'high', partCodeBased: true };
-  }
-  if (/^(BC|BD|2N|MJE|TIP|2SA|2SB|2SC|2SD|S8\d{3}|S9\d{3})/.test(partCodeKey)) {
-    return { category: 'Transistors', subcategory: 'BJT', confidence: 'medium', partCodeBased: true };
-  }
-  // ESPxxxx, STM32xxxx, ATmega/ATtiny, PIC, nRFxxxxx — microcontrollers
-  if (/^(ESP(32|8266)|STM32|ATMEGA|ATTINY|PIC\d|NRF\d|RP\d{3,4})/.test(partCodeKey)) {
-    return { category: 'ICs', subcategory: 'Microcontroller', confidence: 'high', partCodeBased: true };
+  // Part-code: delegate to shared pattern DB (SMD + common families).
+  const codeHit = lookupComponent(comp.part_code);
+  if (codeHit?.category) {
+    return {
+      category: codeHit.category,
+      subcategory: codeHit.subcategory || '',
+      confidence: 'high',
+      partCodeBased: true,
+    };
   }
 
   // ── Description-based heuristics (medium confidence; safer than part-code)
@@ -319,11 +268,13 @@ function heuristicClassify(comp) {
 
   // Resistor: standard codes with kOhm/M/R suffix or starts with R-/RES
   if (/(\b\d+(\.\d+)?[krm]\b)|res-|resistor|direnc|\b\d+r\d*\b/.test(blob)) {
-    return { category: 'Resistors', subcategory: 'Through-Hole', confidence: 'medium' };
+    const smd = /\b(0201|0402|0603|0805|1206|1210|smd|cip)\b/.test(blob);
+    return { category: 'Resistors', subcategory: smd ? 'SMD' : 'Through-Hole', confidence: 'medium' };
   }
   // Capacitor: uF / nF / pF
-  if (/(\d+(\.\d+)?\s?(uf|nf|pf|mf)\b)|cap-|capacitor|kondans/.test(blob)) {
-    return { category: 'Capacitors', subcategory: 'Ceramic', confidence: 'medium' };
+  if (/(\d+(\.\d+)?\s?(uf|nf|pf|mf)\b)|cap-|capacitor|kondans|mlcc/.test(blob)) {
+    const sub = /\b(mlcc|ceramic|seramik)\b/.test(blob) ? 'MLCC' : 'Ceramic';
+    return { category: 'Capacitors', subcategory: sub, confidence: 'medium' };
   }
   // Inductor: uH / mH
   if (/(\d+(\.\d+)?\s?(uh|mh|nh)\b)|inductor|bobin|choke/.test(blob)) {
@@ -389,7 +340,7 @@ function buildSuggestions(components) {
     }
 
     if (!hit) {
-      const hitByDesc = categorizeByDescription(comp.description);
+      const hitByDesc = categorizeByDescription(comp.description || comp.notes);
       if (hitByDesc) { hit = hitByDesc; source = 'description'; confidence = 'medium'; }
     }
     if (!hit) {
@@ -512,6 +463,24 @@ function renderActionCell(s) {
       `&rarr; <strong>${escHtml(s.hit.category)}</strong></span>` + tail
     );
   }
+  if (s.action === 'delete-invalid-import') {
+    return (
+      `<span class="badge" style="background:var(--accent-red-dim,#3d1f1f);color:var(--accent-red,#f87171)">` +
+      t('bulk.action.deleteInvalid') + `</span>` +
+      `<span style="color:var(--text-muted);font-size:0.74rem;margin-left:6px">` +
+      escHtml(t('bulk.import.invalidHint')) + `</span>` + tail
+    );
+  }
+  if (s.action === 'fix-import-code') {
+    return (
+      `<span class="badge" style="background:var(--accent-dim);color:var(--accent)">` +
+      t('bulk.action.fixCode') + `</span>` +
+      `<span style="color:var(--text-muted);font-size:0.74rem;margin-left:6px">` +
+      escHtml(s.hit.part_code || '') +
+      (s.hit.category ? ` &rarr; <strong>${escHtml(s.hit.category)}</strong>` : '') +
+      `</span>` + tail
+    );
+  }
   if (s.action === 'merge') {
     const memberLabels = s.members.map(m => escHtml(m.part_code)).join(', ');
     return (
@@ -547,7 +516,8 @@ function renderList(suggestions) {
     const checkedAttr = (s.confidence === 'high' || s.confidence === 'medium') ? 'checked' : '';
     const rowClass = s.anomaly ? 'bulk-row-anomaly'
                   : s.action === 'merge' ? 'bulk-row-merge'
-                  : s.action === 'datasheet' ? 'bulk-row-datasheet' : '';
+                  : s.action === 'datasheet' ? 'bulk-row-datasheet'
+                  : s.action === 'delete-invalid-import' ? 'bulk-row-anomaly' : '';
     const partLabel = s.action === 'merge'
       ? s.members.map(m => m.part_code).join(' + ')
       : s.comp?.part_code || '';
@@ -607,6 +577,34 @@ async function applySelected(suggestions) {
 
       if (s.action === 'normalize-cat') {
         await updateComponent(s.comp.id, { ...s.comp, category: s.hit.category });
+        success++;
+        continue;
+      }
+
+      if (s.action === 'delete-invalid-import') {
+        await deleteComponent(s.comp.id);
+        success++;
+        continue;
+      }
+
+      if (s.action === 'fix-import-code') {
+        const mpn = s.hit.part_code;
+        const enriched = inferImportRow({
+          ...s.comp,
+          part_code: mpn,
+          mpn,
+        });
+        const updated = {
+          ...s.comp,
+          ...enriched,
+          part_code: mpn,
+          category: enriched.category || s.hit.category || s.comp.category,
+          subcategory: enriched.subcategory || s.hit.subcategory || s.comp.subcategory,
+          package: enriched.package || s.hit.package || s.comp.package,
+          manufacturer: enriched.manufacturer || s.hit.manufacturer || s.comp.manufacturer,
+          description: s.comp.description || enriched.description || s.hit.description || '',
+        };
+        await updateComponent(s.comp.id, updated);
         success++;
         continue;
       }
@@ -724,6 +722,7 @@ export function initBulkCategorize() {
       return;
     }
     const uncategorized    = scopeComponents.filter(c => !c.category || c.category === UNCATEGORIZED_CATEGORY);
+    const impFixes         = findInvalidImpImports(scopeComponents);
     const anomalies        = getMisclassified(scopeComponents);
     const taxonomyFixes    = findCategoryNormalizations(scopeComponents);
     const datasheetFills   = findDatasheetBackfills(scopeComponents);
@@ -731,7 +730,7 @@ export function initBulkCategorize() {
 
     if (uncategorized.length === 0 && anomalies.length === 0 &&
         datasheetFills.length === 0 && dedupeGroups.length === 0 &&
-        taxonomyFixes.length === 0) {
+        taxonomyFixes.length === 0 && impFixes.length === 0) {
       showToast(t('toast.bulkNone'), 'info');
       return;
     }
@@ -739,6 +738,7 @@ export function initBulkCategorize() {
     const baseSuggestions = buildSuggestions(scopeComponents);
     // Order by user value: anomalies > taxonomy > duplicates > datasheet > categorize
     bulkAllSuggestions = dedupeSuggestions([
+      ...impFixes,
       ...anomalies,
       ...taxonomyFixes,
       ...dedupeGroups,
@@ -751,6 +751,7 @@ export function initBulkCategorize() {
       const parts = [
         t('bulk.subtitle.scope', { total: scopeComponents.length, match: bulkAllSuggestions.length }),
       ];
+      if (impFixes.length        > 0) parts.push(t('bulk.import.found',    { n: impFixes.length }));
       if (anomalies.length      > 0) parts.push(t('anomaly.btn.open',     { n: anomalies.length }));
       if (taxonomyFixes.length  > 0) parts.push(t('bulk.taxonomy.found',  { n: taxonomyFixes.length }));
       if (dedupeGroups.length   > 0) parts.push(t('bulk.merge.found',     { n: dedupeGroups.length }));
