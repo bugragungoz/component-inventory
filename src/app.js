@@ -1134,7 +1134,12 @@ function initViewToggle() {
 function initSearch() {
   let debounceTimer;
   const input = document.getElementById('search-input');
+  const btnClear = document.getElementById('btn-clear-search');
+
   input.addEventListener('input', () => {
+    if (btnClear) {
+      btnClear.style.display = input.value.length > 0 ? '' : 'none';
+    }
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
       state.searchQuery = input.value.trim().toLowerCase();
@@ -1142,6 +1147,17 @@ function initSearch() {
       renderTable();
     }, 200);
   });
+
+  if (btnClear) {
+    btnClear.addEventListener('click', () => {
+      input.value = '';
+      btnClear.style.display = 'none';
+      state.searchQuery = '';
+      applyFilters();
+      renderTable();
+      input.focus();
+    });
+  }
 
   document.getElementById('sidebar-search').addEventListener('input', () => {
     updateCategoryTree();
