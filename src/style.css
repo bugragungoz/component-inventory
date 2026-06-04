@@ -3257,3 +3257,13 @@ button:focus-visible,
   font-size: 11px;
   font-family: var(--font-mono);
 }
+
+/* ================================================================
+   MICRO-INTERACTIONS
+   ================================================================ */
+.interaction-safe {
+  transition: transform var(--t), background var(--t), color var(--t);
+}
+.interaction-safe:active {
+  transform: scale(0.95);
+}
