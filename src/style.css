@@ -3257,3 +3257,10 @@ button:focus-visible,
   font-size: 11px;
   font-family: var(--font-mono);
 }
+
+/* Accessibility enhancement: visible focus for modal close buttons */
+.modal-close:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--accent-dim);
+  border-radius: var(--radius);
+}
