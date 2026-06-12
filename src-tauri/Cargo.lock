@@ -494,7 +494,7 @@ dependencies = [
 
 [[package]]
 name = "component-inventory"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "chrono",
  "reqwest 0.12.28",

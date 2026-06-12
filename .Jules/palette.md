@@ -1,0 +1,4 @@
+## 2024-05-19 - Ensure ARIA Labels for Icon-Only Buttons and Modal Controls
+
+**Learning:** When developing accessible Vanilla JS and HTML5 interfaces within a Tauri ecosystem, it's critical to ensure that any interactive elements, like icon-only buttons (`.icon-btn`) and modal close buttons (`.modal-close`), communicate their function correctly to screen readers. If these elements use SVGs for icons, the SVG itself must be hidden from assistive technologies (`aria-hidden="true"`) to prevent redundancy or confusion, while the button itself requires an explicit `aria-label`.
+**Action:** For all future `button` or interactive elements relying solely on iconography, always add an `aria-label` describing the action, and apply `aria-hidden="true"` to the internal SVG or icon element. This ensures compliance with accessibility standards and prevents screen-reader verbosity.
