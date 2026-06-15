@@ -417,8 +417,8 @@ a:hover { text-decoration: underline; }
 .drive-pill:hover  { background: var(--bg-raised); border-color: var(--border-strong); }
 .drive-pill:active { transform: scale(0.99); }
 .drive-pill:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 3px var(--accent-dim);
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
   border-color: var(--accent);
 }
 
@@ -2471,17 +2471,17 @@ input, select, textarea {
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: none;
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-dim);
 }
 button:focus-visible,
 .icon-btn:focus-visible,
 .tree-cat:focus-visible,
 .tree-sub:focus-visible,
 .tree-item:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 2px var(--accent-dim);
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
   border-radius: var(--radius-sm);
 }
 /* Auto-categorize: anomaly rows (likely-misclassified) get a soft amber accent */

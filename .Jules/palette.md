@@ -1,0 +1,4 @@
+## 2024-05-23 - High Contrast Focus Outlines & Aria Labels
+
+**Learning:** Low opacity (`rgba` with low alpha like `var(--accent-dim)`) `box-shadow` values for focus indicators are often invisible to users with contrast sensitivities or when viewed on uncalibrated monitors. Icon-only buttons lacking `aria-label`s provide zero context to screen reader users, breaking core accessibility standards despite having a visual `title` attribute.
+**Action:** Replace `box-shadow: 0 0 0 Xpx var(--accent-dim)` with explicit `outline: 2px solid var(--accent); outline-offset: 2px;` across all focusable elements (inputs, buttons, list items) to guarantee high-contrast, OS-level crisp focus rings. Ensure all icon-only buttons (e.g. `.modal-close`, sidebar tool icons) have explicit `aria-label` attributes to decouple visual styling from semantic meaning.
