@@ -1026,6 +1026,11 @@ textarea.settings-input-path {
   transition: color var(--t), background var(--t);
 }
 .modal-close:hover { color: var(--text-primary); background: var(--bg-overlay); }
+.modal-close:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--accent-dim);
+  border-radius: var(--radius-sm);
+}
 
 .modal-body {
   flex: 1;
@@ -2477,6 +2482,7 @@ textarea:focus-visible {
 }
 button:focus-visible,
 .icon-btn:focus-visible,
+.modal-close:focus-visible,
 .tree-cat:focus-visible,
 .tree-sub:focus-visible,
 .tree-item:focus-visible {

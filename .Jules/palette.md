@@ -1,0 +1,3 @@
+## 2026-06-23 - [Icon-Only Button Accessibility and Focus Outline]
+**Learning:** Vanilla JS modals and icon buttons rely on explicitly setting `aria-label` (and `data-i18n-aria-label` for translation) on interactive elements, and `aria-hidden="true"` for inner SVGs to prevent screen reader noise. Keyboard accessibility demands visible `:focus-visible` styles matching the existing Anthropic/Minimalist design logic.
+**Action:** Always append explicit `aria-label` (and i18n variant) to icon-only buttons, hide decorative SVG graphics with `aria-hidden="true"`, and explicitly add or reuse `:focus-visible` ring CSS for predictable keyboard focus handling.
