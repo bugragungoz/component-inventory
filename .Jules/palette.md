@@ -1,0 +1,5 @@
+## 2024-05-19 - Explicit Screen-Reader Contexts for Icon Buttons and Modals
+
+**Learning:** When using Vanilla JS and semantic HTML5 in this Tauri app architecture, components like modals and icon-only buttons need explicit ARIA semantics because external heavy UI libraries are prohibited. Furthermore, since the app relies on a custom Vanilla JS i18n implementation, ARIA labels for icon-only buttons cannot be hardcoded strings. They must use specific data attributes (`data-i18n-aria-label`) that correspond to existing translation keys to ensure proper localization at runtime.
+
+**Action:** Ensure all modal containers (`<div class="modal...">`) include `role="dialog"` and `aria-modal="true"`. For all icon-only buttons (like `.modal-close` or `.icon-btn`), add `aria-hidden="true"` to the internal decorative `<svg>` elements. Most importantly, always assign a `data-i18n-aria-label` attribute (e.g., `data-i18n-aria-label="settings.btn.close"`) with an existing translation key rather than a hardcoded string, ensuring the Vanilla JS i18n module processes and translates the label properly.
