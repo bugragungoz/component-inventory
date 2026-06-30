@@ -549,13 +549,13 @@ async function applyRename() {
 
   if (!newName) { showToast(t('toast.nameEmpty'), 'warning'); return; }
   if (newName === (isSub ? oldSub : oldCat)) {
-    overlay.style.display = 'none';
+    closeModal(overlay);
     return;
   }
 
   try {
     await renameCategory(isSub ? oldSub : oldCat, newName, isSub, oldCat);
-    overlay.style.display = 'none';
+    closeModal(overlay);
     showToast(t('toast.renamed', { name: newName }), 'success');
   } catch (err) {
     showToast(t('toast.renameFailed') + (err.message || err), 'error');
@@ -568,7 +568,7 @@ function initRenameModal() {
   const input    = document.getElementById('rename-cat-input');
   if (!overlay) return;
 
-  const closeRename = () => { overlay.style.display = 'none'; };
+  const closeRename = () => { closeModal(overlay); };
 
   btnOk?.addEventListener('click', applyRename);
   document.getElementById('btn-rename-cat-cancel')?.addEventListener('click', closeRename);
@@ -1271,20 +1271,20 @@ function initModalCloseHandlers() {
   document.querySelectorAll('[data-close]').forEach(btn => {
     btn.addEventListener('click', () => {
       const overlayId = btn.dataset.close;
-      document.getElementById(overlayId).style.display = 'none';
+      closeModal(document.getElementById(overlayId));
     });
   });
 
   document.querySelectorAll('.modal-overlay').forEach(overlay => {
     overlay.addEventListener('click', e => {
-      if (e.target === overlay) overlay.style.display = 'none';
+      if (e.target === overlay) closeModal(overlay);
     });
   });
 
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
       document.querySelectorAll('.modal-overlay').forEach(o => {
-        o.style.display = 'none';
+        if (o.style.display !== 'none') closeModal(o);
       });
     }
   });
@@ -1293,6 +1293,15 @@ function initModalCloseHandlers() {
 // ============================================================
 // Utility
 // ============================================================
+function closeModal(overlay) {
+  if (!overlay) return;
+  overlay.classList.add('closing');
+  setTimeout(() => {
+    overlay.style.display = 'none';
+    overlay.classList.remove('closing');
+  }, 140);
+}
+
 export function escHtml(str) {
   if (!str) return '';
   return String(str)

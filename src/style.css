@@ -2508,6 +2508,22 @@ button:focus-visible,
   to   { opacity: 1; }
 }
 
+.modal-overlay.closing {
+  animation: ci-overlay-fade-out 140ms ease forwards;
+}
+.modal-overlay.closing .modal {
+  animation: ci-modal-pop-out 140ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes ci-overlay-fade-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+@keyframes ci-modal-pop-out {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to   { opacity: 0; transform: translateY(6px) scale(0.985); }
+}
+
+
 /* Reduced-motion accessibility */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
