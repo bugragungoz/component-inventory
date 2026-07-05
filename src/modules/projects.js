@@ -1,6 +1,6 @@
 import { invoke } from '@tauri-apps/api/core';
 import { open as openDialog } from '@tauri-apps/plugin-dialog';
-import { state, escHtml, showToast } from '../app.js';
+import { state, escHtml, showToast , closeModal } from '../app.js';
 import { t, applyTranslations } from './i18n.js';
 import {
   normalizePartKey,
@@ -760,7 +760,7 @@ async function commitAssign() {
     [projectId, assignContext.id, qty, note]
   );
   showToast(t('assign.saved'), 'success');
-  document.getElementById('overlay-assign-project').style.display = 'none';
+  closeModal(document.getElementById('overlay-assign-project'));
   document.dispatchEvent(new CustomEvent('project-usage-changed'));
 }
 

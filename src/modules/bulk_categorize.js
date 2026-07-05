@@ -1,5 +1,5 @@
 import { lookupComponent, lookupCanonical, categorizeByDescription } from './hardcoded_datasheet.js';
-import { state, updateComponent, deleteComponent, showToast, escHtml, beginMutationBatch, endMutationBatch } from '../app.js';
+import { state, updateComponent, deleteComponent, showToast, escHtml, beginMutationBatch, endMutationBatch , closeModal } from '../app.js';
 import { t, applyTranslations }                                 from './i18n.js';
 import { normaliseCategory }                                    from './modals.js';
 import { getSelectedIds }                                       from './table.js';
@@ -689,7 +689,7 @@ async function applySelected(suggestions) {
 
 function closeOverlay() {
   const overlay = document.getElementById('overlay-bulk-cat');
-  if (overlay) overlay.style.display = 'none';
+  if (overlay) closeModal(overlay);
 }
 
 // ================================================================

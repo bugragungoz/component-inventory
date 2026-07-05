@@ -1,4 +1,4 @@
-import { state, showToast, loadComponents } from '../app.js';
+import { state, showToast, loadComponents , closeModal } from '../app.js';
 import { invoke } from '@tauri-apps/api/core';
 
 const OLLAMA_BASE       = 'http://localhost:11434';
@@ -199,7 +199,7 @@ function setProgress(current, total, batchLabel) {
 
 function hideProgress() {
   const overlay = document.getElementById('categorize-progress');
-  if (overlay) overlay.style.display = 'none';
+  if (overlay) closeModal(overlay);
 }
 
 async function autoCategorizeAll() {

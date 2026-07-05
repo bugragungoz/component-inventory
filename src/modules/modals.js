@@ -1,7 +1,7 @@
 import {
   state, addComponent, updateComponent, deleteComponent,
   showToast, refreshDatalistsGlobal
-} from '../app.js';
+, closeModal } from '../app.js';
 import { initSortHeaders } from './table.js';
 import { lookupComponent, categorizeByDescription } from './hardcoded_datasheet.js';
 import { readFile, copyFile, mkdir } from '@tauri-apps/plugin-fs';
@@ -630,7 +630,7 @@ async function handleSave() {
       await addComponent(data);
       showToast(t('toast.componentAdded'), 'success');
     }
-    document.getElementById('overlay-edit').style.display = 'none';
+    closeModal(document.getElementById('overlay-edit'));
   } catch (err) {
     showToast(t('toast.saveFailed') + (err.message || err), 'error');
   } finally {
@@ -736,8 +736,8 @@ function initDeleteConfirm() {
     try {
       await deleteComponent(_deleteTargetId);
       showToast(t('toast.componentDeleted'), 'success');
-      document.getElementById('overlay-confirm').style.display = 'none';
-      document.getElementById('overlay-detail').style.display = 'none';
+      closeModal(document.getElementById('overlay-confirm'));
+      closeModal(document.getElementById('overlay-detail'));
     } catch (err) {
       showToast(t('toast.deleteFailed') + (err.message || err), 'error');
     } finally {
@@ -754,7 +754,7 @@ function initDetailActions() {
     const partCode = document.getElementById('detail-part-code').textContent;
     const comp = state.components.find(c => c.part_code === partCode);
     if (comp) {
-      document.getElementById('overlay-detail').style.display = 'none';
+      closeModal(document.getElementById('overlay-detail'));
       openEditModal(comp);
     }
   });
@@ -763,7 +763,7 @@ function initDetailActions() {
     const partCode = document.getElementById('detail-part-code').textContent;
     const comp = state.components.find(c => c.part_code === partCode);
     if (comp) {
-      document.getElementById('overlay-detail').style.display = 'none';
+      closeModal(document.getElementById('overlay-detail'));
       document.dispatchEvent(new CustomEvent('open-delete-confirm', { detail: comp }));
     }
   });

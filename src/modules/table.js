@@ -1,4 +1,4 @@
-import { state, escHtml, deleteComponents, showToast, listStockMovementsFor } from '../app.js';
+import { state, escHtml, deleteComponents, showToast, listStockMovementsFor , closeModal } from '../app.js';
 import { lookupComponent, applyDbData }                 from './hardcoded_datasheet.js';
 import { setLabelComponent }                             from './labels.js';
 import { readFile }                                      from '@tauri-apps/plugin-fs';
@@ -96,7 +96,7 @@ function initSelectionBar() {
   document.getElementById('btn-bulk-del-confirm')?.addEventListener('click', async () => {
     const n = selectedIds.size;
     const overlay = document.getElementById('overlay-bulk-confirm');
-    if (overlay) overlay.style.display = 'none';
+    if (overlay) closeModal(overlay);
     try {
       await deleteComponents(Array.from(selectedIds));
       clearSelection();
@@ -105,7 +105,7 @@ function initSelectionBar() {
       showToast(t('toast.deleteFailed') + (err.message || err), 'error');
     }
   });
-  const closeBulk = () => { document.getElementById('overlay-bulk-confirm').style.display = 'none'; };
+  const closeBulk = () => { closeModal(document.getElementById('overlay-bulk-confirm')); };
   document.getElementById('btn-bulk-del-cancel')?.addEventListener('click', closeBulk);
   document.getElementById('btn-bulk-del-cancel-footer')?.addEventListener('click', closeBulk);
 }

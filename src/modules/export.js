@@ -1,4 +1,4 @@
-import { state, showToast } from '../app.js';
+import { state, showToast , closeModal } from '../app.js';
 import { save as saveDialog }  from '@tauri-apps/plugin-dialog';
 import { writeFile }            from '@tauri-apps/plugin-fs';
 import { t } from './i18n.js';
@@ -225,7 +225,7 @@ export function initExport() {
   document.querySelectorAll('.format-btn').forEach(btn => {
     btn.addEventListener('click', async () => {
       const format = btn.dataset.format;
-      document.getElementById('overlay-export').style.display = 'none';
+      closeModal(document.getElementById('overlay-export'));
 
       if (state.components.length === 0) {
         showToast(t('toast.exportEmpty'), 'warning');

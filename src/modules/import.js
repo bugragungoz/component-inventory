@@ -1,4 +1,4 @@
-import { upsertComponents, showToast, escHtml, parseLocaleNumber } from '../app.js';
+import { upsertComponents, showToast, escHtml, parseLocaleNumber , closeModal } from '../app.js';
 import { invoke } from '@tauri-apps/api/core';
 import { t } from './i18n.js';
 import { detectDelimiter as detectDelimiterCore, normalizeRowsCore, getMappedHeaderNamesCore, validateRowsCore } from './import_core.js';
@@ -593,7 +593,7 @@ export function initImport() {
       await upsertComponents(_importRows, mode);
 
       const count = _importRows.length;
-      document.getElementById('overlay-import').style.display = 'none';
+      closeModal(document.getElementById('overlay-import'));
       resetImportUI();
 
       if (preImportBackupPath) {
