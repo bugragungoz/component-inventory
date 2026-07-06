@@ -199,7 +199,7 @@ function setProgress(current, total, batchLabel) {
 
 function hideProgress() {
   const overlay = document.getElementById('categorize-progress');
-  if (overlay) overlay.style.display = 'none';
+  if (overlay) window.closeModal(overlay);
 }
 
 async function autoCategorizeAll() {
