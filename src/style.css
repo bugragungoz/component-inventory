@@ -966,6 +966,11 @@ tr:hover .row-actions { opacity: 1; }
 .modal-overlay[style*="display: none"] { display: none !important; }
 
 @keyframes overlay-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes overlay-out { from { opacity: 1; } to { opacity: 0; } }
+
+.modal-overlay.closing {
+  animation: overlay-out 140ms ease forwards;
+}
 
 .modal {
   background: var(--bg-surface);
@@ -997,6 +1002,15 @@ textarea.settings-input-path {
 @keyframes modal-in {
   from { opacity: 0; transform: scale(0.97) translateY(10px); }
   to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes modal-out {
+  from { opacity: 1; transform: scale(1) translateY(0); }
+  to   { opacity: 0; transform: scale(0.97) translateY(10px); }
+}
+
+.modal-overlay.closing .modal {
+  animation: modal-out 140ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .modal-header {
