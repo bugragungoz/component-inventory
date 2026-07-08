@@ -689,7 +689,7 @@ async function applySelected(suggestions) {
 
 function closeOverlay() {
   const overlay = document.getElementById('overlay-bulk-cat');
-  if (overlay) overlay.style.display = 'none';
+  if (overlay) window.closeModal(overlay);
 }
 
 // ================================================================

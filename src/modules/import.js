@@ -593,7 +593,7 @@ export function initImport() {
       await upsertComponents(_importRows, mode);
 
       const count = _importRows.length;
-      document.getElementById('overlay-import').style.display = 'none';
+      window.closeModal(document.getElementById('overlay-import'));
       resetImportUI();
 
       if (preImportBackupPath) {
