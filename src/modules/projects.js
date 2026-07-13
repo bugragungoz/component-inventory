@@ -760,7 +760,7 @@ async function commitAssign() {
     [projectId, assignContext.id, qty, note]
   );
   showToast(t('assign.saved'), 'success');
-  document.getElementById('overlay-assign-project').style.display = 'none';
+  window.closeModal(document.getElementById('overlay-assign-project'));
   document.dispatchEvent(new CustomEvent('project-usage-changed'));
 }
 

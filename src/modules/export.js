@@ -225,7 +225,7 @@ export function initExport() {
   document.querySelectorAll('.format-btn').forEach(btn => {
     btn.addEventListener('click', async () => {
       const format = btn.dataset.format;
-      document.getElementById('overlay-export').style.display = 'none';
+      window.closeModal(document.getElementById('overlay-export'));
 
       if (state.components.length === 0) {
         showToast(t('toast.exportEmpty'), 'warning');
