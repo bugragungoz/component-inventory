@@ -1,0 +1,1159 @@
+{
+  "_meta": {
+    "nativeName": "Deutsch",
+    "dir": "ltr",
+    "reviewed": false
+  },
+  "app": {
+    "name": "Component Inventory",
+    "skip": "Zum Inhalt springen"
+  },
+  "common": {
+    "cancel": "Abbrechen",
+    "close": "Schließen",
+    "save": "Speichern",
+    "undo": "Rückgängig",
+    "retry": "Erneut versuchen",
+    "loading": "Wird geladen",
+    "errorPrefix": "Fehler:"
+  },
+  "nav": {
+    "inventory": "Bestand",
+    "projects": "Projekte",
+    "import": "Import",
+    "backups": "Sicherungen",
+    "settings": "Einstellungen"
+  },
+  "sidebar": {
+    "label": "Seitenleiste",
+    "navLabel": "Hauptmenü",
+    "categories": "Kategorien",
+    "filterCategories": "Kategorien filtern",
+    "allParts": "Alle Teile",
+    "collapse": "{name} zuklappen",
+    "expand": "{name} aufklappen",
+    "rename": "{name} umbenennen",
+    "storagePlaces": "Lagerorte"
+  },
+  "about": {
+    "github": "Projekt auf GitHub"
+  },
+  "startup": {
+    "title": "Der Bestand konnte nicht geöffnet werden",
+    "newerSchema": "Diese Datenbank wurde von einer neueren Version von Component Inventory geschrieben. Installieren Sie die neueste Version; diese ändert die Datei nicht.",
+    "failed": "Die Datenbank konnte nicht geöffnet werden: {error}",
+    "nothingChanged": "Es wurde nichts verändert. Ihre Daten liegen weiterhin in diesem Ordner:",
+    "openFolder": "Datenordner öffnen",
+    "migrated": "Ihr Bestand wurde in das neue Format übernommen. Vorher wurde eine Kopie der alten Datei gesichert.",
+    "migratedAction": "Sicherungen ansehen"
+  },
+  "status": {
+    "syncOff": "Drive-Abgleich aus",
+    "syncError": "Drive-Abgleich fehlgeschlagen: {error}",
+    "syncPending": "Drive-Abgleich wartet",
+    "synced": "Drive abgeglichen {time}",
+    "parts": {
+      "one": "{count} Teil",
+      "other": "{count} Teile"
+    },
+    "pieces": {
+      "one": "{count} Stück",
+      "other": "{count} Stück"
+    },
+    "lowStock": {
+      "one": "{count} mit wenig Bestand",
+      "other": "{count} mit wenig Bestand"
+    },
+    "lastBackup": "Sicherung {time}",
+    "syncOn": "Drive-Abgleich an"
+  },
+  "update": {
+    "available": "Version {version} ist verfügbar.",
+    "download": "Herunterladen",
+    "current": "Sie haben die neueste Version ({version}).",
+    "failed": "Die Suche nach Updates ist fehlgeschlagen. Prüfen Sie die Internetverbindung."
+  },
+  "table": {
+    "label": "Teile",
+    "selectAll": "Alle angezeigten Teile auswählen",
+    "actions": "Aktionen",
+    "selectRow": "{code} auswählen",
+    "editPart": "{code} bearbeiten",
+    "deletePart": "{code} löschen",
+    "lowStockTitle": "Wenig Bestand",
+    "usageTitle": "In {count} Projekten verwendet, {required} Stück benötigt",
+    "usage": {
+      "one": "{count} Projekt",
+      "other": "{count} Projekte"
+    }
+  },
+  "inventory": {
+    "search": "Teile suchen",
+    "searchPlaceholder": "Code, Beschreibung, Hersteller suchen...",
+    "clearSearch": "Suche leeren",
+    "lowStock": {
+      "one": "Wenig Bestand ({count})",
+      "other": "Wenig Bestand ({count})"
+    },
+    "removeFilter": "Diesen Filter entfernen",
+    "showing": {
+      "one": "{shown} von {count} Teil",
+      "other": "{shown} von {count} Teilen"
+    },
+    "columns": "Spalten",
+    "more": "Weitere Aktionen",
+    "labelsAll": "Etiketten für die angezeigten Teile drucken",
+    "autoCategorize": "Automatisch einordnen",
+    "export": "Exportieren",
+    "import": "Importieren",
+    "add": "Teil hinzufügen",
+    "emptyTitle": "Noch keine Teile",
+    "emptyBody": "Fügen Sie Ihr erstes Teil hinzu oder importieren Sie eine Bestellung, eine Tabelle oder ein PDF.",
+    "noMatchTitle": "Keine passenden Teile",
+    "noMatchSearch": "Nichts passt zu „{query}“. Prüfen Sie die Schreibweise oder suchen Sie mit weniger Wörtern.",
+    "noMatchFilter": "Kein Teil passt zu diesen Filtern.",
+    "clearFilters": "Filter zurücksetzen"
+  },
+  "selection": {
+    "label": "Ausgewählte Teile",
+    "count": {
+      "one": "{count} ausgewählt",
+      "other": "{count} ausgewählt"
+    },
+    "assign": "Zum Projekt hinzufügen",
+    "labels": "Etiketten",
+    "autoCategorize": "Automatisch einordnen",
+    "delete": "Löschen",
+    "clear": "Auswahl aufheben",
+    "moveToPlace": "In Lagerort verschieben"
+  },
+  "delete": {
+    "title": {
+      "one": "Dieses Teil löschen?",
+      "other": "{count} Teile löschen?"
+    },
+    "bodyOne": "{code} und sein Bestandsverlauf werden entfernt.",
+    "bodyMany": {
+      "one": "{count} Teil und sein Bestandsverlauf werden entfernt.",
+      "other": "{count} Teile und ihr Bestandsverlauf werden entfernt."
+    },
+    "bodyUsed": {
+      "one": "{count} davon steht auf einer Projektliste; diese Zeilen werden mit entfernt.",
+      "other": "{count} davon stehen auf Projektlisten; diese Zeilen werden mit entfernt."
+    },
+    "bodyUndo": "Sie können das direkt danach rückgängig machen.",
+    "confirm": "Löschen",
+    "done": {
+      "one": "Teil gelöscht.",
+      "other": "{count} Teile gelöscht."
+    },
+    "restored": {
+      "one": "Teil wiederhergestellt.",
+      "other": "{count} Teile wiederhergestellt."
+    },
+    "restoredSkipped": {
+      "one": "{count} Teil konnte nicht wiederhergestellt werden: sein Code gehört jetzt einem anderen Teil.",
+      "other": "{count} Teile konnten nicht wiederhergestellt werden: ihre Codes gehören jetzt anderen Teilen."
+    }
+  },
+  "detail": {
+    "label": "Details zu {code}",
+    "quantity": "Menge",
+    "takeOne": "Eins entnehmen",
+    "addOne": "Eins hinzufügen",
+    "setTo": "Setzen auf",
+    "set": "Setzen",
+    "qtyInvalid": "Geben Sie eine ganze Stückzahl ein, 0 oder mehr.",
+    "edit": "Bearbeiten",
+    "duplicate": "Duplizieren",
+    "printLabel": "Etikett",
+    "assign": "Zum Projekt hinzufügen",
+    "datasheet": "Datenblatt",
+    "delete": "Löschen",
+    "imageAlt": "Foto von {code}",
+    "imageMissing": "Die Bilddatei fehlt.",
+    "facts": "Details",
+    "parameters": "Parameter",
+    "projects": "In Projekten verwendet",
+    "needs": {
+      "one": "benötigt {count}",
+      "other": "benötigt {count}"
+    },
+    "noProjects": "Auf keiner Projektliste.",
+    "history": "Bestandsverlauf",
+    "after": {
+      "one": "jetzt {count}",
+      "other": "jetzt {count}"
+    },
+    "noHistory": "Noch keine Änderungen erfasst.",
+    "created": "Hinzugefügt {time}",
+    "updated": "Zuletzt geändert {time}"
+  },
+  "edit": {
+    "addTitle": "Teil hinzufügen",
+    "editTitle": "{code} bearbeiten",
+    "add": "Teil hinzufügen",
+    "save": "Änderungen speichern",
+    "formMode": "Formular",
+    "simple": "Einfach",
+    "detailed": "Ausführlich",
+    "codeHint": "Die Teilenummer des Herstellers, etwa LM7805 oder IRFZ44N.",
+    "errCodeRequired": "Geben Sie einen Teilecode ein.",
+    "errQuantity": "Geben Sie eine ganze Stückzahl von 0 bis 999.999.999 ein.",
+    "errUrl": "Der Link muss mit https:// oder http:// beginnen.",
+    "errNumber": "{field} ist keine Zahl.",
+    "addToExisting": {
+      "one": "Zum vorhandenen Teil hinzufügen ({count} auf Lager)",
+      "other": "Zum vorhandenen Teil hinzufügen ({count} auf Lager)"
+    },
+    "openExisting": "Vorhandenes Teil öffnen",
+    "addedToExisting": {
+      "one": "{count} Stück zu {code} hinzugefügt.",
+      "other": "{count} Stück zu {code} hinzugefügt."
+    },
+    "qtyHint": {
+      "one": "Leer bedeutet {count} Stück (Ihre Vorgabe).",
+      "other": "Leer bedeutet {count} Stück (Ihre Vorgabe)."
+    },
+    "newCategory": "Neue Kategorie...",
+    "newCategoryName": "Name der neuen Kategorie",
+    "rulesKnow": "Bekannte Teilenummer",
+    "fillEmpty": "Leere Felder füllen",
+    "filledFrom": "Leere Felder aus {source} gefüllt.",
+    "autoDescription": "Beschreibung erzeugen",
+    "guessCategory": "Kategorie aus der Beschreibung ableiten",
+    "noCategoryGuess": "Aus der Beschreibung geht keine Kategorie hervor.",
+    "categoryGuessed": "Kategorie auf {category} gesetzt.",
+    "placeHint": "Wo das Teil liegt: eine Schublade, Kiste oder ein Regal. Optional.",
+    "electrical": "Elektrische Werte",
+    "ratedVoltage": "Nennspannung",
+    "parameters": "Parameter dieses Typs",
+    "sourcing": "Hersteller und Lieferant",
+    "customFields": "Eigene Spalten",
+    "chooseImage": "Bild wählen",
+    "changeImage": "Bild ändern",
+    "removeImage": "Bild entfernen",
+    "simpleNote": "Wechseln Sie zu Ausführlich für Hersteller, Lieferant, elektrische Werte, Notizen und Bild.",
+    "discardTitle": "Änderungen verwerfen?",
+    "discardBody": "Was Sie in dieses Formular eingegeben haben, geht verloren.",
+    "discard": "Verwerfen",
+    "keepEditing": "Weiter bearbeiten",
+    "added": "{code} hinzugefügt.",
+    "saved": "{code} gespeichert.",
+    "show": "Anzeigen"
+  },
+  "rename": {
+    "title": "{name} umbenennen",
+    "subTitle": "{name} umbenennen",
+    "newName": "Neuer Name",
+    "hint": {
+      "one": "{count} Teil erhält den neuen Namen.",
+      "other": "{count} Teile erhalten den neuen Namen."
+    },
+    "errEmpty": "Geben Sie einen Namen ein.",
+    "mergeNote": "{name} gibt es schon; die Teile werden dort einsortiert.",
+    "confirm": "Umbenennen",
+    "done": {
+      "one": "{count} Teil nach {name} verschoben.",
+      "other": "{count} Teile nach {name} verschoben."
+    }
+  },
+  "columns": {
+    "title": "Tabellenspalten",
+    "body": "Wählen Sie, welche Spalten die Tabelle zeigt und in welcher Reihenfolge. Teilecode und Menge werden immer gezeigt.",
+    "reset": "Standardspalten",
+    "moveUp": "{name} nach oben",
+    "moveDown": "{name} nach unten",
+    "newCustom": "Eigene neue Spalte",
+    "newCustomHint": "Ein Textfeld, das jedes Teil bekommt, etwa „Gekauft bei“.",
+    "add": "Spalte hinzufügen"
+  },
+  "shortcuts": {
+    "title": "Tastenkürzel",
+    "search": "Teile suchen",
+    "add": "Teil hinzufügen",
+    "import": "Importieren",
+    "move": "Zwischen Zeilen wechseln",
+    "open": "Teil öffnen",
+    "select": "Zeile auswählen",
+    "delete": "Teil löschen",
+    "close": "Bereich oder Dialog schließen",
+    "help": "Diese Liste zeigen"
+  },
+  "labels": {
+    "title": {
+      "one": "Etiketten für {count} Teil",
+      "other": "Etiketten für {count} Teile"
+    },
+    "sheet": "Etikettenbogen",
+    "copies": "Exemplare je Etikett",
+    "skip": "Bereits benutzte Etiketten auf dem ersten Bogen",
+    "skipHint": "Der Druck beginnt danach.",
+    "show": "Auf dem Etikett",
+    "qr": "QR-Code mit dem Teilecode",
+    "save": "PDF speichern",
+    "saved": "Etiketten gespeichert unter {path}",
+    "previewAlt": "Etikettenvorschau für {code}",
+    "summary": {
+      "one": "{count} Etikett, {pages} Seite(n)",
+      "other": "{count} Etiketten, {pages} Seite(n)"
+    },
+    "sheets": {
+      "a4-2x7": "A4, 2 x 7 (95 x 38 mm)",
+      "a4-3x8": "A4, 3 x 8 (63,5 x 33,9 mm)",
+      "roll-50x25": "Etikettendrucker-Rolle, 50 x 25 mm"
+    }
+  },
+  "export": {
+    "title": "Bestand exportieren",
+    "format": "Format",
+    "run": "Exportieren",
+    "saved": "Gespeichert unter {path}",
+    "progress": "Seiten werden gezeichnet",
+    "folder": "Öffnet sich in {path}",
+    "onlyShown": {
+      "one": "Nur das {count} jetzt angezeigte Teil",
+      "other": "Nur die {count} jetzt angezeigten Teile"
+    },
+    "allParts": {
+      "one": "{count} Teil wird exportiert.",
+      "other": "Alle {count} Teile werden exportiert."
+    },
+    "pdfTitle": {
+      "one": "Bestand, {count} Teil",
+      "other": "Bestand, {count} Teile"
+    },
+    "pdfPage": "Seite {page} von {pages}",
+    "formats": {
+      "xlsx": {
+        "title": "Excel-Arbeitsmappe",
+        "body": "Ein Übersichtsblatt und ein Blatt je Kategorie, mit Filtern."
+      },
+      "csv": {
+        "title": "CSV",
+        "body": "Eine Tabelle, öffnet sich in jedem Tabellenprogramm."
+      },
+      "json": {
+        "title": "JSON",
+        "body": "Alle Felder, für andere Programme."
+      },
+      "pdf": {
+        "title": "PDF-Liste",
+        "body": "Eine druckbare Liste mit Teilecode, Kategorie, Menge und Beschreibung."
+      }
+    }
+  },
+  "assign": {
+    "title": {
+      "one": "{count} Teil zu einem Projekt hinzufügen",
+      "other": "{count} Teile zu einem Projekt hinzufügen"
+    },
+    "project": "Projekt",
+    "newProject": "Neues Projekt...",
+    "qty": "Benötigte Stück je Teil",
+    "qtyHint": "Steht das Teil schon auf der Liste, wird die Zeile erhöht.",
+    "confirm": "Hinzufügen",
+    "done": {
+      "one": "{count} Teil zu {name} hinzugefügt.",
+      "other": "{count} Teile zu {name} hinzugefügt."
+    },
+    "open": "Projekt öffnen"
+  },
+  "projects": {
+    "list": "Projekte",
+    "newName": "Name des neuen Projekts",
+    "create": "Projekt anlegen",
+    "lines": {
+      "one": "{count} Zeile",
+      "other": "{count} Zeilen"
+    },
+    "short": {
+      "one": "{count} fehlen",
+      "other": "{count} fehlen"
+    },
+    "ready": "Auf Lager",
+    "moveUp": "{name} nach oben",
+    "moveDown": "{name} nach unten",
+    "addPart": "Teil hinzufügen",
+    "addPartPlaceholder": "In Ihren Teilen suchen",
+    "matches": "Passende Teile",
+    "required": "Benötigt",
+    "add": "Hinzufügen",
+    "addInvalid": "Wählen Sie ein Teil und geben Sie ein, wie viele Stück es braucht.",
+    "stock": "Auf Lager",
+    "status": "Status",
+    "missing": {
+      "one": "{count} fehlen",
+      "other": "{count} fehlen"
+    },
+    "enough": "Genug",
+    "requiredFor": "Benötigte Stück von {code}",
+    "removeLine": "{code} von der Liste entfernen",
+    "lineRemoved": "{code} von der Liste entfernt.",
+    "bomEmpty": "Noch keine Teile auf dieser Liste. Suchen Sie oben ein Teil, um es hinzuzufügen.",
+    "name": "Projektname",
+    "delete": "Projekt löschen",
+    "deleteTitle": "{name} löschen?",
+    "deleteBody": {
+      "one": "Das Projekt und seine {count} Zeile werden entfernt. Ihre Teile bleiben. Sie können das direkt danach rückgängig machen.",
+      "other": "Das Projekt und seine {count} Zeilen werden entfernt. Ihre Teile bleiben. Sie können das direkt danach rückgängig machen."
+    },
+    "deleted": "{name} gelöscht.",
+    "summary": "{lines} Zeilen, {pieces} Stück benötigt.",
+    "missingTotal": {
+      "one": "{count} Stück fehlen",
+      "other": "{count} Stück fehlen"
+    },
+    "allInStock": "Alles auf Lager",
+    "tabs": "Projektbereiche",
+    "bom": "Stückliste",
+    "schematic": "Schaltplan",
+    "notes": "Notizen",
+    "description": "Beschreibung",
+    "emptyTitle": "Noch keine Projekte",
+    "emptyBody": "Legen Sie links ein Projekt an und fügen Sie dann die benötigten Teile hinzu.",
+    "nameRequired": "Geben Sie einen Projektnamen ein.",
+    "schematicTitle": "Stückliste aus dem Schaltplan",
+    "schematicBody": "{matched} Teile im Schaltplan passen zu Ihrem Bestand, {unmatched} nicht.",
+    "schematicApply": {
+      "one": "{count} Zeile hinzufügen",
+      "other": "{count} Zeilen hinzufügen"
+    },
+    "refs": "Referenzen",
+    "unmatched": {
+      "one": "{count} Symbol ohne passendes Teil",
+      "other": "{count} Symbole ohne passendes Teil"
+    },
+    "schematicAdded": {
+      "one": "{count} Zeile hinzugefügt.",
+      "other": "{count} Zeilen hinzugefügt."
+    }
+  },
+  "schematic": {
+    "emptyTitle": "Kein Schaltplan",
+    "emptyBody": "Hängen Sie ein PDF, ein Bild oder einen KiCad-Schaltplan (.kicad_sch) an, um ihn hier zu sehen.",
+    "pick": "Datei wählen",
+    "change": "Datei ändern",
+    "remove": "Entfernen",
+    "importBom": "Stückliste daraus erstellen",
+    "readError": "Die Datei konnte nicht gelesen werden: {error}",
+    "pdfError": "Dieses PDF konnte nicht geöffnet werden.",
+    "toolbar": "Schaltplanansicht",
+    "stage": "Schaltplan",
+    "prevPage": "Vorherige Seite",
+    "nextPage": "Nächste Seite",
+    "page": "Seite {page} von {pages}",
+    "zoomIn": "Vergrößern",
+    "zoomOut": "Verkleinern",
+    "fit": "Einpassen",
+    "kicadAlt": {
+      "one": "Schaltplan mit {count} Teil",
+      "other": "Schaltplan mit {count} Teilen"
+    },
+    "kicadHint": "Zum Zoomen scrollen, zum Verschieben ziehen, Doppelklick zum Einpassen.",
+    "kicadEmpty": "In diesem Schaltplan wurden keine Teile oder Leitungen gefunden.",
+    "imageAlt": "Schaltplan von {name}",
+    "status": {
+      "ok": "Auf Lager",
+      "short": "Nicht genug",
+      "extra": "Im Bestand, nicht auf der Liste",
+      "unknown": "Nicht im Bestand",
+      "unassigned": "Kein Wert",
+      "power": "Versorgung"
+    }
+  },
+  "bulk": {
+    "title": "Automatisch einordnen",
+    "body": "Vorschläge aus Teilenummern, Beschreibungen und der Teilebibliothek. Nichts ändert sich, bevor Sie es anwenden; vorher wird gesichert.",
+    "scope": "Betrachtet werden",
+    "scopeAll": {
+      "one": "Alle Teile ({count})",
+      "other": "Alle Teile ({count})"
+    },
+    "scopeUncategorized": "Nicht eingeordnete Teile",
+    "scopeSelected": {
+      "one": "Ausgewählte Teile ({count})",
+      "other": "Ausgewählte Teile ({count})"
+    },
+    "kinds": "Arten von Vorschlägen",
+    "kind": {
+      "categorize": "Kategorie",
+      "normalize": "Schreibweise",
+      "enrich": "Leere Felder",
+      "merge": "Doppelte"
+    },
+    "source": {
+      "part-code": "aus der Teilenummer",
+      "opto": "Optokoppler-Familie",
+      "description": "aus der Beschreibung",
+      "heuristic": "aus Stichwörtern"
+    },
+    "confidence": {
+      "high": "Sicher",
+      "medium": "Wahrscheinlich",
+      "low": "Vermutung"
+    },
+    "misfiled": "scheint falsch eingeordnet",
+    "mergeTotal": {
+      "one": "zusammen {count} Stück",
+      "other": "zusammen {count} Stück"
+    },
+    "selectAll": "Alle in dieser Liste auswählen",
+    "selectNone": "Keine in dieser Liste auswählen",
+    "selected": {
+      "one": "{count} ausgewählt",
+      "other": "{count} ausgewählt"
+    },
+    "apply": {
+      "one": "{count} anwenden",
+      "other": "{count} anwenden"
+    },
+    "applied": {
+      "one": "{count} Teil geändert.",
+      "other": "{count} Teile geändert."
+    },
+    "seeBackups": "Sicherungen",
+    "noneTitle": "Nichts vorzuschlagen",
+    "noneBody": {
+      "one": "Das betrachtete Teil braucht hier keine Änderung.",
+      "other": "Die {count} betrachteten Teile brauchen hier keine Änderung."
+    }
+  },
+  "backups": {
+    "create": "Jetzt sichern",
+    "created": "Sicherung erstellt.",
+    "openFolder": "Sicherungsordner öffnen",
+    "policy": {
+      "one": "Wenn sich etwas geändert hat, wird alle {minutes} Minuten automatisch gesichert; die neuesten {count} bleiben erhalten. Manuelle Sicherungen und die vor einem Update werden nie entfernt.",
+      "other": "Wenn sich etwas geändert hat, wird alle {minutes} Minuten automatisch gesichert; die neuesten {count} bleiben erhalten. Manuelle Sicherungen und die vor einem Update werden nie entfernt."
+    },
+    "emptyTitle": "Noch keine Sicherungen",
+    "emptyBody": "Erstellen Sie jetzt eine; die App sichert außerdem vor jedem Import und jeder Wiederherstellung.",
+    "when": "Wann",
+    "kind": "Art",
+    "size": "Größe",
+    "compare": "Was sich geändert hat",
+    "restore": "Wiederherstellen",
+    "copyName": "Pfad von {name} kopieren",
+    "copied": "Pfad kopiert.",
+    "restoreTitle": "Diese Sicherung wiederherstellen?",
+    "restoreBody": "Ihr Bestand wird auf den Stand von {time} zurückgesetzt. Vorher wird eine Kopie der aktuellen Daten gesichert, sodass Sie das rückgängig machen können.",
+    "restored": "Sicherung wiederhergestellt.",
+    "restoreUndone": "Wiederherstellung rückgängig gemacht.",
+    "diffTitle": "Änderungen seit {time}",
+    "diffBody": "Damals ist die Sicherung, jetzt ist Ihr Bestand.",
+    "diffTabs": "Arten von Änderungen",
+    "changed": "Geändert",
+    "added": "Seitdem hinzugefügt",
+    "removed": "Seitdem entfernt",
+    "field": "Feld",
+    "then": "Damals",
+    "now": "Jetzt",
+    "noneChanged": "Kein Teil wurde geändert.",
+    "noneAdded": "Kein Teil wurde hinzugefügt.",
+    "noneRemoved": "Kein Teil wurde entfernt.",
+    "kinds": {
+      "auto": "Automatisch",
+      "manual": "Manuell",
+      "pre-import": "Vor dem Import",
+      "pre-undo": "Vor dem Rückgängigmachen",
+      "pre-bulk": "Vor einer Sammeländerung",
+      "pre-restore": "Vor der Wiederherstellung",
+      "pre-delete": "Vor dem Löschen",
+      "pre-migration": "Vor dem Update",
+      "legacy": "Alte App"
+    }
+  },
+  "import": {
+    "dropTitle": "Datei hier ablegen",
+    "dropBody": "Eine als PDF gedruckte Bestell- oder Warenkorbseite, eine Excel- oder CSV-Liste oder eine .cinv.json-Datei aus der Browsererweiterung.",
+    "choose": "Datei wählen",
+    "reading": "{name} wird gelesen",
+    "sources": {
+      "extension": {
+        "title": "Von einer Shopseite",
+        "body": "Die Browsererweiterung liest Ihre Bestellung bei Özdisan, Motorobit oder Robocombo und öffnet sie hier."
+      },
+      "pdf": {
+        "title": "Eine gedruckte Seite",
+        "body": "Drucken Sie eine Bestell- oder Warenkorbseite als PDF. Zeilen mit einer Menge werden gelesen; die Liste endet bei der Zwischensumme."
+      },
+      "table": {
+        "title": "Eine Tabelle",
+        "body": "Jedes Blatt mit Spaltennamen wie Teilecode, Menge oder Beschreibung wird gelesen."
+      }
+    },
+    "errors": {
+      "tooLarge": "Die Datei ist größer als {mb} MB.",
+      "empty": "Die Datei enthält keine Zeilen.",
+      "noHeaders": "Kein Blatt hat Spaltennamen, die diese App kennt (etwa Teilecode oder Menge).",
+      "pdfNoText": "Dieses PDF hat keine Textebene (es ist ein gescanntes Bild) und kann nicht gelesen werden.",
+      "pdfNoRows": "In diesem PDF wurden keine Zeilen mit einer Menge gefunden.",
+      "unknownType": "Dateien mit der Endung .{ext} können nicht importiert werden.",
+      "link": "Der Link aus der Erweiterung konnte nicht gelesen werden.",
+      "cinv": {
+        "invalid-json": "Das ist keine gültige .cinv.json-Datei.",
+        "not-cinv": "Diese JSON-Datei stammt nicht aus der Erweiterung.",
+        "unsupported-version": "Diese Datei wurde mit einer neueren Erweiterung erstellt. Aktualisieren Sie die App.",
+        "no-items": "Die Datei enthält keine Teile.",
+        "no-valid-items": "Keine Zeile der Datei konnte gelesen werden."
+      },
+      "linkFailed": "Fehler: Die Liste aus der Erweiterung konnte nicht geöffnet werden ({error}). Verwenden Sie im Erweiterungsfenster „Als Datei speichern“ und ziehen Sie die Datei hierher."
+    },
+    "linkReceived": {
+      "one": "{count} Zeile von {shop} ist bereit zur Prüfung.",
+      "other": "{count} Zeilen von {shop} sind bereit zur Prüfung."
+    },
+    "mapping": {
+      "title": {
+        "one": "Spalten ({count})",
+        "other": "Spalten ({count})"
+      },
+      "body": "Welches Feld jede Spalte der Datei füllt. Auf Ignorieren gesetzte Spalten werden nicht gelesen.",
+      "fieldFor": "Feld für Spalte {column}",
+      "ignore": "Ignorieren"
+    },
+    "review": {
+      "title": "Prüfung: {source}",
+      "lineCount": {
+        "one": "{count} Zeile",
+        "other": "{count} Zeilen"
+      },
+      "pieceCount": {
+        "one": "{count} Stück",
+        "other": "{count} Stück"
+      },
+      "toCheck": {
+        "one": "{count} zu prüfen",
+        "other": "{count} zu prüfen"
+      },
+      "unreadable": {
+        "one": "{count} ohne Menge oder Code",
+        "other": "{count} ohne Menge oder Code"
+      },
+      "excluded": {
+        "one": "{count} ausgelassen",
+        "other": "{count} ausgelassen"
+      },
+      "skipped": {
+        "one": "{count} Zeile der Quelle konnte nicht gelesen werden",
+        "other": "{count} Zeilen der Quelle konnten nicht gelesen werden"
+      },
+      "filter": "Anzeigen",
+      "all": "Alle",
+      "checkTab": "Zu prüfen",
+      "status": "Status",
+      "name": "Name in der Quelle",
+      "units": "Einheiten",
+      "pack": "Je Einheit",
+      "pieces": "Stück",
+      "stock": "Auf Lager",
+      "new": "Neu",
+      "inStock": {
+        "one": "jetzt {count}",
+        "other": "jetzt {count}"
+      },
+      "include": "{name} importieren",
+      "check": "Bitte prüfen",
+      "ok": "Sieht richtig aus",
+      "codeFor": "Teilecode für {name}",
+      "unitsFor": "Einheiten von {name}",
+      "packFor": "Stück je Einheit von {name}",
+      "showing": "Zeilen 1 bis {shown} von {total}. Für weitere nach unten scrollen."
+    },
+    "why": {
+      "plain": {
+        "one": "{count} Stück",
+        "other": "{count} Stück"
+      },
+      "pack": "{units} Einheiten x {pack}er-Packung = {pieces} Stück",
+      "unknown": "Die Menge konnte nicht gelesen werden."
+    },
+    "reason": {
+      "readFrom": "Menge aus der Spalte {column} gelesen.",
+      "packRule": "Der Name endet auf „- {size} Adet“: der Shop verkauft das als {size}er-Packung.",
+      "packExtension": "Die Erweiterung hat eine {size}er-Packung erkannt.",
+      "packEdited": "Sie haben {size} Stück je Einheit eingegeben.",
+      "perPiece": "Ein Stück je Einheit."
+    },
+    "issue": {
+      "noQuantity": "Keine Mengenspalte; ein Stück wird angenommen.",
+      "noQuantityRaw": "„{raw}“ ist keine Menge.",
+      "notWhole": "„{raw}“ ist keine ganze Zahl; es wurde gerundet.",
+      "noCode": "Kein Teilecode: geben Sie einen ein oder lassen Sie die Zeile aus.",
+      "nameAsCode": "Keine Teilenummer gefunden; der Name dient als Code.",
+      "codeFromName": "Der Teilecode wurde aus dem Namen übernommen.",
+      "shopCode": "{code} ist die eigene Nummer des Shops, keine Teilenummer.",
+      "filledLibrary": "Leere Felder aus der Teilebibliothek gefüllt.",
+      "filledRules": "Leere Felder aus bekannten Teilenummern gefüllt.",
+      "duplicate": {
+        "one": "Dieser Code steht auf {count} Zeile; die Mengen werden addiert.",
+        "other": "Dieser Code steht auf {count} Zeilen; die Mengen werden addiert."
+      }
+    },
+    "mode": {
+      "label": "Wie anwenden",
+      "add": {
+        "title": "Zum Bestand addieren",
+        "body": "Mengen werden zu Ihren Teilen addiert; neue Codes werden neue Teile."
+      },
+      "sync": {
+        "title": "Mengen setzen",
+        "body": "Die Mengen ersetzen den Bestand der Teile in der Datei; andere Teile bleiben, wie sie sind."
+      },
+      "replace": {
+        "title": "Alles ersetzen",
+        "body": "Der Bestand wird genau diese Datei. Teile, die nicht darin stehen, werden entfernt."
+      }
+    },
+    "backupNote": "Vor dem Schreiben wird gesichert, und Sie können den Import danach rückgängig machen.",
+    "apply": {
+      "one": "{count} Zeile importieren",
+      "other": "{count} Zeilen importieren"
+    },
+    "replaceTitle": "Den ganzen Bestand ersetzen?",
+    "replaceBody": {
+      "one": "Ihr {count} Teil wird durch die Zeilen dieser Datei ersetzt.",
+      "other": "Ihre {count} Teile werden durch die Zeilen dieser Datei ersetzt."
+    },
+    "replaceConfirm": "Ersetzen",
+    "doneTitle": "Importiert",
+    "doneBody": "{created} neue Teile, {updated} aktualisiert, insgesamt {pieces} Stück.",
+    "doneUndoneTitle": "Import rückgängig gemacht",
+    "doneUndoneBody": "Ihr Bestand ist wieder wie vorher.",
+    "showInventory": "Bestand anzeigen",
+    "another": "Weitere Datei importieren",
+    "undo": "Import rückgängig machen",
+    "undoTitle": "Diesen Import rückgängig machen?",
+    "undoBody": "{source}: von ihm angelegte Teile werden entfernt und geänderte Mengen zurückgesetzt. Spätere Änderungen von Ihnen bleiben soweit möglich erhalten.",
+    "undone": {
+      "one": "Import rückgängig gemacht, {count} Teil zurückgesetzt.",
+      "other": "Import rückgängig gemacht, {count} Teile zurückgesetzt."
+    },
+    "undoNote": {
+      "deleted_since": "{code} wurde nach dem Import gelöscht.",
+      "edited_since": "{code} wurde nach dem Import bearbeitet; Ihre Änderung blieb erhalten.",
+      "used_in_project": "{code} steht auf einer Projektliste und wurde behalten.",
+      "stock_below": "{code} hat weniger Stück, als der Import hinzufügte; es steht jetzt auf 0.",
+      "code_taken": "{code} gehört jetzt einem anderen Teil."
+    },
+    "history": {
+      "title": "Frühere Importe",
+      "empty": "Noch keine Importe.",
+      "when": "Wann",
+      "source": "Quelle",
+      "mode": "Wie",
+      "result": "Ergebnis",
+      "counts": "{created} neu, {updated} aktualisiert, {pieces} Stück",
+      "undone": "Rückgängig gemacht"
+    },
+    "linkQueued": "Eine weitere Liste aus der Erweiterung wartet. Sie öffnet sich, wenn Sie diese Prüfung abschließen."
+  },
+  "settings": {
+    "range": "Geben Sie eine ganze Zahl von {min} bis {max} ein.",
+    "choose": "Ordner wählen",
+    "clear": "Leeren",
+    "language": {
+      "title": "Sprache und Aussehen",
+      "label": "Sprache",
+      "unreviewed": "noch nicht geprüft",
+      "unreviewedNote": "Diese Übersetzung wurde noch nicht von Muttersprachlern geprüft. Korrekturen sind auf GitHub willkommen."
+    },
+    "theme": {
+      "label": "Design",
+      "system": "Wie Windows",
+      "dark": "Dunkel",
+      "light": "Hell",
+      "switchLight": "Zum hellen Design wechseln",
+      "switchDark": "Zum dunklen Design wechseln"
+    },
+    "parts": {
+      "title": "Teile",
+      "defaultQuantity": "Standardmenge für ein neues Teil",
+      "lowStock": "Wenig Bestand bei höchstens",
+      "lowStockHint": "Teile mit dieser oder einer kleineren Stückzahl werden markiert.",
+      "formMode": "Formular zum Hinzufügen und Bearbeiten",
+      "storagePlace": "Lagerort",
+      "storagePlaceHint": "Wo ein Teil liegt (Schublade, Kiste, Regal). Wird gezeigt, sobald Sie ihn nutzen.",
+      "placeAuto": "Zeigen, sobald genutzt",
+      "placeShow": "Immer zeigen",
+      "placeHide": "Ausblenden"
+    },
+    "backups": {
+      "title": "Sicherungen",
+      "hint": "Kopien Ihres Bestands im Datenordner.",
+      "interval": "Automatische Sicherung alle (Minuten)",
+      "intervalHint": "0 schaltet automatische Sicherungen ab.",
+      "retention": "Aufzubewahrende automatische Sicherungen",
+      "retentionHint": "Ältere werden entfernt. Manuelle Sicherungen bleiben immer erhalten.",
+      "openData": "Datenordner öffnen"
+    },
+    "export": {
+      "title": "Exportordner",
+      "none": "Nicht gesetzt: der Speichern-Dialog fragt jedes Mal."
+    },
+    "drive": {
+      "title": "Google-Drive-Abgleich",
+      "hint": "Nach jeder Änderung schreibt die App eine Excel-, JSON- und Datenbankkopie in einen Ordner von Google Drive für Desktop. Drive lädt sie hoch; öffnen Sie die Excel-Datei auf dem Handy.",
+      "enable": "Kopien in den Drive-Ordner schreiben",
+      "needFolder": "Wählen Sie zuerst den Ordner.",
+      "noFolder": "Kein Ordner gewählt",
+      "baseName": "Dateiname",
+      "baseNameHint": "Die Dateien heißen {name}.xlsx, {name}.json und {name}.db.",
+      "lastSync": "Zuletzt geschrieben {time}",
+      "syncNow": "Jetzt schreiben"
+    },
+    "columns": {
+      "title": "Eigene Spalten",
+      "hint": "Zusätzliche Felder, die jedes Teil hat. Hinzufügen im Spaltendialog des Bestands.",
+      "none": "Keine eigenen Spalten.",
+      "deleteTitle": "Spalte {name} löschen?",
+      "deleteBody": "Die Spalte und ihre Werte in allen Teilen werden entfernt.",
+      "delete": "Spalte löschen"
+    },
+    "updates": {
+      "title": "Updates",
+      "auto": "Beim Start nach einer neuen Version suchen",
+      "hint": "Es wird nur ein Hinweis gezeigt; nichts wird von selbst heruntergeladen.",
+      "now": "Jetzt suchen"
+    },
+    "about": {
+      "title": "Über",
+      "version": "Version",
+      "data": "Datenordner",
+      "schema": "Datenbankformat",
+      "library": "Teilebibliothek",
+      "libraryOn": "Vorhanden",
+      "libraryOff": "Nicht gefunden",
+      "languages": "Sprachen",
+      "translate": "Beim Übersetzen helfen"
+    }
+  },
+  "field": {
+    "part_code": "Teilecode",
+    "category": "Kategorie",
+    "subcategory": "Unterkategorie",
+    "quantity": "Menge",
+    "package": "Gehäuse",
+    "manufacturer": "Hersteller",
+    "mpn": "Herstellerteilenummer",
+    "location": "Lagerort",
+    "preferred_supplier": "Lieferant",
+    "voltage_max": "Max. Spannung",
+    "current_max": "Max. Strom",
+    "resistance": "Wert",
+    "tolerance": "Toleranz",
+    "power_rating": "Leistung",
+    "description": "Beschreibung",
+    "datasheet_url": "Datenblatt-Link",
+    "unit_price": "Stückpreis",
+    "notes": "Notizen",
+    "image_path": "Bild",
+    "updated_at": "Zuletzt geändert",
+    "created_at": "Hinzugefügt"
+  },
+  "attr": {
+    "accuracy": "Genauigkeit",
+    "bjt_type": "Typ",
+    "channel": "Kanaltyp",
+    "channels": "Kanäle",
+    "color": "Farbe",
+    "core": "CPU-Kern",
+    "diode_type": "Diodentyp",
+    "dropout": "Dropout",
+    "freq_max": "Max. Frequenz",
+    "freq_range": "Frequenzbereich",
+    "freq_tol": "Toleranz",
+    "frequency": "Frequenz",
+    "inductance": "Induktivität",
+    "interface": "Schnittstelle",
+    "io_pins": "E/A-Pins",
+    "load_cap": "Lastkapazität",
+    "luminosity": "Helligkeit",
+    "measurement": "Misst",
+    "power_va": "Leistung",
+    "pz": "Verlustleistung",
+    "qg": "Gate-Ladung",
+    "range": "Bereich",
+    "reg_type": "Typ",
+    "slew_rate": "Anstiegsrate",
+    "supply_v": "Versorgung",
+    "tq": "Ausschaltzeit",
+    "turns_ratio": "Windungsverhältnis",
+    "v_supply": "Versorgung",
+    "wavelength": "Wellenlänge",
+    "ztol": "Toleranz"
+  },
+  "movement": {
+    "create": "Hinzugefügt",
+    "edit": "Bearbeitet",
+    "adjust": "Menge geändert",
+    "delete": "Gelöscht",
+    "bulk-delete": "Mit anderen gelöscht",
+    "restore": "Wiederhergestellt",
+    "import": "Import",
+    "import-replace": "Durch einen Ersetzen-Import entfernt",
+    "import-undo": "Import rückgängig gemacht",
+    "merge": "Zusammengeführt",
+    "bulk": "Sammeländerung",
+    "auto-categorize": "Automatisch eingeordnet"
+  },
+  "errors": {
+    "generic": "Etwas ist schiefgegangen. Versuchen Sie es erneut; falls es wieder passiert, sind die Sicherungen im Datenordner sicher.",
+    "database": "Die Datenbank konnte nicht gelesen oder geschrieben werden.",
+    "file": "Die Datei konnte nicht gelesen oder geschrieben werden.",
+    "data": "Die gespeicherten Daten konnten nicht gelesen werden.",
+    "not_found": "Es existiert nicht mehr; vielleicht wurde es gelöscht. Die Liste wurde aktualisiert.",
+    "invalid_input": "Dieser Wert ist nicht erlaubt.",
+    "duplicate_part_code": "Ein anderes Teil hat diesen Code bereits.",
+    "newer_schema": "Die Datenbank wurde von einer neueren Version der App geschrieben.",
+    "conflict": "Es hat sich inzwischen geändert. Versuchen Sie es erneut.",
+    "export": "Der Export konnte nicht geschrieben werden.",
+    "network": "Keine Internetverbindung.",
+    "internal": "In der App ist etwas schiefgegangen.",
+    "startup": "Die App konnte nicht starten."
+  },
+  "category": {
+    "Resistors": "Widerstände",
+    "Potentiometers": "Potentiometer",
+    "Thermistors": "Thermistoren",
+    "Varistors": "Varistoren",
+    "Capacitors": "Kondensatoren",
+    "Inductors": "Induktivitäten",
+    "Transformers": "Transformatoren",
+    "Transistors": "Transistoren",
+    "Thyristors": "Thyristoren",
+    "Diodes": "Dioden",
+    "LEDs": "LEDs",
+    "ICs": "ICs",
+    "Microcontrollers": "Mikrocontroller",
+    "Sensors": "Sensoren",
+    "Relays": "Relais",
+    "Connectors": "Steckverbinder",
+    "Crystals": "Quarze",
+    "Switches": "Schalter",
+    "Modules": "Module",
+    "Mechanical": "Mechanik",
+    "Consumables": "Verbrauchsmaterial",
+    "Uncategorized": "Nicht eingeordnet"
+  },
+  "subcategory": {
+    "Carbon Film": "Kohleschicht",
+    "Metal Film": "Metallschicht",
+    "Through-Hole": "Bedrahtet",
+    "Wirewound": "Drahtgewickelt",
+    "SMD": "SMD",
+    "Thick Film": "Dickschicht",
+    "Thin Film": "Dünnschicht",
+    "Power": "Leistung",
+    "Precision": "Präzision",
+    "Network / Array": "Netzwerk / Array",
+    "Shunt": "Shunt",
+    "Trimpot": "Trimmer",
+    "Single-turn": "Eingängig",
+    "Multi-turn": "Mehrgängig",
+    "Linear": "Linear",
+    "Rotary": "Drehbar",
+    "Logarithmic": "Logarithmisch",
+    "Slide": "Schieber",
+    "NTC": "NTC",
+    "PTC": "PTC",
+    "MOV": "MOV",
+    "SIOV": "SIOV",
+    "Electrolytic": "Elektrolyt",
+    "Ceramic": "Keramik",
+    "Tantalum": "Tantal",
+    "Film": "Folie",
+    "Polymer": "Polymer",
+    "Supercapacitor": "Superkondensator",
+    "MLCC": "MLCC",
+    "Variable / Trimmer": "Variabel / Trimmer",
+    "Inductor": "Spule",
+    "Ferrite Core": "Ferritkern",
+    "Toroid Core": "Ringkern",
+    "Common Mode Choke": "Gleichtaktdrossel",
+    "Ferrite Bead": "Ferritperle",
+    "Step-Up": "Aufwärts",
+    "Step-Down": "Abwärts",
+    "Isolation": "Trenntrafo",
+    "Audio": "Audio",
+    "Toroidal": "Ringkern",
+    "Pulse / Current": "Impuls / Strom",
+    "BJT NPN - General Purpose": "BJT NPN - Universal",
+    "BJT NPN - HV": "BJT NPN - Hochvolt",
+    "BJT NPN - HC": "BJT NPN - Hochstrom",
+    "BJT NPN - HF": "BJT NPN - HF",
+    "BJT NPN": "BJT NPN",
+    "BJT PNP - General Purpose": "BJT PNP - Universal",
+    "BJT PNP - HV": "BJT PNP - Hochvolt",
+    "BJT PNP - HC": "BJT PNP - Hochstrom",
+    "BJT PNP - HF": "BJT PNP - HF",
+    "BJT PNP": "BJT PNP",
+    "MOSFET N-Channel": "MOSFET N-Kanal",
+    "MOSFET N-Channel - HV": "MOSFET N-Kanal - Hochvolt",
+    "MOSFET N-Channel - HC": "MOSFET N-Kanal - Hochstrom",
+    "MOSFET N-Channel - Logic-Level": "MOSFET N-Kanal - Logic-Level",
+    "Power MOSFET": "Leistungs-MOSFET",
+    "MOSFET P-Channel": "MOSFET P-Kanal",
+    "MOSFET P-Channel - HV": "MOSFET P-Kanal - Hochvolt",
+    "MOSFET P-Channel - HC": "MOSFET P-Kanal - Hochstrom",
+    "IGBT": "IGBT",
+    "JFET": "JFET",
+    "Darlington NPN": "Darlington NPN",
+    "Darlington PNP": "Darlington PNP",
+    "Darlington Array": "Darlington-Array",
+    "SCR": "SCR",
+    "TRIAC": "TRIAC",
+    "DIAC": "DIAC",
+    "Rectifier": "Gleichrichter",
+    "Signal": "Signaldiode",
+    "Switching": "Schaltdiode",
+    "Schottky": "Schottky",
+    "Zener": "Zener",
+    "TVS": "TVS",
+    "Fast Recovery": "Fast Recovery",
+    "Bridge Rectifier": "Brückengleichrichter",
+    "Varactor": "Kapazitätsdiode",
+    "Indicator": "Anzeige",
+    "High-Power": "Hochleistung",
+    "RGB": "RGB",
+    "Addressable": "Adressierbar",
+    "IR": "Infrarot",
+    "UV": "UV",
+    "Laser": "Laser",
+    "7-Segment": "7-Segment",
+    "Photodiode / Phototransistor": "Fotodiode / Fototransistor",
+    "Op-Amp": "Operationsverstärker",
+    "Op-Amps": "Operationsverstärker",
+    "Instrumentation Amplifier": "Instrumentenverstärker",
+    "Comparator": "Komparator",
+    "Timer": "Timer",
+    "Voltage Regulator": "Spannungsregler",
+    "Linear Regulator": "Linearregler",
+    "LDO Regulator": "LDO-Regler",
+    "Switching Regulator": "Schaltregler",
+    "Buck Converter": "Abwärtswandler",
+    "Boost Converter": "Aufwärtswandler",
+    "DC-DC Converter": "DC-DC-Wandler",
+    "Voltage Reference": "Spannungsreferenz",
+    "Gate Driver": "Gate-Treiber",
+    "Motor Driver": "Motortreiber",
+    "Stepper Driver": "Schrittmotortreiber",
+    "PWM Controller": "PWM-Controller",
+    "Optocoupler": "Optokoppler",
+    "Logic Gate": "Logikgatter",
+    "Logic": "Logik",
+    "Shift Register": "Schieberegister",
+    "Multiplexer": "Multiplexer",
+    "LED Driver": "LED-Treiber",
+    "RS-232 Driver": "RS-232-Treiber",
+    "USB-UART": "USB-UART",
+    "RS-485 Transceiver": "RS-485-Transceiver",
+    "CAN Transceiver": "CAN-Transceiver",
+    "I/O Expander": "E/A-Erweiterung",
+    "Interface": "Schnittstelle",
+    "WiFi / BT SoC": "WiFi / BT SoC",
+    "RF Transceiver": "Funk-Transceiver",
+    "Audio Amplifier": "Audioverstärker",
+    "ADC": "ADC",
+    "DAC": "DAC",
+    "EEPROM / Flash": "EEPROM / Flash",
+    "EEPROM": "EEPROM",
+    "Flash Memory": "Flash-Speicher",
+    "Real-Time Clock": "Echtzeituhr",
+    "RTC": "RTC",
+    "Battery Charger": "Ladecontroller",
+    "Current Sensor": "Stromsensor",
+    "Microcontroller": "Mikrocontroller",
+    "STM32 (ARM Cortex-M)": "STM32 (ARM Cortex-M)",
+    "AVR (Atmel)": "AVR (Atmel)",
+    "PIC": "PIC",
+    "MSP430": "MSP430",
+    "RP2040 (Pi Pico)": "RP2040 (Pi Pico)",
+    "8051": "8051",
+    "ESP32 / ESP8266": "ESP32 / ESP8266",
+    "Temperature": "Temperatur",
+    "Humidity": "Feuchte",
+    "Pressure": "Druck",
+    "Hall Effect": "Hall-Effekt",
+    "Current": "Strom",
+    "Accelerometer": "Beschleunigung",
+    "Gyroscope": "Gyroskop",
+    "IMU": "IMU",
+    "Proximity": "Näherung",
+    "Distance / ToF": "Entfernung / ToF",
+    "Ultrasonic": "Ultraschall",
+    "PIR (Motion)": "PIR (Bewegung)",
+    "Light / Color": "Licht / Farbe",
+    "Gas": "Gas",
+    "Force / Strain": "Kraft / Dehnung",
+    "SPST": "SPST",
+    "SPDT": "SPDT",
+    "DPDT": "DPDT",
+    "Solid State": "Halbleiterrelais",
+    "Reed": "Reed",
+    "Pin Header": "Stiftleiste",
+    "Socket": "Buchsenleiste",
+    "Terminal Block": "Klemmleiste",
+    "IC Socket": "IC-Sockel",
+    "JST": "JST",
+    "Molex": "Molex",
+    "USB": "USB",
+    "RJ45": "RJ45",
+    "D-Sub": "D-Sub",
+    "DC Jack": "DC-Buchse",
+    "XT60 / XT30": "XT60 / XT30",
+    "RF / Coaxial": "HF / Koaxial",
+    "IDC / Ribbon": "IDC / Flachband",
+    "Crystal": "Quarz",
+    "HC-49/S": "HC-49/S",
+    "Oscillator (XO)": "Oszillator (XO)",
+    "TCXO": "TCXO",
+    "Resonator": "Resonator",
+    "Tactile": "Taster",
+    "Toggle": "Kippschalter",
+    "Encoder": "Drehgeber",
+    "DIP": "DIP-Schalter",
+    "Rocker": "Wippschalter",
+    "Limit": "Endschalter",
+    "Power Supply": "Netzteil",
+    "Sensor Board": "Sensorplatine",
+    "Display": "Display",
+    "RF / Wireless": "Funk",
+    "Development Board": "Entwicklungsboard",
+    "Programmer / Debugger": "Programmer / Debugger",
+    "Panel Meter": "Einbaumessgerät",
+    "Heat Sink": "Kühlkörper",
+    "Standoff": "Abstandsbolzen",
+    "Screw / Nut": "Schraube / Mutter",
+    "Fan": "Lüfter",
+    "Cable / Wire": "Kabel / Draht",
+    "PCB / Board": "Leiterplatte",
+    "Enclosure": "Gehäuse",
+    "Battery Holder": "Batteriehalter",
+    "Solder": "Lot",
+    "Flux": "Flussmittel",
+    "Heat Shrink": "Schrumpfschlauch",
+    "Insulating Tape": "Isolierband",
+    "Cleaner": "Reiniger",
+    "Hand Tools": "Handwerkzeug"
+  },
+  "place": {
+    "moveTitle": {
+      "one": "{count} Teil an einen Lagerort legen",
+      "other": "{count} Teile an einen Lagerort legen"
+    },
+    "moveHint": "Wählen Sie einen Ort oder geben Sie einen neuen Namen ein (Kiste, Schublade, Regal). Leer lassen, um die Teile aus jedem Ort zu nehmen.",
+    "move": "Verschieben",
+    "renameTitle": "{name} umbenennen",
+    "joinNote": "{name} gibt es bereits; die Teile kommen dazu.",
+    "done": {
+      "one": "{count} Teil liegt jetzt in {name}.",
+      "other": "{count} Teile liegen jetzt in {name}."
+    },
+    "cleared": {
+      "one": "{count} Teil aus seinem Lagerort genommen.",
+      "other": "{count} Teile aus ihren Lagerorten genommen."
+    }
+  }
+}

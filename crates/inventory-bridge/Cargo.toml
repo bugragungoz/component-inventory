@@ -1,0 +1,16 @@
+[package]
+name = "inventory-bridge"
+description = "JSON-lines bridge to inventory-core, used by the UI test harness"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+publish = false
+
+[dependencies]
+inventory-core.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+rusqlite.workspace = true

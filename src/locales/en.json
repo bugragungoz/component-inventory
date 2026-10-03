@@ -1,0 +1,1159 @@
+{
+  "_meta": {
+    "nativeName": "English",
+    "dir": "ltr",
+    "reviewed": true
+  },
+  "app": {
+    "name": "Component Inventory",
+    "skip": "Skip to content"
+  },
+  "common": {
+    "cancel": "Cancel",
+    "close": "Close",
+    "save": "Save",
+    "undo": "Undo",
+    "retry": "Try again",
+    "loading": "Loading",
+    "errorPrefix": "Error:"
+  },
+  "nav": {
+    "inventory": "Inventory",
+    "projects": "Projects",
+    "import": "Import",
+    "backups": "Backups",
+    "settings": "Settings"
+  },
+  "sidebar": {
+    "label": "Sidebar",
+    "navLabel": "Main",
+    "categories": "Categories",
+    "filterCategories": "Filter categories",
+    "allParts": "All parts",
+    "collapse": "Collapse {name}",
+    "expand": "Expand {name}",
+    "rename": "Rename {name}",
+    "storagePlaces": "Storage places"
+  },
+  "about": {
+    "github": "Project on GitHub"
+  },
+  "startup": {
+    "title": "The inventory could not be opened",
+    "newerSchema": "This database was written by a newer version of Component Inventory. Install the newest version; this one will not change the file.",
+    "failed": "Opening the database failed: {error}",
+    "nothingChanged": "Nothing was changed. Your data is still in this folder:",
+    "openFolder": "Open the data folder",
+    "migrated": "Your inventory was updated to the new format. A copy of the old file was saved first.",
+    "migratedAction": "See backups"
+  },
+  "status": {
+    "syncOff": "Drive sync off",
+    "syncError": "Drive sync failed: {error}",
+    "syncPending": "Drive sync waiting",
+    "synced": "Drive synced {time}",
+    "parts": {
+      "one": "{count} part",
+      "other": "{count} parts"
+    },
+    "pieces": {
+      "one": "{count} piece",
+      "other": "{count} pieces"
+    },
+    "lowStock": {
+      "one": "{count} low on stock",
+      "other": "{count} low on stock"
+    },
+    "lastBackup": "Backup {time}",
+    "syncOn": "Drive sync on"
+  },
+  "update": {
+    "available": "Version {version} is available.",
+    "download": "Download",
+    "current": "You have the newest version ({version}).",
+    "failed": "Could not check for updates. Check the internet connection."
+  },
+  "table": {
+    "label": "Parts",
+    "selectAll": "Select all shown parts",
+    "actions": "Actions",
+    "selectRow": "Select {code}",
+    "editPart": "Edit {code}",
+    "deletePart": "Delete {code}",
+    "lowStockTitle": "Low on stock",
+    "usageTitle": "Used in {count} projects, {required} pieces needed",
+    "usage": {
+      "one": "{count} project",
+      "other": "{count} projects"
+    }
+  },
+  "inventory": {
+    "search": "Search parts",
+    "searchPlaceholder": "Search code, description, manufacturer...",
+    "clearSearch": "Clear the search",
+    "lowStock": {
+      "one": "Low stock ({count})",
+      "other": "Low stock ({count})"
+    },
+    "removeFilter": "Remove this filter",
+    "showing": {
+      "one": "{shown} of {count} part",
+      "other": "{shown} of {count} parts"
+    },
+    "columns": "Columns",
+    "more": "More actions",
+    "labelsAll": "Print labels for the shown parts",
+    "autoCategorize": "Auto-categorize",
+    "export": "Export",
+    "import": "Import",
+    "add": "Add part",
+    "emptyTitle": "No parts yet",
+    "emptyBody": "Add your first part, or import an order, a spreadsheet or a PDF.",
+    "noMatchTitle": "No parts match",
+    "noMatchSearch": "Nothing matches “{query}”. Check the spelling or search for fewer words.",
+    "noMatchFilter": "No part matches these filters.",
+    "clearFilters": "Clear filters"
+  },
+  "selection": {
+    "label": "Selected parts",
+    "count": {
+      "one": "{count} selected",
+      "other": "{count} selected"
+    },
+    "assign": "Add to project",
+    "labels": "Labels",
+    "autoCategorize": "Auto-categorize",
+    "delete": "Delete",
+    "clear": "Clear selection",
+    "moveToPlace": "Move to storage place"
+  },
+  "delete": {
+    "title": {
+      "one": "Delete this part?",
+      "other": "Delete {count} parts?"
+    },
+    "bodyOne": "{code} and its stock history will be removed.",
+    "bodyMany": {
+      "one": "{count} part and its stock history will be removed.",
+      "other": "{count} parts and their stock history will be removed."
+    },
+    "bodyUsed": {
+      "one": "{count} of them is on a project parts list; those lines go too.",
+      "other": "{count} of them are on project parts lists; those lines go too."
+    },
+    "bodyUndo": "You can undo this right after.",
+    "confirm": "Delete",
+    "done": {
+      "one": "Part deleted.",
+      "other": "{count} parts deleted."
+    },
+    "restored": {
+      "one": "Part restored.",
+      "other": "{count} parts restored."
+    },
+    "restoredSkipped": {
+      "one": "{count} part could not be restored: its code is used by another part now.",
+      "other": "{count} parts could not be restored: their codes are used by other parts now."
+    }
+  },
+  "detail": {
+    "label": "Details of {code}",
+    "quantity": "Quantity",
+    "takeOne": "Take one out",
+    "addOne": "Add one",
+    "setTo": "Set to",
+    "set": "Set",
+    "qtyInvalid": "Type a whole number of pieces, 0 or more.",
+    "edit": "Edit",
+    "duplicate": "Duplicate",
+    "printLabel": "Label",
+    "assign": "Add to project",
+    "datasheet": "Datasheet",
+    "delete": "Delete",
+    "imageAlt": "Photo of {code}",
+    "imageMissing": "The image file is missing.",
+    "facts": "Details",
+    "parameters": "Parameters",
+    "projects": "Used in projects",
+    "needs": {
+      "one": "needs {count}",
+      "other": "needs {count}"
+    },
+    "noProjects": "Not on any project parts list.",
+    "history": "Stock history",
+    "after": {
+      "one": "now {count}",
+      "other": "now {count}"
+    },
+    "noHistory": "No changes recorded yet.",
+    "created": "Added {time}",
+    "updated": "Last changed {time}"
+  },
+  "edit": {
+    "addTitle": "Add a part",
+    "editTitle": "Edit {code}",
+    "add": "Add part",
+    "save": "Save changes",
+    "formMode": "Form",
+    "simple": "Simple",
+    "detailed": "Detailed",
+    "codeHint": "The manufacturer part number, such as LM7805 or IRFZ44N.",
+    "errCodeRequired": "Type a part code.",
+    "errQuantity": "Type a whole number of pieces, from 0 to 999,999,999.",
+    "errUrl": "The link must start with https:// or http://.",
+    "errNumber": "{field} is not a number.",
+    "addToExisting": {
+      "one": "Add to the existing part ({count} in stock)",
+      "other": "Add to the existing part ({count} in stock)"
+    },
+    "openExisting": "Open the existing part",
+    "addedToExisting": {
+      "one": "Added {count} piece to {code}.",
+      "other": "Added {count} pieces to {code}."
+    },
+    "qtyHint": {
+      "one": "Empty means {count} piece (your default).",
+      "other": "Empty means {count} pieces (your default)."
+    },
+    "newCategory": "New category...",
+    "newCategoryName": "Name of the new category",
+    "rulesKnow": "Known part number",
+    "fillEmpty": "Fill empty fields",
+    "filledFrom": "Empty fields filled from {source}.",
+    "autoDescription": "Write description",
+    "guessCategory": "Guess category from description",
+    "noCategoryGuess": "The description does not say which category this is.",
+    "categoryGuessed": "Category set to {category}.",
+    "placeHint": "Where the part is kept: a drawer, box or shelf. Optional.",
+    "electrical": "Electrical values",
+    "ratedVoltage": "Rated voltage",
+    "parameters": "Parameters for this type",
+    "sourcing": "Maker and supplier",
+    "customFields": "Your columns",
+    "chooseImage": "Choose image",
+    "changeImage": "Change image",
+    "removeImage": "Remove image",
+    "simpleNote": "Switch to Detailed for the maker, supplier, electrical values, notes and image.",
+    "discardTitle": "Discard your changes?",
+    "discardBody": "What you typed in this form will be lost.",
+    "discard": "Discard",
+    "keepEditing": "Keep editing",
+    "added": "{code} added.",
+    "saved": "{code} saved.",
+    "show": "Show"
+  },
+  "rename": {
+    "title": "Rename {name}",
+    "subTitle": "Rename {name}",
+    "newName": "New name",
+    "hint": {
+      "one": "{count} part will move to the new name.",
+      "other": "{count} parts will move to the new name."
+    },
+    "errEmpty": "Type a name.",
+    "mergeNote": "{name} already exists; the parts will join it.",
+    "confirm": "Rename",
+    "done": {
+      "one": "{count} part moved to {name}.",
+      "other": "{count} parts moved to {name}."
+    }
+  },
+  "columns": {
+    "title": "Table columns",
+    "body": "Choose which columns the table shows and their order. Part code and quantity are always shown.",
+    "reset": "Default columns",
+    "moveUp": "Move {name} up",
+    "moveDown": "Move {name} down",
+    "newCustom": "New column of your own",
+    "newCustomHint": "A text field every part gets, such as “Bought from”.",
+    "add": "Add column"
+  },
+  "shortcuts": {
+    "title": "Keyboard shortcuts",
+    "search": "Search parts",
+    "add": "Add a part",
+    "import": "Import",
+    "move": "Move between rows",
+    "open": "Open the part",
+    "select": "Select the row",
+    "delete": "Delete the part",
+    "close": "Close the panel or dialog",
+    "help": "Show this list"
+  },
+  "labels": {
+    "title": {
+      "one": "Labels for {count} part",
+      "other": "Labels for {count} parts"
+    },
+    "sheet": "Label sheet",
+    "copies": "Copies of each label",
+    "skip": "Labels already used on the first sheet",
+    "skipHint": "Printing starts after them.",
+    "show": "On the label",
+    "qr": "QR code with the part code",
+    "save": "Save PDF",
+    "saved": "Labels saved to {path}",
+    "previewAlt": "Label preview for {code}",
+    "summary": {
+      "one": "{count} label, {pages} page(s)",
+      "other": "{count} labels, {pages} page(s)"
+    },
+    "sheets": {
+      "a4-2x7": "A4, 2 x 7 (95 x 38 mm)",
+      "a4-3x8": "A4, 3 x 8 (63.5 x 33.9 mm)",
+      "roll-50x25": "Label printer roll, 50 x 25 mm"
+    }
+  },
+  "export": {
+    "title": "Export the inventory",
+    "format": "Format",
+    "run": "Export",
+    "saved": "Saved to {path}",
+    "progress": "Drawing pages",
+    "folder": "Opens in {path}",
+    "onlyShown": {
+      "one": "Only the {count} part shown now",
+      "other": "Only the {count} parts shown now"
+    },
+    "allParts": {
+      "one": "{count} part will be exported.",
+      "other": "All {count} parts will be exported."
+    },
+    "pdfTitle": {
+      "one": "Inventory, {count} part",
+      "other": "Inventory, {count} parts"
+    },
+    "pdfPage": "Page {page} of {pages}",
+    "formats": {
+      "xlsx": {
+        "title": "Excel workbook",
+        "body": "A summary sheet and one sheet per category, with filters."
+      },
+      "csv": {
+        "title": "CSV",
+        "body": "One table, opens in any spreadsheet."
+      },
+      "json": {
+        "title": "JSON",
+        "body": "Every field, for other programs."
+      },
+      "pdf": {
+        "title": "PDF list",
+        "body": "A printable list of part code, category, quantity and description."
+      }
+    }
+  },
+  "assign": {
+    "title": {
+      "one": "Add {count} part to a project",
+      "other": "Add {count} parts to a project"
+    },
+    "project": "Project",
+    "newProject": "New project...",
+    "qty": "Pieces needed per part",
+    "qtyHint": "Added to the line if the part is already on the list.",
+    "confirm": "Add",
+    "done": {
+      "one": "{count} part added to {name}.",
+      "other": "{count} parts added to {name}."
+    },
+    "open": "Open project"
+  },
+  "projects": {
+    "list": "Projects",
+    "newName": "New project name",
+    "create": "Create project",
+    "lines": {
+      "one": "{count} line",
+      "other": "{count} lines"
+    },
+    "short": {
+      "one": "{count} missing",
+      "other": "{count} missing"
+    },
+    "ready": "In stock",
+    "moveUp": "Move {name} up",
+    "moveDown": "Move {name} down",
+    "addPart": "Add a part",
+    "addPartPlaceholder": "Search your parts",
+    "matches": "Matching parts",
+    "required": "Needed",
+    "add": "Add",
+    "addInvalid": "Pick a part and type how many pieces it needs.",
+    "stock": "In stock",
+    "status": "Status",
+    "missing": {
+      "one": "{count} missing",
+      "other": "{count} missing"
+    },
+    "enough": "Enough",
+    "requiredFor": "Pieces of {code} needed",
+    "removeLine": "Remove {code} from the list",
+    "lineRemoved": "{code} removed from the list.",
+    "bomEmpty": "No parts on this list yet. Search for a part above to add it.",
+    "name": "Project name",
+    "delete": "Delete project",
+    "deleteTitle": "Delete {name}?",
+    "deleteBody": {
+      "one": "The project and its {count} line will be removed. Your parts stay. You can undo this right after.",
+      "other": "The project and its {count} lines will be removed. Your parts stay. You can undo this right after."
+    },
+    "deleted": "{name} deleted.",
+    "summary": "{lines} lines, {pieces} pieces needed.",
+    "missingTotal": {
+      "one": "{count} piece missing",
+      "other": "{count} pieces missing"
+    },
+    "allInStock": "Everything is in stock",
+    "tabs": "Project sections",
+    "bom": "Parts list",
+    "schematic": "Schematic",
+    "notes": "Notes",
+    "description": "Description",
+    "emptyTitle": "No projects yet",
+    "emptyBody": "Create a project on the left, then add the parts it needs.",
+    "nameRequired": "Type a project name.",
+    "schematicTitle": "Parts list from the schematic",
+    "schematicBody": "{matched} parts on the schematic match your inventory; {unmatched} do not.",
+    "schematicApply": {
+      "one": "Add {count} line",
+      "other": "Add {count} lines"
+    },
+    "refs": "References",
+    "unmatched": {
+      "one": "{count} symbol without a matching part",
+      "other": "{count} symbols without a matching part"
+    },
+    "schematicAdded": {
+      "one": "{count} line added.",
+      "other": "{count} lines added."
+    }
+  },
+  "schematic": {
+    "emptyTitle": "No schematic",
+    "emptyBody": "Attach a PDF, an image or a KiCad schematic (.kicad_sch) to see it here.",
+    "pick": "Choose a file",
+    "change": "Change file",
+    "remove": "Remove",
+    "importBom": "Build parts list from it",
+    "readError": "The file could not be read: {error}",
+    "pdfError": "This PDF could not be opened.",
+    "toolbar": "Schematic view",
+    "stage": "Schematic",
+    "prevPage": "Previous page",
+    "nextPage": "Next page",
+    "page": "Page {page} of {pages}",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "fit": "Fit to view",
+    "kicadAlt": {
+      "one": "Schematic with {count} part",
+      "other": "Schematic with {count} parts"
+    },
+    "kicadHint": "Scroll to zoom, drag to move, double-click to fit.",
+    "kicadEmpty": "No parts or wires found in this schematic.",
+    "imageAlt": "Schematic of {name}",
+    "status": {
+      "ok": "In stock",
+      "short": "Not enough",
+      "extra": "In inventory, not on the list",
+      "unknown": "Not in inventory",
+      "unassigned": "No value",
+      "power": "Power"
+    }
+  },
+  "bulk": {
+    "title": "Auto-categorize",
+    "body": "Suggestions from part numbers, descriptions and the parts library. Nothing changes until you apply; a backup is taken first.",
+    "scope": "Look at",
+    "scopeAll": {
+      "one": "All parts ({count})",
+      "other": "All parts ({count})"
+    },
+    "scopeUncategorized": "Uncategorized parts",
+    "scopeSelected": {
+      "one": "Selected part ({count})",
+      "other": "Selected parts ({count})"
+    },
+    "kinds": "Kinds of suggestion",
+    "kind": {
+      "categorize": "Category",
+      "normalize": "Spelling",
+      "enrich": "Empty fields",
+      "merge": "Duplicates"
+    },
+    "source": {
+      "part-code": "from part number",
+      "opto": "optocoupler family",
+      "description": "from description",
+      "heuristic": "from keywords"
+    },
+    "confidence": {
+      "high": "Sure",
+      "medium": "Likely",
+      "low": "Guess"
+    },
+    "misfiled": "looks misfiled",
+    "mergeTotal": {
+      "one": "{count} piece together",
+      "other": "{count} pieces together"
+    },
+    "selectAll": "Select all in this list",
+    "selectNone": "Select none in this list",
+    "selected": {
+      "one": "{count} selected",
+      "other": "{count} selected"
+    },
+    "apply": {
+      "one": "Apply {count}",
+      "other": "Apply {count}"
+    },
+    "applied": {
+      "one": "{count} part changed.",
+      "other": "{count} parts changed."
+    },
+    "seeBackups": "Backups",
+    "noneTitle": "Nothing to suggest",
+    "noneBody": {
+      "one": "The {count} part looked at needs no change here.",
+      "other": "The {count} parts looked at need no change here."
+    }
+  },
+  "backups": {
+    "create": "Back up now",
+    "created": "Backup made.",
+    "openFolder": "Open backups folder",
+    "policy": {
+      "one": "An automatic backup is made every {minutes} minutes when something changed; the newest {count} are kept. Manual backups and the ones made before an update are never removed.",
+      "other": "An automatic backup is made every {minutes} minutes when something changed; the newest {count} are kept. Manual backups and the ones made before an update are never removed."
+    },
+    "emptyTitle": "No backups yet",
+    "emptyBody": "Make one now; the app also makes them before every import and restore.",
+    "when": "When",
+    "kind": "Kind",
+    "size": "Size",
+    "compare": "What changed",
+    "restore": "Restore",
+    "copyName": "Copy the path of {name}",
+    "copied": "Path copied.",
+    "restoreTitle": "Restore this backup?",
+    "restoreBody": "Your inventory goes back to {time}. A copy of the current data is saved first, so you can undo this.",
+    "restored": "Backup restored.",
+    "restoreUndone": "Restore undone.",
+    "diffTitle": "Changes since {time}",
+    "diffBody": "Then is the backup, now is your inventory.",
+    "diffTabs": "Kinds of change",
+    "changed": "Changed",
+    "added": "Added since",
+    "removed": "Removed since",
+    "field": "Field",
+    "then": "Then",
+    "now": "Now",
+    "noneChanged": "No part changed.",
+    "noneAdded": "No part was added.",
+    "noneRemoved": "No part was removed.",
+    "kinds": {
+      "auto": "Automatic",
+      "manual": "Manual",
+      "pre-import": "Before import",
+      "pre-undo": "Before undo",
+      "pre-bulk": "Before bulk change",
+      "pre-restore": "Before restore",
+      "pre-delete": "Before delete",
+      "pre-migration": "Before update",
+      "legacy": "Old app"
+    }
+  },
+  "import": {
+    "dropTitle": "Drop a file here",
+    "dropBody": "An order or cart page printed to PDF, an Excel or CSV list, or a .cinv.json file from the browser extension.",
+    "choose": "Choose a file",
+    "reading": "Reading {name}",
+    "sources": {
+      "extension": {
+        "title": "From a shop page",
+        "body": "The browser extension reads your order on Özdisan, Motorobit or Robocombo and opens it here."
+      },
+      "pdf": {
+        "title": "A printed page",
+        "body": "Print an order or cart page to PDF. Lines with a quantity become rows; the list stops at the subtotal."
+      },
+      "table": {
+        "title": "A spreadsheet",
+        "body": "Every sheet with column names such as Part code, Quantity or Description is read."
+      }
+    },
+    "errors": {
+      "tooLarge": "The file is larger than {mb} MB.",
+      "empty": "The file has no rows.",
+      "noHeaders": "No sheet has column names this app knows (such as Part code or Quantity).",
+      "pdfNoText": "This PDF has no text layer (it is a scanned image), so it cannot be read.",
+      "pdfNoRows": "No lines with a quantity were found in this PDF.",
+      "unknownType": "Files ending in .{ext} cannot be imported.",
+      "link": "The link from the extension could not be read.",
+      "cinv": {
+        "invalid-json": "This is not a valid .cinv.json file.",
+        "not-cinv": "This JSON file did not come from the extension.",
+        "unsupported-version": "This file was made by a newer extension. Update the app.",
+        "no-items": "The file lists no parts.",
+        "no-valid-items": "None of the lines in the file could be read."
+      },
+      "linkFailed": "Error: the list from the extension could not be opened ({error}). Use Save as file in the extension panel and drop the file here."
+    },
+    "linkReceived": {
+      "one": "{count} line from {shop} is ready to review.",
+      "other": "{count} lines from {shop} are ready to review."
+    },
+    "mapping": {
+      "title": {
+        "one": "Columns ({count})",
+        "other": "Columns ({count})"
+      },
+      "body": "Which field each column of the file fills. Columns set to Ignore are not read.",
+      "fieldFor": "Field for column {column}",
+      "ignore": "Ignore"
+    },
+    "review": {
+      "title": "Review: {source}",
+      "lineCount": {
+        "one": "{count} line",
+        "other": "{count} lines"
+      },
+      "pieceCount": {
+        "one": "{count} piece",
+        "other": "{count} pieces"
+      },
+      "toCheck": {
+        "one": "{count} to check",
+        "other": "{count} to check"
+      },
+      "unreadable": {
+        "one": "{count} without a count or code",
+        "other": "{count} without a count or code"
+      },
+      "excluded": {
+        "one": "{count} left out",
+        "other": "{count} left out"
+      },
+      "skipped": {
+        "one": "{count} line in the source could not be read",
+        "other": "{count} lines in the source could not be read"
+      },
+      "filter": "Show",
+      "all": "All",
+      "checkTab": "To check",
+      "status": "Status",
+      "name": "Name in the source",
+      "units": "Units",
+      "pack": "Per unit",
+      "pieces": "Pieces",
+      "stock": "In stock",
+      "new": "New",
+      "inStock": {
+        "one": "{count} now",
+        "other": "{count} now"
+      },
+      "include": "Import {name}",
+      "check": "Needs a look",
+      "ok": "Looks right",
+      "codeFor": "Part code for {name}",
+      "unitsFor": "Units of {name}",
+      "packFor": "Pieces per unit of {name}",
+      "showing": "Showing lines 1 to {shown} of {total}. Scroll down for more."
+    },
+    "why": {
+      "plain": {
+        "one": "{count} piece",
+        "other": "{count} pieces"
+      },
+      "pack": "{units} units x {pack}-piece pack = {pieces} pieces",
+      "unknown": "The count could not be read."
+    },
+    "reason": {
+      "readFrom": "Count read from the column {column}.",
+      "packRule": "The name ends in “- {size} Adet”: the shop sells this as a pack of {size}.",
+      "packExtension": "The extension found a pack of {size}.",
+      "packEdited": "You set {size} pieces per unit.",
+      "perPiece": "One piece per unit."
+    },
+    "issue": {
+      "noQuantity": "No quantity column; one piece is assumed.",
+      "noQuantityRaw": "“{raw}” is not a count.",
+      "notWhole": "“{raw}” is not a whole number; it was rounded.",
+      "noCode": "No part code: type one or leave the line out.",
+      "nameAsCode": "No part number found; the name is used as the code.",
+      "codeFromName": "The part code was taken from the name.",
+      "shopCode": "{code} is the shop's own code, not a part number.",
+      "filledLibrary": "Empty fields filled from the parts library.",
+      "filledRules": "Empty fields filled from known part numbers.",
+      "duplicate": {
+        "one": "This code is on {count} line; they are added together.",
+        "other": "This code is on {count} lines; they are added together."
+      }
+    },
+    "mode": {
+      "label": "How to apply",
+      "add": {
+        "title": "Add to stock",
+        "body": "Counts are added to the parts you have; new codes become new parts."
+      },
+      "sync": {
+        "title": "Set counts",
+        "body": "Counts replace the stock of parts in the file; other parts stay as they are."
+      },
+      "replace": {
+        "title": "Replace everything",
+        "body": "The inventory becomes exactly this file. Parts not in it are removed."
+      }
+    },
+    "backupNote": "A backup is made before anything is written, and you can undo the import afterwards.",
+    "apply": {
+      "one": "Import {count} line",
+      "other": "Import {count} lines"
+    },
+    "replaceTitle": "Replace the whole inventory?",
+    "replaceBody": {
+      "one": "Your {count} part will be replaced by the lines in this file.",
+      "other": "Your {count} parts will be replaced by the lines in this file."
+    },
+    "replaceConfirm": "Replace",
+    "doneTitle": "Imported",
+    "doneBody": "{created} new parts, {updated} updated, {pieces} pieces in all.",
+    "doneUndoneTitle": "Import undone",
+    "doneUndoneBody": "Your inventory is back to how it was before.",
+    "showInventory": "Show inventory",
+    "another": "Import another file",
+    "undo": "Undo import",
+    "undoTitle": "Undo this import?",
+    "undoBody": "{source}: parts it added are removed and counts it changed go back. Changes you made since are kept where possible.",
+    "undone": {
+      "one": "Import undone, {count} part changed back.",
+      "other": "Import undone, {count} parts changed back."
+    },
+    "undoNote": {
+      "deleted_since": "{code} was deleted after the import.",
+      "edited_since": "{code} was edited after the import; your edit was kept.",
+      "used_in_project": "{code} is on a project list, so it was kept.",
+      "stock_below": "{code} has fewer pieces than the import added; it went to 0.",
+      "code_taken": "{code} is used by another part now."
+    },
+    "history": {
+      "title": "Past imports",
+      "empty": "No imports yet.",
+      "when": "When",
+      "source": "Source",
+      "mode": "How",
+      "result": "Result",
+      "counts": "{created} new, {updated} updated, {pieces} pieces",
+      "undone": "Undone"
+    },
+    "linkQueued": "Another list from the extension is waiting. It opens when you finish this review."
+  },
+  "settings": {
+    "range": "Type a whole number from {min} to {max}.",
+    "choose": "Choose folder",
+    "clear": "Clear",
+    "language": {
+      "title": "Language and look",
+      "label": "Language",
+      "unreviewed": "not reviewed yet",
+      "unreviewedNote": "This translation has not been checked by a native speaker yet. Corrections are welcome on GitHub."
+    },
+    "theme": {
+      "label": "Theme",
+      "system": "Same as Windows",
+      "dark": "Dark",
+      "light": "Light",
+      "switchLight": "Switch to light theme",
+      "switchDark": "Switch to dark theme"
+    },
+    "parts": {
+      "title": "Parts",
+      "defaultQuantity": "Default quantity for a new part",
+      "lowStock": "Low stock at or below",
+      "lowStockHint": "Parts with this many pieces or fewer are marked.",
+      "formMode": "Add and edit form",
+      "storagePlace": "Storage place",
+      "storagePlaceHint": "Where a part is kept (drawer, box, shelf). Shown when you use it.",
+      "placeAuto": "Show once used",
+      "placeShow": "Always show",
+      "placeHide": "Hide"
+    },
+    "backups": {
+      "title": "Backups",
+      "hint": "Copies of your inventory, kept in the data folder.",
+      "interval": "Automatic backup every (minutes)",
+      "intervalHint": "0 turns automatic backups off.",
+      "retention": "Automatic backups to keep",
+      "retentionHint": "Older ones are removed. Manual backups are always kept.",
+      "openData": "Open the data folder"
+    },
+    "export": {
+      "title": "Export folder",
+      "none": "Not set: the save dialog asks each time."
+    },
+    "drive": {
+      "title": "Google Drive sync",
+      "hint": "After every change the app writes an Excel, JSON and database copy into a folder inside Google Drive for Desktop. Drive uploads them; open the Excel file on your phone.",
+      "enable": "Write copies to the Drive folder",
+      "needFolder": "Choose the folder first.",
+      "noFolder": "No folder chosen",
+      "baseName": "File name",
+      "baseNameHint": "Files are named {name}.xlsx, {name}.json and {name}.db.",
+      "lastSync": "Last written {time}",
+      "syncNow": "Write now"
+    },
+    "columns": {
+      "title": "Your columns",
+      "hint": "Extra fields every part has. Add them in the Columns dialog of the inventory.",
+      "none": "No columns of your own.",
+      "deleteTitle": "Delete the column {name}?",
+      "deleteBody": "The column and its values in every part are removed.",
+      "delete": "Delete column"
+    },
+    "updates": {
+      "title": "Updates",
+      "auto": "Check for a new version at startup",
+      "hint": "Only a notice is shown; nothing is downloaded by itself.",
+      "now": "Check now"
+    },
+    "about": {
+      "title": "About",
+      "version": "Version",
+      "data": "Data folder",
+      "schema": "Database format",
+      "library": "Parts library",
+      "libraryOn": "Available",
+      "libraryOff": "Not found",
+      "languages": "Languages",
+      "translate": "Help translate"
+    }
+  },
+  "field": {
+    "part_code": "Part code",
+    "category": "Category",
+    "subcategory": "Subcategory",
+    "quantity": "Quantity",
+    "package": "Package",
+    "manufacturer": "Manufacturer",
+    "mpn": "Manufacturer part number",
+    "location": "Storage place",
+    "preferred_supplier": "Supplier",
+    "voltage_max": "Max voltage",
+    "current_max": "Max current",
+    "resistance": "Value",
+    "tolerance": "Tolerance",
+    "power_rating": "Power",
+    "description": "Description",
+    "datasheet_url": "Datasheet link",
+    "unit_price": "Unit price",
+    "notes": "Notes",
+    "image_path": "Image",
+    "updated_at": "Last changed",
+    "created_at": "Added"
+  },
+  "attr": {
+    "accuracy": "Accuracy",
+    "bjt_type": "Type",
+    "channel": "Channel type",
+    "channels": "Channels",
+    "color": "Color",
+    "core": "CPU core",
+    "diode_type": "Diode type",
+    "dropout": "Dropout",
+    "freq_max": "Max frequency",
+    "freq_range": "Frequency range",
+    "freq_tol": "Tolerance",
+    "frequency": "Frequency",
+    "inductance": "Inductance",
+    "interface": "Interface",
+    "io_pins": "I/O pins",
+    "load_cap": "Load capacitance",
+    "luminosity": "Brightness",
+    "measurement": "Measures",
+    "power_va": "Power",
+    "pz": "Power dissipation",
+    "qg": "Gate charge",
+    "range": "Range",
+    "reg_type": "Type",
+    "slew_rate": "Slew rate",
+    "supply_v": "Supply",
+    "tq": "Turn-off time",
+    "turns_ratio": "Turns ratio",
+    "v_supply": "Supply",
+    "wavelength": "Wavelength",
+    "ztol": "Tolerance"
+  },
+  "movement": {
+    "create": "Added",
+    "edit": "Edited",
+    "adjust": "Count changed",
+    "delete": "Deleted",
+    "bulk-delete": "Deleted with others",
+    "restore": "Restored",
+    "import": "Import",
+    "import-replace": "Removed by a replace import",
+    "import-undo": "Import undone",
+    "merge": "Merged",
+    "bulk": "Bulk change",
+    "auto-categorize": "Auto-categorize"
+  },
+  "errors": {
+    "generic": "Something went wrong. Try again; if it keeps happening, the backups are safe in the data folder.",
+    "database": "The database could not be read or written.",
+    "file": "The file could not be read or written.",
+    "data": "The stored data could not be read.",
+    "not_found": "It no longer exists. Someone may have deleted it; the list was refreshed.",
+    "invalid_input": "That value is not allowed.",
+    "duplicate_part_code": "Another part already has this code.",
+    "newer_schema": "The database was written by a newer version of the app.",
+    "conflict": "It changed in the meantime. Try again.",
+    "export": "The export could not be written.",
+    "network": "No connection to the internet.",
+    "internal": "Something went wrong inside the app.",
+    "startup": "The app could not start."
+  },
+  "category": {
+    "Resistors": "Resistors",
+    "Potentiometers": "Potentiometers",
+    "Thermistors": "Thermistors",
+    "Varistors": "Varistors",
+    "Capacitors": "Capacitors",
+    "Inductors": "Inductors",
+    "Transformers": "Transformers",
+    "Transistors": "Transistors",
+    "Thyristors": "Thyristors",
+    "Diodes": "Diodes",
+    "LEDs": "LEDs",
+    "ICs": "ICs",
+    "Microcontrollers": "Microcontrollers",
+    "Sensors": "Sensors",
+    "Relays": "Relays",
+    "Connectors": "Connectors",
+    "Crystals": "Crystals",
+    "Switches": "Switches",
+    "Modules": "Modules",
+    "Mechanical": "Mechanical",
+    "Consumables": "Consumables",
+    "Uncategorized": "Uncategorized"
+  },
+  "subcategory": {
+    "Carbon Film": "Carbon Film",
+    "Metal Film": "Metal Film",
+    "Through-Hole": "Through-Hole",
+    "Wirewound": "Wirewound",
+    "SMD": "SMD",
+    "Thick Film": "Thick Film",
+    "Thin Film": "Thin Film",
+    "Power": "Power",
+    "Precision": "Precision",
+    "Network / Array": "Network / Array",
+    "Shunt": "Shunt",
+    "Trimpot": "Trimpot",
+    "Single-turn": "Single-turn",
+    "Multi-turn": "Multi-turn",
+    "Linear": "Linear",
+    "Rotary": "Rotary",
+    "Logarithmic": "Logarithmic",
+    "Slide": "Slide",
+    "NTC": "NTC",
+    "PTC": "PTC",
+    "MOV": "MOV",
+    "SIOV": "SIOV",
+    "Electrolytic": "Electrolytic",
+    "Ceramic": "Ceramic",
+    "Tantalum": "Tantalum",
+    "Film": "Film",
+    "Polymer": "Polymer",
+    "Supercapacitor": "Supercapacitor",
+    "MLCC": "MLCC",
+    "Variable / Trimmer": "Variable / Trimmer",
+    "Inductor": "Inductor",
+    "Ferrite Core": "Ferrite Core",
+    "Toroid Core": "Toroid Core",
+    "Common Mode Choke": "Common Mode Choke",
+    "Ferrite Bead": "Ferrite Bead",
+    "Step-Up": "Step-Up",
+    "Step-Down": "Step-Down",
+    "Isolation": "Isolation",
+    "Audio": "Audio",
+    "Toroidal": "Toroidal",
+    "Pulse / Current": "Pulse / Current",
+    "BJT NPN - General Purpose": "BJT NPN - General Purpose",
+    "BJT NPN - HV": "BJT NPN - HV",
+    "BJT NPN - HC": "BJT NPN - HC",
+    "BJT NPN - HF": "BJT NPN - HF",
+    "BJT NPN": "BJT NPN",
+    "BJT PNP - General Purpose": "BJT PNP - General Purpose",
+    "BJT PNP - HV": "BJT PNP - HV",
+    "BJT PNP - HC": "BJT PNP - HC",
+    "BJT PNP - HF": "BJT PNP - HF",
+    "BJT PNP": "BJT PNP",
+    "MOSFET N-Channel": "MOSFET N-Channel",
+    "MOSFET N-Channel - HV": "MOSFET N-Channel - HV",
+    "MOSFET N-Channel - HC": "MOSFET N-Channel - HC",
+    "MOSFET N-Channel - Logic-Level": "MOSFET N-Channel - Logic-Level",
+    "Power MOSFET": "Power MOSFET",
+    "MOSFET P-Channel": "MOSFET P-Channel",
+    "MOSFET P-Channel - HV": "MOSFET P-Channel - HV",
+    "MOSFET P-Channel - HC": "MOSFET P-Channel - HC",
+    "IGBT": "IGBT",
+    "JFET": "JFET",
+    "Darlington NPN": "Darlington NPN",
+    "Darlington PNP": "Darlington PNP",
+    "Darlington Array": "Darlington Array",
+    "SCR": "SCR",
+    "TRIAC": "TRIAC",
+    "DIAC": "DIAC",
+    "Rectifier": "Rectifier",
+    "Signal": "Signal",
+    "Switching": "Switching",
+    "Schottky": "Schottky",
+    "Zener": "Zener",
+    "TVS": "TVS",
+    "Fast Recovery": "Fast Recovery",
+    "Bridge Rectifier": "Bridge Rectifier",
+    "Varactor": "Varactor",
+    "Indicator": "Indicator",
+    "High-Power": "High-Power",
+    "RGB": "RGB",
+    "Addressable": "Addressable",
+    "IR": "IR",
+    "UV": "UV",
+    "Laser": "Laser",
+    "7-Segment": "7-Segment",
+    "Photodiode / Phototransistor": "Photodiode / Phototransistor",
+    "Op-Amp": "Op-Amp",
+    "Op-Amps": "Op-Amps",
+    "Instrumentation Amplifier": "Instrumentation Amplifier",
+    "Comparator": "Comparator",
+    "Timer": "Timer",
+    "Voltage Regulator": "Voltage Regulator",
+    "Linear Regulator": "Linear Regulator",
+    "LDO Regulator": "LDO Regulator",
+    "Switching Regulator": "Switching Regulator",
+    "Buck Converter": "Buck Converter",
+    "Boost Converter": "Boost Converter",
+    "DC-DC Converter": "DC-DC Converter",
+    "Voltage Reference": "Voltage Reference",
+    "Gate Driver": "Gate Driver",
+    "Motor Driver": "Motor Driver",
+    "Stepper Driver": "Stepper Driver",
+    "PWM Controller": "PWM Controller",
+    "Optocoupler": "Optocoupler",
+    "Logic Gate": "Logic Gate",
+    "Logic": "Logic",
+    "Shift Register": "Shift Register",
+    "Multiplexer": "Multiplexer",
+    "LED Driver": "LED Driver",
+    "RS-232 Driver": "RS-232 Driver",
+    "USB-UART": "USB-UART",
+    "RS-485 Transceiver": "RS-485 Transceiver",
+    "CAN Transceiver": "CAN Transceiver",
+    "I/O Expander": "I/O Expander",
+    "Interface": "Interface",
+    "WiFi / BT SoC": "WiFi / BT SoC",
+    "RF Transceiver": "RF Transceiver",
+    "Audio Amplifier": "Audio Amplifier",
+    "ADC": "ADC",
+    "DAC": "DAC",
+    "EEPROM / Flash": "EEPROM / Flash",
+    "EEPROM": "EEPROM",
+    "Flash Memory": "Flash Memory",
+    "Real-Time Clock": "Real-Time Clock",
+    "RTC": "RTC",
+    "Battery Charger": "Battery Charger",
+    "Current Sensor": "Current Sensor",
+    "Microcontroller": "Microcontroller",
+    "STM32 (ARM Cortex-M)": "STM32 (ARM Cortex-M)",
+    "AVR (Atmel)": "AVR (Atmel)",
+    "PIC": "PIC",
+    "MSP430": "MSP430",
+    "RP2040 (Pi Pico)": "RP2040 (Pi Pico)",
+    "8051": "8051",
+    "ESP32 / ESP8266": "ESP32 / ESP8266",
+    "Temperature": "Temperature",
+    "Humidity": "Humidity",
+    "Pressure": "Pressure",
+    "Hall Effect": "Hall Effect",
+    "Current": "Current",
+    "Accelerometer": "Accelerometer",
+    "Gyroscope": "Gyroscope",
+    "IMU": "IMU",
+    "Proximity": "Proximity",
+    "Distance / ToF": "Distance / ToF",
+    "Ultrasonic": "Ultrasonic",
+    "PIR (Motion)": "PIR (Motion)",
+    "Light / Color": "Light / Color",
+    "Gas": "Gas",
+    "Force / Strain": "Force / Strain",
+    "SPST": "SPST",
+    "SPDT": "SPDT",
+    "DPDT": "DPDT",
+    "Solid State": "Solid State",
+    "Reed": "Reed",
+    "Pin Header": "Pin Header",
+    "Socket": "Socket",
+    "Terminal Block": "Terminal Block",
+    "IC Socket": "IC Socket",
+    "JST": "JST",
+    "Molex": "Molex",
+    "USB": "USB",
+    "RJ45": "RJ45",
+    "D-Sub": "D-Sub",
+    "DC Jack": "DC Jack",
+    "XT60 / XT30": "XT60 / XT30",
+    "RF / Coaxial": "RF / Coaxial",
+    "IDC / Ribbon": "IDC / Ribbon",
+    "Crystal": "Crystal",
+    "HC-49/S": "HC-49/S",
+    "Oscillator (XO)": "Oscillator (XO)",
+    "TCXO": "TCXO",
+    "Resonator": "Resonator",
+    "Tactile": "Tactile",
+    "Toggle": "Toggle",
+    "Encoder": "Encoder",
+    "DIP": "DIP",
+    "Rocker": "Rocker",
+    "Limit": "Limit",
+    "Power Supply": "Power Supply",
+    "Sensor Board": "Sensor Board",
+    "Display": "Display",
+    "RF / Wireless": "RF / Wireless",
+    "Development Board": "Development Board",
+    "Programmer / Debugger": "Programmer / Debugger",
+    "Panel Meter": "Panel Meter",
+    "Heat Sink": "Heat Sink",
+    "Standoff": "Standoff",
+    "Screw / Nut": "Screw / Nut",
+    "Fan": "Fan",
+    "Cable / Wire": "Cable / Wire",
+    "PCB / Board": "PCB / Board",
+    "Enclosure": "Enclosure",
+    "Battery Holder": "Battery Holder",
+    "Solder": "Solder",
+    "Flux": "Flux",
+    "Heat Shrink": "Heat Shrink",
+    "Insulating Tape": "Insulating Tape",
+    "Cleaner": "Cleaner",
+    "Hand Tools": "Hand Tools"
+  },
+  "place": {
+    "moveTitle": {
+      "one": "Put {count} part in a storage place",
+      "other": "Put {count} parts in a storage place"
+    },
+    "moveHint": "Pick a place or type a new name (a box, a drawer, a shelf). Leave it empty to take the parts out of any place.",
+    "move": "Move",
+    "renameTitle": "Rename {name}",
+    "joinNote": "{name} already exists; the parts will join it.",
+    "done": {
+      "one": "{count} part is now in {name}.",
+      "other": "{count} parts are now in {name}."
+    },
+    "cleared": {
+      "one": "{count} part taken out of its storage place.",
+      "other": "{count} parts taken out of their storage places."
+    }
+  }
+}

@@ -1,0 +1,1159 @@
+{
+  "_meta": {
+    "nativeName": "Türkçe",
+    "dir": "ltr",
+    "reviewed": true
+  },
+  "app": {
+    "name": "Component Inventory",
+    "skip": "İçeriğe geç"
+  },
+  "common": {
+    "cancel": "Vazgeç",
+    "close": "Kapat",
+    "save": "Kaydet",
+    "undo": "Geri al",
+    "retry": "Yeniden dene",
+    "loading": "Yükleniyor",
+    "errorPrefix": "Hata:"
+  },
+  "nav": {
+    "inventory": "Envanter",
+    "projects": "Projeler",
+    "import": "İçe aktar",
+    "backups": "Yedekler",
+    "settings": "Ayarlar"
+  },
+  "sidebar": {
+    "label": "Kenar çubuğu",
+    "navLabel": "Ana menü",
+    "categories": "Kategoriler",
+    "filterCategories": "Kategori ara",
+    "allParts": "Tüm parçalar",
+    "collapse": "{name} daralt",
+    "expand": "{name} genişlet",
+    "rename": "{name} adını değiştir",
+    "storagePlaces": "Saklama yerleri"
+  },
+  "about": {
+    "github": "GitHub'daki proje"
+  },
+  "startup": {
+    "title": "Envanter açılamadı",
+    "newerSchema": "Bu veritabanı Component Inventory'nin daha yeni bir sürümüyle yazılmış. En yeni sürümü kurun; bu sürüm dosyaya dokunmaz.",
+    "failed": "Veritabanı açılamadı: {error}",
+    "nothingChanged": "Hiçbir şey değiştirilmedi. Verileriniz hâlâ bu klasörde:",
+    "openFolder": "Veri klasörünü aç",
+    "migrated": "Envanteriniz yeni biçime güncellendi. Önce eski dosyanın bir kopyası alındı.",
+    "migratedAction": "Yedekleri gör"
+  },
+  "status": {
+    "syncOff": "Drive eşitleme kapalı",
+    "syncError": "Drive eşitleme başarısız: {error}",
+    "syncPending": "Drive eşitleme bekliyor",
+    "synced": "Drive eşitlendi {time}",
+    "parts": {
+      "one": "{count} parça",
+      "other": "{count} parça"
+    },
+    "pieces": {
+      "one": "{count} adet",
+      "other": "{count} adet"
+    },
+    "lowStock": {
+      "one": "{count} parçanın stoku azaldı",
+      "other": "{count} parçanın stoku azaldı"
+    },
+    "lastBackup": "Yedek {time}",
+    "syncOn": "Drive eşitleme açık"
+  },
+  "update": {
+    "available": "{version} sürümü çıktı.",
+    "download": "İndir",
+    "current": "En yeni sürümü kullanıyorsunuz ({version}).",
+    "failed": "Güncelleme denetlenemedi. İnternet bağlantısını kontrol edin."
+  },
+  "table": {
+    "label": "Parçalar",
+    "selectAll": "Görünen tüm parçaları seç",
+    "actions": "İşlemler",
+    "selectRow": "{code} seç",
+    "editPart": "{code} düzenle",
+    "deletePart": "{code} sil",
+    "lowStockTitle": "Stoku azaldı",
+    "usageTitle": "{count} projede kullanılıyor, {required} adet gerekiyor",
+    "usage": {
+      "one": "{count} proje",
+      "other": "{count} proje"
+    }
+  },
+  "inventory": {
+    "search": "Parça ara",
+    "searchPlaceholder": "Kod, açıklama, üretici ara...",
+    "clearSearch": "Aramayı temizle",
+    "lowStock": {
+      "one": "Stoku azalan ({count})",
+      "other": "Stoku azalan ({count})"
+    },
+    "removeFilter": "Bu filtreyi kaldır",
+    "showing": {
+      "one": "{count} parçadan {shown} tanesi",
+      "other": "{count} parçadan {shown} tanesi"
+    },
+    "columns": "Sütunlar",
+    "more": "Diğer işlemler",
+    "labelsAll": "Görünen parçalar için etiket bas",
+    "autoCategorize": "Otomatik kategorile",
+    "export": "Dışa aktar",
+    "import": "İçe aktar",
+    "add": "Parça ekle",
+    "emptyTitle": "Henüz parça yok",
+    "emptyBody": "İlk parçanızı ekleyin ya da bir siparişi, tabloyu veya PDF'yi içe aktarın.",
+    "noMatchTitle": "Eşleşen parça yok",
+    "noMatchSearch": "“{query}” ile eşleşen bir şey yok. Yazımı kontrol edin ya da daha az kelimeyle arayın.",
+    "noMatchFilter": "Bu filtrelere uyan parça yok.",
+    "clearFilters": "Filtreleri temizle"
+  },
+  "selection": {
+    "label": "Seçili parçalar",
+    "count": {
+      "one": "{count} seçili",
+      "other": "{count} seçili"
+    },
+    "assign": "Projeye ekle",
+    "labels": "Etiket",
+    "autoCategorize": "Otomatik kategorile",
+    "delete": "Sil",
+    "clear": "Seçimi kaldır",
+    "moveToPlace": "Saklama yerine taşı"
+  },
+  "delete": {
+    "title": {
+      "one": "Bu parça silinsin mi?",
+      "other": "{count} parça silinsin mi?"
+    },
+    "bodyOne": "{code} ve stok geçmişi silinecek.",
+    "bodyMany": {
+      "one": "{count} parça ve stok geçmişleri silinecek.",
+      "other": "{count} parça ve stok geçmişleri silinecek."
+    },
+    "bodyUsed": {
+      "one": "{count} tanesi bir projenin parça listesinde; o satırlar da silinir.",
+      "other": "{count} tanesi bir projenin parça listesinde; o satırlar da silinir."
+    },
+    "bodyUndo": "Hemen ardından geri alabilirsiniz.",
+    "confirm": "Sil",
+    "done": {
+      "one": "Parça silindi.",
+      "other": "{count} parça silindi."
+    },
+    "restored": {
+      "one": "Parça geri getirildi.",
+      "other": "{count} parça geri getirildi."
+    },
+    "restoredSkipped": {
+      "one": "{count} parça geri getirilemedi: kodu artık başka bir parçada.",
+      "other": "{count} parça geri getirilemedi: kodu artık başka bir parçada."
+    }
+  },
+  "detail": {
+    "label": "{code} ayrıntıları",
+    "quantity": "Adet",
+    "takeOne": "Bir tane çıkar",
+    "addOne": "Bir tane ekle",
+    "setTo": "Şuna ayarla",
+    "set": "Ayarla",
+    "qtyInvalid": "0 veya daha büyük bir tam sayı yazın.",
+    "edit": "Düzenle",
+    "duplicate": "Kopyala",
+    "printLabel": "Etiket",
+    "assign": "Projeye ekle",
+    "datasheet": "Datasheet",
+    "delete": "Sil",
+    "imageAlt": "{code} fotoğrafı",
+    "imageMissing": "Görsel dosyası bulunamadı.",
+    "facts": "Ayrıntılar",
+    "parameters": "Parametreler",
+    "projects": "Kullanıldığı projeler",
+    "needs": {
+      "one": "{count} gerekli",
+      "other": "{count} gerekli"
+    },
+    "noProjects": "Hiçbir projenin parça listesinde değil.",
+    "history": "Stok geçmişi",
+    "after": {
+      "one": "şimdi {count}",
+      "other": "şimdi {count}"
+    },
+    "noHistory": "Henüz kayıtlı değişiklik yok.",
+    "created": "Eklendi: {time}",
+    "updated": "Son değişiklik: {time}"
+  },
+  "edit": {
+    "addTitle": "Parça ekle",
+    "editTitle": "{code} düzenle",
+    "add": "Parçayı ekle",
+    "save": "Değişiklikleri kaydet",
+    "formMode": "Form",
+    "simple": "Basit",
+    "detailed": "Ayrıntılı",
+    "codeHint": "Üreticinin parça numarası; örneğin LM7805 ya da IRFZ44N.",
+    "errCodeRequired": "Bir parça kodu yazın.",
+    "errQuantity": "0 ile 999.999.999 arasında bir tam sayı yazın.",
+    "errUrl": "Bağlantı https:// veya http:// ile başlamalı.",
+    "errNumber": "{field} bir sayı değil.",
+    "addToExisting": {
+      "one": "Mevcut parçaya ekle (stokta {count})",
+      "other": "Mevcut parçaya ekle (stokta {count})"
+    },
+    "openExisting": "Mevcut parçayı aç",
+    "addedToExisting": {
+      "one": "{code} parçasına {count} adet eklendi.",
+      "other": "{code} parçasına {count} adet eklendi."
+    },
+    "qtyHint": {
+      "one": "Boş bırakılırsa {count} adet (varsayılanınız).",
+      "other": "Boş bırakılırsa {count} adet (varsayılanınız)."
+    },
+    "newCategory": "Yeni kategori...",
+    "newCategoryName": "Yeni kategorinin adı",
+    "rulesKnow": "Bilinen parça numarası",
+    "fillEmpty": "Boş alanları doldur",
+    "filledFrom": "Boş alanlar {source} ile dolduruldu.",
+    "autoDescription": "Açıklamayı yaz",
+    "guessCategory": "Kategoriyi açıklamadan tahmin et",
+    "noCategoryGuess": "Açıklamadan hangi kategori olduğu anlaşılmıyor.",
+    "categoryGuessed": "Kategori {category} yapıldı.",
+    "placeHint": "Parçanın durduğu yer: çekmece, kutu veya raf. İsteğe bağlı.",
+    "electrical": "Elektriksel değerler",
+    "ratedVoltage": "Anma gerilimi",
+    "parameters": "Bu türün parametreleri",
+    "sourcing": "Üretici ve tedarikçi",
+    "customFields": "Sizin sütunlarınız",
+    "chooseImage": "Görsel seç",
+    "changeImage": "Görseli değiştir",
+    "removeImage": "Görseli kaldır",
+    "simpleNote": "Üretici, tedarikçi, elektriksel değerler, notlar ve görsel için Ayrıntılı'ya geçin.",
+    "discardTitle": "Değişiklikler atılsın mı?",
+    "discardBody": "Bu forma yazdıklarınız kaybolacak.",
+    "discard": "At",
+    "keepEditing": "Düzenlemeye devam et",
+    "added": "{code} eklendi.",
+    "saved": "{code} kaydedildi.",
+    "show": "Göster"
+  },
+  "rename": {
+    "title": "{name} adını değiştir",
+    "subTitle": "{name} adını değiştir",
+    "newName": "Yeni ad",
+    "hint": {
+      "one": "{count} parça yeni ada taşınacak.",
+      "other": "{count} parça yeni ada taşınacak."
+    },
+    "errEmpty": "Bir ad yazın.",
+    "mergeNote": "{name} zaten var; parçalar ona katılacak.",
+    "confirm": "Adını değiştir",
+    "done": {
+      "one": "{count} parça {name} altına taşındı.",
+      "other": "{count} parça {name} altına taşındı."
+    }
+  },
+  "columns": {
+    "title": "Tablo sütunları",
+    "body": "Tabloda hangi sütunların görüneceğini ve sırasını seçin. Parça kodu ve adet her zaman görünür.",
+    "reset": "Varsayılan sütunlar",
+    "moveUp": "{name} yukarı taşı",
+    "moveDown": "{name} aşağı taşı",
+    "newCustom": "Kendi sütununuz",
+    "newCustomHint": "Her parçada bulunan bir metin alanı; örneğin “Nereden alındı”.",
+    "add": "Sütun ekle"
+  },
+  "shortcuts": {
+    "title": "Klavye kısayolları",
+    "search": "Parça ara",
+    "add": "Parça ekle",
+    "import": "İçe aktar",
+    "move": "Satırlar arasında gezin",
+    "open": "Parçayı aç",
+    "select": "Satırı seç",
+    "delete": "Parçayı sil",
+    "close": "Paneli veya pencereyi kapat",
+    "help": "Bu listeyi göster"
+  },
+  "labels": {
+    "title": {
+      "one": "{count} parça için etiket",
+      "other": "{count} parça için etiket"
+    },
+    "sheet": "Etiket kâğıdı",
+    "copies": "Her etiketten kaç tane",
+    "skip": "İlk sayfada kullanılmış etiket sayısı",
+    "skipHint": "Baskı bunlardan sonra başlar.",
+    "show": "Etikette",
+    "qr": "Parça kodlu QR kod",
+    "save": "PDF olarak kaydet",
+    "saved": "Etiketler kaydedildi: {path}",
+    "previewAlt": "{code} etiket önizlemesi",
+    "summary": {
+      "one": "{count} etiket, {pages} sayfa",
+      "other": "{count} etiket, {pages} sayfa"
+    },
+    "sheets": {
+      "a4-2x7": "A4, 2 x 7 (95 x 38 mm)",
+      "a4-3x8": "A4, 3 x 8 (63,5 x 33,9 mm)",
+      "roll-50x25": "Etiket yazıcısı rulosu, 50 x 25 mm"
+    }
+  },
+  "export": {
+    "title": "Envanteri dışa aktar",
+    "format": "Biçim",
+    "run": "Dışa aktar",
+    "saved": "Kaydedildi: {path}",
+    "progress": "Sayfalar çiziliyor",
+    "folder": "{path} klasöründe açılır",
+    "onlyShown": {
+      "one": "Yalnızca şu an görünen {count} parça",
+      "other": "Yalnızca şu an görünen {count} parça"
+    },
+    "allParts": {
+      "one": "{count} parça dışa aktarılacak.",
+      "other": "{count} parçanın tümü dışa aktarılacak."
+    },
+    "pdfTitle": {
+      "one": "Envanter, {count} parça",
+      "other": "Envanter, {count} parça"
+    },
+    "pdfPage": "Sayfa {page} / {pages}",
+    "formats": {
+      "xlsx": {
+        "title": "Excel çalışma kitabı",
+        "body": "Bir özet sayfası ve her kategori için filtreli bir sayfa."
+      },
+      "csv": {
+        "title": "CSV",
+        "body": "Tek tablo; her tablo programında açılır."
+      },
+      "json": {
+        "title": "JSON",
+        "body": "Tüm alanlar, başka programlar için."
+      },
+      "pdf": {
+        "title": "PDF liste",
+        "body": "Parça kodu, kategori, adet ve açıklamadan oluşan yazdırılabilir liste."
+      }
+    }
+  },
+  "assign": {
+    "title": {
+      "one": "{count} parçayı projeye ekle",
+      "other": "{count} parçayı projeye ekle"
+    },
+    "project": "Proje",
+    "newProject": "Yeni proje...",
+    "qty": "Parça başına gereken adet",
+    "qtyHint": "Parça listede zaten varsa satıra eklenir.",
+    "confirm": "Ekle",
+    "done": {
+      "one": "{count} parça {name} projesine eklendi.",
+      "other": "{count} parça {name} projesine eklendi."
+    },
+    "open": "Projeyi aç"
+  },
+  "projects": {
+    "list": "Projeler",
+    "newName": "Yeni proje adı",
+    "create": "Proje oluştur",
+    "lines": {
+      "one": "{count} satır",
+      "other": "{count} satır"
+    },
+    "short": {
+      "one": "{count} eksik",
+      "other": "{count} eksik"
+    },
+    "ready": "Stokta var",
+    "moveUp": "{name} yukarı taşı",
+    "moveDown": "{name} aşağı taşı",
+    "addPart": "Parça ekle",
+    "addPartPlaceholder": "Parçalarınızda arayın",
+    "matches": "Eşleşen parçalar",
+    "required": "Gereken",
+    "add": "Ekle",
+    "addInvalid": "Bir parça seçin ve kaç adet gerektiğini yazın.",
+    "stock": "Stokta",
+    "status": "Durum",
+    "missing": {
+      "one": "{count} eksik",
+      "other": "{count} eksik"
+    },
+    "enough": "Yeterli",
+    "requiredFor": "Gereken {code} adedi",
+    "removeLine": "{code} listeden çıkar",
+    "lineRemoved": "{code} listeden çıkarıldı.",
+    "bomEmpty": "Bu listede henüz parça yok. Eklemek için yukarıda bir parça arayın.",
+    "name": "Proje adı",
+    "delete": "Projeyi sil",
+    "deleteTitle": "{name} silinsin mi?",
+    "deleteBody": {
+      "one": "Proje ve {count} satırı silinecek. Parçalarınız yerinde kalır. Hemen ardından geri alabilirsiniz.",
+      "other": "Proje ve {count} satırı silinecek. Parçalarınız yerinde kalır. Hemen ardından geri alabilirsiniz."
+    },
+    "deleted": "{name} silindi.",
+    "summary": "{lines} satır, {pieces} adet gerekli.",
+    "missingTotal": {
+      "one": "{count} adet eksik",
+      "other": "{count} adet eksik"
+    },
+    "allInStock": "Hepsi stokta var",
+    "tabs": "Proje bölümleri",
+    "bom": "Parça listesi",
+    "schematic": "Şema",
+    "notes": "Notlar",
+    "description": "Açıklama",
+    "emptyTitle": "Henüz proje yok",
+    "emptyBody": "Soldan bir proje oluşturun, ardından gereken parçaları ekleyin.",
+    "nameRequired": "Bir proje adı yazın.",
+    "schematicTitle": "Şemadan parça listesi",
+    "schematicBody": "Şemadaki {matched} parça envanterinizle eşleşiyor; {unmatched} tanesi eşleşmiyor.",
+    "schematicApply": {
+      "one": "{count} satır ekle",
+      "other": "{count} satır ekle"
+    },
+    "refs": "Referanslar",
+    "unmatched": {
+      "one": "Eşleşen parçası olmayan {count} sembol",
+      "other": "Eşleşen parçası olmayan {count} sembol"
+    },
+    "schematicAdded": {
+      "one": "{count} satır eklendi.",
+      "other": "{count} satır eklendi."
+    }
+  },
+  "schematic": {
+    "emptyTitle": "Şema yok",
+    "emptyBody": "Burada görmek için bir PDF, görsel veya KiCad şeması (.kicad_sch) ekleyin.",
+    "pick": "Dosya seç",
+    "change": "Dosyayı değiştir",
+    "remove": "Kaldır",
+    "importBom": "Ondan parça listesi oluştur",
+    "readError": "Dosya okunamadı: {error}",
+    "pdfError": "Bu PDF açılamadı.",
+    "toolbar": "Şema görünümü",
+    "stage": "Şema",
+    "prevPage": "Önceki sayfa",
+    "nextPage": "Sonraki sayfa",
+    "page": "Sayfa {page} / {pages}",
+    "zoomIn": "Yakınlaştır",
+    "zoomOut": "Uzaklaştır",
+    "fit": "Sığdır",
+    "kicadAlt": {
+      "one": "{count} parçalı şema",
+      "other": "{count} parçalı şema"
+    },
+    "kicadHint": "Yakınlaştırmak için kaydırın, taşımak için sürükleyin, sığdırmak için çift tıklayın.",
+    "kicadEmpty": "Bu şemada parça ya da bağlantı bulunamadı.",
+    "imageAlt": "{name} şeması",
+    "status": {
+      "ok": "Stokta var",
+      "short": "Yetersiz",
+      "extra": "Envanterde var, listede yok",
+      "unknown": "Envanterde yok",
+      "unassigned": "Değeri yok",
+      "power": "Besleme"
+    }
+  },
+  "bulk": {
+    "title": "Otomatik kategorile",
+    "body": "Parça numaralarından, açıklamalardan ve parça kütüphanesinden öneriler. Uygulayana kadar hiçbir şey değişmez; önce yedek alınır.",
+    "scope": "Bakılacak parçalar",
+    "scopeAll": {
+      "one": "Tüm parçalar ({count})",
+      "other": "Tüm parçalar ({count})"
+    },
+    "scopeUncategorized": "Kategorisiz parçalar",
+    "scopeSelected": {
+      "one": "Seçili parçalar ({count})",
+      "other": "Seçili parçalar ({count})"
+    },
+    "kinds": "Öneri türleri",
+    "kind": {
+      "categorize": "Kategori",
+      "normalize": "Yazım",
+      "enrich": "Boş alanlar",
+      "merge": "Kopyalar"
+    },
+    "source": {
+      "part-code": "parça numarasından",
+      "opto": "optokuplör ailesi",
+      "description": "açıklamadan",
+      "heuristic": "anahtar kelimelerden"
+    },
+    "confidence": {
+      "high": "Kesin",
+      "medium": "Muhtemel",
+      "low": "Tahmin"
+    },
+    "misfiled": "yanlış yerde görünüyor",
+    "mergeTotal": {
+      "one": "toplam {count} adet",
+      "other": "toplam {count} adet"
+    },
+    "selectAll": "Bu listedekilerin hepsini seç",
+    "selectNone": "Bu listede hiçbirini seçme",
+    "selected": {
+      "one": "{count} seçili",
+      "other": "{count} seçili"
+    },
+    "apply": {
+      "one": "{count} öneriyi uygula",
+      "other": "{count} öneriyi uygula"
+    },
+    "applied": {
+      "one": "{count} parça değişti.",
+      "other": "{count} parça değişti."
+    },
+    "seeBackups": "Yedekler",
+    "noneTitle": "Önerilecek bir şey yok",
+    "noneBody": {
+      "one": "Bakılan {count} parçada burada değişecek bir şey yok.",
+      "other": "Bakılan {count} parçada burada değişecek bir şey yok."
+    }
+  },
+  "backups": {
+    "create": "Şimdi yedekle",
+    "created": "Yedek alındı.",
+    "openFolder": "Yedek klasörünü aç",
+    "policy": {
+      "one": "Bir şey değiştiyse her {minutes} dakikada otomatik yedek alınır; en yeni {count} tanesi saklanır. Elle alınan yedekler ve güncellemeden önce alınanlar hiç silinmez.",
+      "other": "Bir şey değiştiyse her {minutes} dakikada otomatik yedek alınır; en yeni {count} tanesi saklanır. Elle alınan yedekler ve güncellemeden önce alınanlar hiç silinmez."
+    },
+    "emptyTitle": "Henüz yedek yok",
+    "emptyBody": "Şimdi bir tane alın; uygulama her içe aktarmadan ve geri yüklemeden önce de yedek alır.",
+    "when": "Zaman",
+    "kind": "Tür",
+    "size": "Boyut",
+    "compare": "Ne değişti",
+    "restore": "Geri yükle",
+    "copyName": "{name} yolunu kopyala",
+    "copied": "Yol kopyalandı.",
+    "restoreTitle": "Bu yedek geri yüklensin mi?",
+    "restoreBody": "Envanteriniz {time} anına döner. Önce mevcut verinin bir kopyası alınır; bu işlemi geri alabilirsiniz.",
+    "restored": "Yedek geri yüklendi.",
+    "restoreUndone": "Geri yükleme geri alındı.",
+    "diffTitle": "{time} sonrası değişiklikler",
+    "diffBody": "O zaman yedekteki, şimdi envanterinizdeki değer.",
+    "diffTabs": "Değişiklik türleri",
+    "changed": "Değişen",
+    "added": "Sonradan eklenen",
+    "removed": "Sonradan silinen",
+    "field": "Alan",
+    "then": "O zaman",
+    "now": "Şimdi",
+    "noneChanged": "Değişen parça yok.",
+    "noneAdded": "Eklenen parça yok.",
+    "noneRemoved": "Silinen parça yok.",
+    "kinds": {
+      "auto": "Otomatik",
+      "manual": "Elle",
+      "pre-import": "İçe aktarma öncesi",
+      "pre-undo": "Geri alma öncesi",
+      "pre-bulk": "Toplu değişiklik öncesi",
+      "pre-restore": "Geri yükleme öncesi",
+      "pre-delete": "Silme öncesi",
+      "pre-migration": "Güncelleme öncesi",
+      "legacy": "Eski uygulama"
+    }
+  },
+  "import": {
+    "dropTitle": "Dosyayı buraya bırakın",
+    "dropBody": "PDF'ye yazdırılmış bir sipariş ya da sepet sayfası, bir Excel veya CSV listesi ya da tarayıcı eklentisinden bir .cinv.json dosyası.",
+    "choose": "Dosya seç",
+    "reading": "{name} okunuyor",
+    "sources": {
+      "extension": {
+        "title": "Mağaza sayfasından",
+        "body": "Tarayıcı eklentisi Özdisan, Motorobit veya Robocombo'daki siparişinizi okur ve burada açar."
+      },
+      "pdf": {
+        "title": "Yazdırılmış sayfa",
+        "body": "Sipariş ya da sepet sayfasını PDF olarak yazdırın. Adedi olan satırlar okunur; liste ara toplamda biter."
+      },
+      "table": {
+        "title": "Tablo",
+        "body": "Parça kodu, Adet veya Açıklama gibi sütun adları olan her sayfa okunur."
+      }
+    },
+    "errors": {
+      "tooLarge": "Dosya {mb} MB'tan büyük.",
+      "empty": "Dosyada satır yok.",
+      "noHeaders": "Hiçbir sayfada bu uygulamanın tanıdığı sütun adı (Parça kodu, Adet gibi) yok.",
+      "pdfNoText": "Bu PDF'de metin katmanı yok (taranmış görüntü), bu yüzden okunamıyor.",
+      "pdfNoRows": "Bu PDF'de adet içeren satır bulunamadı.",
+      "unknownType": ".{ext} uzantılı dosyalar içe aktarılamaz.",
+      "link": "Eklentiden gelen bağlantı okunamadı.",
+      "cinv": {
+        "invalid-json": "Bu geçerli bir .cinv.json dosyası değil.",
+        "not-cinv": "Bu JSON dosyası eklentiden gelmemiş.",
+        "unsupported-version": "Bu dosya daha yeni bir eklentiyle yapılmış. Uygulamayı güncelleyin.",
+        "no-items": "Dosyada parça yok.",
+        "no-valid-items": "Dosyadaki satırların hiçbiri okunamadı."
+      },
+      "linkFailed": "Hata: eklentiden gelen liste açılamadı ({error}). Eklenti panelinde Dosya olarak kaydet'i kullanıp dosyayı buraya bırakın."
+    },
+    "linkReceived": {
+      "one": "{shop} siparişinden {count} satır incelemeye hazır.",
+      "other": "{shop} siparişinden {count} satır incelemeye hazır."
+    },
+    "mapping": {
+      "title": {
+        "one": "Sütunlar ({count})",
+        "other": "Sütunlar ({count})"
+      },
+      "body": "Dosyadaki her sütunun hangi alanı dolduracağı. Yok say seçilen sütunlar okunmaz.",
+      "fieldFor": "{column} sütunu için alan",
+      "ignore": "Yok say"
+    },
+    "review": {
+      "title": "İnceleme: {source}",
+      "lineCount": {
+        "one": "{count} satır",
+        "other": "{count} satır"
+      },
+      "pieceCount": {
+        "one": "{count} adet",
+        "other": "{count} adet"
+      },
+      "toCheck": {
+        "one": "{count} satıra bakılmalı",
+        "other": "{count} satıra bakılmalı"
+      },
+      "unreadable": {
+        "one": "{count} satırda adet ya da kod yok",
+        "other": "{count} satırda adet ya da kod yok"
+      },
+      "excluded": {
+        "one": "{count} satır dışarıda",
+        "other": "{count} satır dışarıda"
+      },
+      "skipped": {
+        "one": "Kaynaktaki {count} satır okunamadı",
+        "other": "Kaynaktaki {count} satır okunamadı"
+      },
+      "filter": "Göster",
+      "all": "Hepsi",
+      "checkTab": "Bakılacaklar",
+      "status": "Durum",
+      "name": "Kaynaktaki ad",
+      "units": "Birim",
+      "pack": "Birimdeki adet",
+      "pieces": "Adet",
+      "stock": "Stokta",
+      "new": "Yeni",
+      "inStock": {
+        "one": "şimdi {count}",
+        "other": "şimdi {count}"
+      },
+      "include": "{name} içe aktar",
+      "check": "Bakılmalı",
+      "ok": "Doğru görünüyor",
+      "codeFor": "{name} parça kodu",
+      "unitsFor": "{name} birim sayısı",
+      "packFor": "{name} birimdeki adet",
+      "showing": "{total} satırın ilk {shown} satırı gösteriliyor. Devamı için aşağı kaydırın."
+    },
+    "why": {
+      "plain": {
+        "one": "{count} adet",
+        "other": "{count} adet"
+      },
+      "pack": "{units} birim x {pack}'lü paket = {pieces} adet",
+      "unknown": "Adet okunamadı."
+    },
+    "reason": {
+      "readFrom": "Adet {column} sütunundan okundu.",
+      "packRule": "Ad “- {size} Adet” ile bitiyor: mağaza bunu {size}'lu paket olarak satıyor.",
+      "packExtension": "Eklenti {size}'lu bir paket buldu.",
+      "packEdited": "Birim başına {size} adet girdiniz.",
+      "perPiece": "Her birim bir adet."
+    },
+    "issue": {
+      "noQuantity": "Adet sütunu yok; bir adet varsayıldı.",
+      "noQuantityRaw": "“{raw}” bir adet değil.",
+      "notWhole": "“{raw}” tam sayı değil; yuvarlandı.",
+      "noCode": "Parça kodu yok: bir kod yazın ya da satırı dışarıda bırakın.",
+      "nameAsCode": "Parça numarası bulunamadı; kod olarak ad kullanıldı.",
+      "codeFromName": "Parça kodu addan çıkarıldı.",
+      "shopCode": "{code} mağazanın kendi kodu, parça numarası değil.",
+      "filledLibrary": "Boş alanlar parça kütüphanesinden dolduruldu.",
+      "filledRules": "Boş alanlar bilinen parça numaralarından dolduruldu.",
+      "duplicate": {
+        "one": "Bu kod {count} satırda var; adetler toplanır.",
+        "other": "Bu kod {count} satırda var; adetler toplanır."
+      }
+    },
+    "mode": {
+      "label": "Nasıl uygulansın",
+      "add": {
+        "title": "Stoka ekle",
+        "body": "Adetler mevcut parçalarınıza eklenir; yeni kodlar yeni parça olur."
+      },
+      "sync": {
+        "title": "Adetleri eşitle",
+        "body": "Dosyadaki parçaların stoku dosyadaki adet olur; diğer parçalar olduğu gibi kalır."
+      },
+      "replace": {
+        "title": "Her şeyi değiştir",
+        "body": "Envanter tam olarak bu dosya olur. Dosyada olmayan parçalar silinir."
+      }
+    },
+    "backupNote": "Yazmadan önce yedek alınır ve içe aktarmayı sonradan geri alabilirsiniz.",
+    "apply": {
+      "one": "{count} satırı içe aktar",
+      "other": "{count} satırı içe aktar"
+    },
+    "replaceTitle": "Envanterin tamamı değiştirilsin mi?",
+    "replaceBody": {
+      "one": "{count} parçanızın yerini bu dosyadaki satırlar alacak.",
+      "other": "{count} parçanızın yerini bu dosyadaki satırlar alacak."
+    },
+    "replaceConfirm": "Değiştir",
+    "doneTitle": "İçe aktarıldı",
+    "doneBody": "{created} yeni parça, {updated} güncellendi, toplam {pieces} adet.",
+    "doneUndoneTitle": "İçe aktarma geri alındı",
+    "doneUndoneBody": "Envanteriniz önceki hâline döndü.",
+    "showInventory": "Envanteri göster",
+    "another": "Başka bir dosya aktar",
+    "undo": "İçe aktarmayı geri al",
+    "undoTitle": "Bu içe aktarma geri alınsın mı?",
+    "undoBody": "{source}: eklediği parçalar silinir, değiştirdiği adetler geri döner. Sonradan yaptığınız değişiklikler mümkün olduğunca korunur.",
+    "undone": {
+      "one": "İçe aktarma geri alındı, {count} parça eski hâline döndü.",
+      "other": "İçe aktarma geri alındı, {count} parça eski hâline döndü."
+    },
+    "undoNote": {
+      "deleted_since": "{code} içe aktarmadan sonra silinmiş.",
+      "edited_since": "{code} içe aktarmadan sonra düzenlenmiş; düzenlemeniz korundu.",
+      "used_in_project": "{code} bir proje listesinde olduğu için silinmedi.",
+      "stock_below": "{code} adedi içe aktarılandan az; 0 yapıldı.",
+      "code_taken": "{code} artık başka bir parçada."
+    },
+    "history": {
+      "title": "Geçmiş içe aktarmalar",
+      "empty": "Henüz içe aktarma yok.",
+      "when": "Zaman",
+      "source": "Kaynak",
+      "mode": "Nasıl",
+      "result": "Sonuç",
+      "counts": "{created} yeni, {updated} güncellendi, {pieces} adet",
+      "undone": "Geri alındı"
+    },
+    "linkQueued": "Eklentiden gelen başka bir liste bekliyor. Bu incelemeyi bitirince açılacak."
+  },
+  "settings": {
+    "range": "{min} ile {max} arasında bir tam sayı yazın.",
+    "choose": "Klasör seç",
+    "clear": "Temizle",
+    "language": {
+      "title": "Dil ve görünüm",
+      "label": "Dil",
+      "unreviewed": "henüz gözden geçirilmedi",
+      "unreviewedNote": "Bu çeviri henüz anadili olan biri tarafından kontrol edilmedi. Düzeltmeler GitHub'da memnuniyetle karşılanır."
+    },
+    "theme": {
+      "label": "Tema",
+      "system": "Windows ile aynı",
+      "dark": "Koyu",
+      "light": "Açık",
+      "switchLight": "Açık temaya geç",
+      "switchDark": "Koyu temaya geç"
+    },
+    "parts": {
+      "title": "Parçalar",
+      "defaultQuantity": "Yeni parçanın varsayılan adedi",
+      "lowStock": "Düşük stok sınırı",
+      "lowStockHint": "Bu kadar veya daha az adedi olan parçalar işaretlenir.",
+      "formMode": "Ekleme ve düzenleme formu",
+      "storagePlace": "Saklama yeri",
+      "storagePlaceHint": "Parçanın durduğu yer (çekmece, kutu, raf). Kullandığınızda görünür.",
+      "placeAuto": "Kullanılınca göster",
+      "placeShow": "Her zaman göster",
+      "placeHide": "Gizle"
+    },
+    "backups": {
+      "title": "Yedekler",
+      "hint": "Envanterinizin kopyaları, veri klasöründe saklanır.",
+      "interval": "Otomatik yedek sıklığı (dakika)",
+      "intervalHint": "0 otomatik yedeği kapatır.",
+      "retention": "Saklanacak otomatik yedek sayısı",
+      "retentionHint": "Daha eskileri silinir. Elle alınan yedekler her zaman saklanır.",
+      "openData": "Veri klasörünü aç"
+    },
+    "export": {
+      "title": "Dışa aktarma klasörü",
+      "none": "Seçilmedi: kaydetme penceresi her seferinde sorar."
+    },
+    "drive": {
+      "title": "Google Drive eşitleme",
+      "hint": "Her değişiklikten sonra uygulama, Google Drive masaüstü uygulamasındaki bir klasöre Excel, JSON ve veritabanı kopyası yazar. Drive bunları yükler; Excel dosyasını telefonunuzda açabilirsiniz.",
+      "enable": "Kopyaları Drive klasörüne yaz",
+      "needFolder": "Önce klasörü seçin.",
+      "noFolder": "Klasör seçilmedi",
+      "baseName": "Dosya adı",
+      "baseNameHint": "Dosyalar {name}.xlsx, {name}.json ve {name}.db olarak adlanır.",
+      "lastSync": "Son yazma {time}",
+      "syncNow": "Şimdi yaz"
+    },
+    "columns": {
+      "title": "Sizin sütunlarınız",
+      "hint": "Her parçada bulunan ek alanlar. Envanterdeki Sütunlar penceresinden eklenir.",
+      "none": "Kendi sütununuz yok.",
+      "deleteTitle": "{name} sütunu silinsin mi?",
+      "deleteBody": "Sütun ve tüm parçalardaki değerleri silinir.",
+      "delete": "Sütunu sil"
+    },
+    "updates": {
+      "title": "Güncellemeler",
+      "auto": "Açılışta yeni sürümü denetle",
+      "hint": "Yalnızca bir bildirim gösterilir; kendiliğinden hiçbir şey indirilmez.",
+      "now": "Şimdi denetle"
+    },
+    "about": {
+      "title": "Hakkında",
+      "version": "Sürüm",
+      "data": "Veri klasörü",
+      "schema": "Veritabanı biçimi",
+      "library": "Parça kütüphanesi",
+      "libraryOn": "Kullanılabilir",
+      "libraryOff": "Bulunamadı",
+      "languages": "Diller",
+      "translate": "Çeviriye yardım et"
+    }
+  },
+  "field": {
+    "part_code": "Parça kodu",
+    "category": "Kategori",
+    "subcategory": "Alt kategori",
+    "quantity": "Adet",
+    "package": "Kılıf",
+    "manufacturer": "Üretici",
+    "mpn": "Üretici parça numarası",
+    "location": "Saklama yeri",
+    "preferred_supplier": "Tedarikçi",
+    "voltage_max": "Maks. gerilim",
+    "current_max": "Maks. akım",
+    "resistance": "Değer",
+    "tolerance": "Tolerans",
+    "power_rating": "Güç",
+    "description": "Açıklama",
+    "datasheet_url": "Datasheet bağlantısı",
+    "unit_price": "Birim fiyat",
+    "notes": "Notlar",
+    "image_path": "Görsel",
+    "updated_at": "Son değişiklik",
+    "created_at": "Eklenme"
+  },
+  "attr": {
+    "accuracy": "Doğruluk",
+    "bjt_type": "Tip",
+    "channel": "Kanal tipi",
+    "channels": "Kanal sayısı",
+    "color": "Renk",
+    "core": "İşlemci çekirdeği",
+    "diode_type": "Diyot tipi",
+    "dropout": "Düşüm gerilimi",
+    "freq_max": "Maks. frekans",
+    "freq_range": "Frekans aralığı",
+    "freq_tol": "Tolerans",
+    "frequency": "Frekans",
+    "inductance": "Endüktans",
+    "interface": "Arayüz",
+    "io_pins": "G/Ç pinleri",
+    "load_cap": "Yük kapasitesi",
+    "luminosity": "Parlaklık",
+    "measurement": "Ölçtüğü",
+    "power_va": "Güç",
+    "pz": "Güç kaybı",
+    "qg": "Gate yükü",
+    "range": "Aralık",
+    "reg_type": "Tip",
+    "slew_rate": "Slew rate",
+    "supply_v": "Besleme",
+    "tq": "Kapanma süresi",
+    "turns_ratio": "Sarım oranı",
+    "v_supply": "Besleme",
+    "wavelength": "Dalga boyu",
+    "ztol": "Tolerans"
+  },
+  "movement": {
+    "create": "Eklendi",
+    "edit": "Düzenlendi",
+    "adjust": "Adet değişti",
+    "delete": "Silindi",
+    "bulk-delete": "Toplu silindi",
+    "restore": "Geri getirildi",
+    "import": "İçe aktarma",
+    "import-replace": "Değiştirme aktarımıyla silindi",
+    "import-undo": "İçe aktarma geri alındı",
+    "merge": "Birleştirildi",
+    "bulk": "Toplu değişiklik",
+    "auto-categorize": "Otomatik kategorileme"
+  },
+  "errors": {
+    "generic": "Bir şeyler ters gitti. Yeniden deneyin; sürerse yedekleriniz veri klasöründe güvende.",
+    "database": "Veritabanı okunamadı ya da yazılamadı.",
+    "file": "Dosya okunamadı ya da yazılamadı.",
+    "data": "Kayıtlı veri okunamadı.",
+    "not_found": "Artık yok; silinmiş olabilir. Liste yenilendi.",
+    "invalid_input": "Bu değere izin verilmiyor.",
+    "duplicate_part_code": "Bu kod başka bir parçada zaten var.",
+    "newer_schema": "Veritabanı uygulamanın daha yeni bir sürümüyle yazılmış.",
+    "conflict": "Bu arada değişmiş. Yeniden deneyin.",
+    "export": "Dışa aktarma yazılamadı.",
+    "network": "İnternet bağlantısı yok.",
+    "internal": "Uygulamanın içinde bir şeyler ters gitti.",
+    "startup": "Uygulama başlatılamadı."
+  },
+  "category": {
+    "Resistors": "Dirençler",
+    "Potentiometers": "Potansiyometreler",
+    "Thermistors": "Termistörler",
+    "Varistors": "Varistörler",
+    "Capacitors": "Kondansatörler",
+    "Inductors": "Bobinler",
+    "Transformers": "Trafolar",
+    "Transistors": "Transistörler",
+    "Thyristors": "Tristörler",
+    "Diodes": "Diyotlar",
+    "LEDs": "LED'ler",
+    "ICs": "Entegreler",
+    "Microcontrollers": "Mikrodenetleyiciler",
+    "Sensors": "Sensörler",
+    "Relays": "Röleler",
+    "Connectors": "Konnektörler",
+    "Crystals": "Kristaller",
+    "Switches": "Anahtarlar",
+    "Modules": "Modüller",
+    "Mechanical": "Mekanik",
+    "Consumables": "Sarf malzemeleri",
+    "Uncategorized": "Kategorisiz"
+  },
+  "subcategory": {
+    "Carbon Film": "Karbon film",
+    "Metal Film": "Metal film",
+    "Through-Hole": "Delikli (THT)",
+    "Wirewound": "Telli",
+    "SMD": "SMD",
+    "Thick Film": "Kalın film",
+    "Thin Film": "İnce film",
+    "Power": "Güç",
+    "Precision": "Hassas",
+    "Network / Array": "Direnç dizisi",
+    "Shunt": "Şönt",
+    "Trimpot": "Trimpot",
+    "Single-turn": "Tek tur",
+    "Multi-turn": "Çok turlu",
+    "Linear": "Lineer",
+    "Rotary": "Döner",
+    "Logarithmic": "Logaritmik",
+    "Slide": "Sürgülü",
+    "NTC": "NTC",
+    "PTC": "PTC",
+    "MOV": "MOV",
+    "SIOV": "SIOV",
+    "Electrolytic": "Elektrolitik",
+    "Ceramic": "Seramik",
+    "Tantalum": "Tantal",
+    "Film": "Film",
+    "Polymer": "Polimer",
+    "Supercapacitor": "Süperkapasitör",
+    "MLCC": "MLCC",
+    "Variable / Trimmer": "Ayarlı / trimer",
+    "Inductor": "Bobin",
+    "Ferrite Core": "Ferit nüve",
+    "Toroid Core": "Toroid nüve",
+    "Common Mode Choke": "Ortak mod şok bobini",
+    "Ferrite Bead": "Ferit boncuk",
+    "Step-Up": "Yükseltici",
+    "Step-Down": "Düşürücü",
+    "Isolation": "İzolasyon",
+    "Audio": "Ses",
+    "Toroidal": "Toroidal",
+    "Pulse / Current": "Darbe / akım",
+    "BJT NPN - General Purpose": "BJT NPN - genel amaçlı",
+    "BJT NPN - HV": "BJT NPN - yüksek gerilim",
+    "BJT NPN - HC": "BJT NPN - yüksek akım",
+    "BJT NPN - HF": "BJT NPN - yüksek frekans",
+    "BJT NPN": "BJT NPN",
+    "BJT PNP - General Purpose": "BJT PNP - genel amaçlı",
+    "BJT PNP - HV": "BJT PNP - yüksek gerilim",
+    "BJT PNP - HC": "BJT PNP - yüksek akım",
+    "BJT PNP - HF": "BJT PNP - yüksek frekans",
+    "BJT PNP": "BJT PNP",
+    "MOSFET N-Channel": "MOSFET N kanal",
+    "MOSFET N-Channel - HV": "MOSFET N kanal - yüksek gerilim",
+    "MOSFET N-Channel - HC": "MOSFET N kanal - yüksek akım",
+    "MOSFET N-Channel - Logic-Level": "MOSFET N kanal - lojik seviye",
+    "Power MOSFET": "Güç MOSFET'i",
+    "MOSFET P-Channel": "MOSFET P kanal",
+    "MOSFET P-Channel - HV": "MOSFET P kanal - yüksek gerilim",
+    "MOSFET P-Channel - HC": "MOSFET P kanal - yüksek akım",
+    "IGBT": "IGBT",
+    "JFET": "JFET",
+    "Darlington NPN": "Darlington NPN",
+    "Darlington PNP": "Darlington PNP",
+    "Darlington Array": "Darlington dizisi",
+    "SCR": "SCR",
+    "TRIAC": "TRIAC",
+    "DIAC": "DIAC",
+    "Rectifier": "Doğrultucu",
+    "Signal": "Sinyal",
+    "Switching": "Anahtarlama",
+    "Schottky": "Schottky",
+    "Zener": "Zener",
+    "TVS": "TVS",
+    "Fast Recovery": "Hızlı toparlanmalı",
+    "Bridge Rectifier": "Köprü diyot",
+    "Varactor": "Varaktör",
+    "Indicator": "Gösterge",
+    "High-Power": "Yüksek güçlü",
+    "RGB": "RGB",
+    "Addressable": "Adreslenebilir",
+    "IR": "Kızılötesi",
+    "UV": "UV",
+    "Laser": "Lazer",
+    "7-Segment": "7 segment",
+    "Photodiode / Phototransistor": "Fotodiyot / fototransistör",
+    "Op-Amp": "Op-amp",
+    "Op-Amps": "Op-amp'ler",
+    "Instrumentation Amplifier": "Enstrümantasyon yükselteci",
+    "Comparator": "Karşılaştırıcı",
+    "Timer": "Zamanlayıcı",
+    "Voltage Regulator": "Voltaj regülatörü",
+    "Linear Regulator": "Lineer regülatör",
+    "LDO Regulator": "LDO regülatör",
+    "Switching Regulator": "Anahtarlamalı regülatör",
+    "Buck Converter": "Buck dönüştürücü",
+    "Boost Converter": "Boost dönüştürücü",
+    "DC-DC Converter": "DC-DC dönüştürücü",
+    "Voltage Reference": "Gerilim referansı",
+    "Gate Driver": "Gate sürücü",
+    "Motor Driver": "Motor sürücü",
+    "Stepper Driver": "Step motor sürücü",
+    "PWM Controller": "PWM denetleyici",
+    "Optocoupler": "Optokuplör",
+    "Logic Gate": "Lojik kapı",
+    "Logic": "Lojik",
+    "Shift Register": "Kaydırmalı kaydedici",
+    "Multiplexer": "Çoklayıcı (MUX)",
+    "LED Driver": "LED sürücü",
+    "RS-232 Driver": "RS-232 sürücü",
+    "USB-UART": "USB-UART",
+    "RS-485 Transceiver": "RS-485 alıcı-verici",
+    "CAN Transceiver": "CAN alıcı-verici",
+    "I/O Expander": "G/Ç genişletici",
+    "Interface": "Arayüz",
+    "WiFi / BT SoC": "WiFi / BT SoC",
+    "RF Transceiver": "RF alıcı-verici",
+    "Audio Amplifier": "Ses yükselteci",
+    "ADC": "ADC",
+    "DAC": "DAC",
+    "EEPROM / Flash": "EEPROM / Flash",
+    "EEPROM": "EEPROM",
+    "Flash Memory": "Flash bellek",
+    "Real-Time Clock": "Gerçek zamanlı saat",
+    "RTC": "RTC",
+    "Battery Charger": "Pil şarj entegresi",
+    "Current Sensor": "Akım sensörü",
+    "Microcontroller": "Mikrodenetleyici",
+    "STM32 (ARM Cortex-M)": "STM32 (ARM Cortex-M)",
+    "AVR (Atmel)": "AVR (Atmel)",
+    "PIC": "PIC",
+    "MSP430": "MSP430",
+    "RP2040 (Pi Pico)": "RP2040 (Pi Pico)",
+    "8051": "8051",
+    "ESP32 / ESP8266": "ESP32 / ESP8266",
+    "Temperature": "Sıcaklık",
+    "Humidity": "Nem",
+    "Pressure": "Basınç",
+    "Hall Effect": "Hall etkili",
+    "Current": "Akım",
+    "Accelerometer": "İvmeölçer",
+    "Gyroscope": "Jiroskop",
+    "IMU": "IMU",
+    "Proximity": "Yakınlık",
+    "Distance / ToF": "Mesafe / ToF",
+    "Ultrasonic": "Ultrasonik",
+    "PIR (Motion)": "PIR (hareket)",
+    "Light / Color": "Işık / renk",
+    "Gas": "Gaz",
+    "Force / Strain": "Kuvvet / gerinim",
+    "SPST": "SPST",
+    "SPDT": "SPDT",
+    "DPDT": "DPDT",
+    "Solid State": "Katı hal (SSR)",
+    "Reed": "Reed",
+    "Pin Header": "Pin header",
+    "Socket": "Soket",
+    "Terminal Block": "Klemens",
+    "IC Socket": "Entegre soketi",
+    "JST": "JST",
+    "Molex": "Molex",
+    "USB": "USB",
+    "RJ45": "RJ45",
+    "D-Sub": "D-Sub",
+    "DC Jack": "DC jak",
+    "XT60 / XT30": "XT60 / XT30",
+    "RF / Coaxial": "RF / koaksiyel",
+    "IDC / Ribbon": "IDC / yassı kablo",
+    "Crystal": "Kristal",
+    "HC-49/S": "HC-49/S",
+    "Oscillator (XO)": "Osilatör (XO)",
+    "TCXO": "TCXO",
+    "Resonator": "Rezonatör",
+    "Tactile": "Buton (tact)",
+    "Toggle": "Toggle",
+    "Encoder": "Enkoder",
+    "DIP": "DIP anahtar",
+    "Rocker": "Anahtar (rocker)",
+    "Limit": "Limit anahtarı",
+    "Power Supply": "Güç kaynağı",
+    "Sensor Board": "Sensör kartı",
+    "Display": "Ekran",
+    "RF / Wireless": "RF / kablosuz",
+    "Development Board": "Geliştirme kartı",
+    "Programmer / Debugger": "Programlayıcı / hata ayıklayıcı",
+    "Panel Meter": "Panel ölçü aleti",
+    "Heat Sink": "Soğutucu",
+    "Standoff": "Aralayıcı",
+    "Screw / Nut": "Vida / somun",
+    "Fan": "Fan",
+    "Cable / Wire": "Kablo",
+    "PCB / Board": "PCB / pertinaks",
+    "Enclosure": "Kutu",
+    "Battery Holder": "Pil yuvası",
+    "Solder": "Lehim",
+    "Flux": "Flux",
+    "Heat Shrink": "Makaron",
+    "Insulating Tape": "İzole bant",
+    "Cleaner": "Temizleyici",
+    "Hand Tools": "El aletleri"
+  },
+  "place": {
+    "moveTitle": {
+      "one": "{count} parçayı bir saklama yerine koy",
+      "other": "{count} parçayı bir saklama yerine koy"
+    },
+    "moveHint": "Bir yer seçin ya da yeni bir ad yazın (kutu, çekmece, raf). Parçaları her yerden çıkarmak için boş bırakın.",
+    "move": "Taşı",
+    "renameTitle": "{name} adını değiştir",
+    "joinNote": "{name} zaten var; parçalar oraya katılacak.",
+    "done": {
+      "one": "{count} parça artık {name} içinde.",
+      "other": "{count} parça artık {name} içinde."
+    },
+    "cleared": {
+      "one": "{count} parça saklama yerinden çıkarıldı.",
+      "other": "{count} parça saklama yerlerinden çıkarıldı."
+    }
+  }
+}

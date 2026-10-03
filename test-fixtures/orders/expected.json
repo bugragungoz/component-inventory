@@ -1,0 +1,438 @@
+{
+  "note": "Ground truth for the order fixtures in this folder. pieces = qty x packSize. Robocombo checked against qty x unit price = line total on every line.",
+  "ozdisan": [
+    {
+      "name": "IC-2101 HIGH-LOW DRIVER SOP8 IR",
+      "code": "IR2101STRPBF",
+      "qty": 3,
+      "packSize": 1,
+      "pieces": 3
+    },
+    {
+      "name": "IC-74HC595 SMD REGISTER 8-BIT 16SOIC",
+      "code": "SN74HC595DR",
+      "qty": 5,
+      "packSize": 1,
+      "pieces": 5
+    },
+    {
+      "name": "IC-4051 MUX/DEMUX 8X1 16SOIC",
+      "code": "CD4051BM96",
+      "qty": 5,
+      "packSize": 1,
+      "pieces": 5
+    },
+    {
+      "name": "IC-74HC4051 MUX-DEMUX 8X1 TSSOP16",
+      "code": "CD74HC4051PWR",
+      "qty": 2,
+      "packSize": 1,
+      "pieces": 2
+    },
+    {
+      "name": "IC-74HC165 8-BIT PARA.LOAD SHIF.REG. SO16 TI",
+      "code": "SN74HC165DR",
+      "qty": 5,
+      "packSize": 1,
+      "pieces": 5
+    },
+    {
+      "name": "IC-18F25K22-I/SS SSOP28 SMD MICROCHIP",
+      "code": "PIC18F25K22-I/SS",
+      "qty": 2,
+      "packSize": 1,
+      "pieces": 2
+    },
+    {
+      "name": "IC-16F1829 MCU 8BIT 14KB FLASH 20SSOP TUBE",
+      "code": "PIC16F1829-I/SS",
+      "qty": 2,
+      "packSize": 1,
+      "pieces": 2
+    },
+    {
+      "name": "IC-4725 DAC 12BIT SOT-23-6",
+      "code": "MCP4725A1T-E/CH",
+      "qty": 1,
+      "packSize": 1,
+      "pieces": 1
+    },
+    {
+      "name": "IC-4921 DAC 12BIT SNGL W/SPI 8SOIC",
+      "code": "MCP4921-E/SN",
+      "qty": 2,
+      "packSize": 1,
+      "pieces": 2
+    },
+    {
+      "name": "IC-1115 ADC 16BIT 860SPS LP 10MSOP",
+      "code": "ADS1115IDGSR",
+      "qty": 3,
+      "packSize": 1,
+      "pieces": 3
+    },
+    {
+      "name": "IC-431 VOLTAGE REFERENCE 3-TERMINAL ADJ TO92-3 UTC",
+      "code": "TL431G-T92-B",
+      "qty": 15,
+      "packSize": 1,
+      "pieces": 15
+    },
+    {
+      "name": "IC-358 AMPLIFIER DUAL SMD TR SO8 ST",
+      "code": "LM358ADT",
+      "qty": 10,
+      "packSize": 1,
+      "pieces": 10
+    },
+    {
+      "name": "IC-2904 DUAL OPERATIONAL AMPLIFIER SMD SO8 ST",
+      "code": "LM2904D",
+      "qty": 10,
+      "packSize": 1,
+      "pieces": 10
+    },
+    {
+      "name": "IC-431 REFERENCE Z-DIODE +2.5..36V SO8 SMD TR ST",
+      "code": "TL431ACDT",
+      "qty": 5,
+      "packSize": 1,
+      "pieces": 5
+    }
+  ],
+  "motorobit": [
+    {
+      "name": "ST-Link V2 Mini Programlayıcı",
+      "code": "",
+      "qty": 1,
+      "packSize": 1,
+      "pieces": 1
+    },
+    {
+      "name": "IRFZ44N - 55V 49A Mosfet - TO220",
+      "code": "",
+      "qty": 8,
+      "packSize": 1,
+      "pieces": 8
+    },
+    {
+      "name": "5mR 2512 3W SMD Şönt Direnç",
+      "code": "",
+      "qty": 2,
+      "packSize": 1,
+      "pieces": 2
+    },
+    {
+      "name": "91K 603 SMD Direnç - 10 Adet",
+      "code": "",
+      "qty": 10,
+      "packSize": 10,
+      "pieces": 100
+    },
+    {
+      "name": "150K 603 SMD Direnç - 10 Adet",
+      "code": "",
+      "qty": 10,
+      "packSize": 10,
+      "pieces": 100
+    },
+    {
+      "name": "27K 603 SMD Direnç - 10 Adet",
+      "code": "",
+      "qty": 10,
+      "packSize": 10,
+      "pieces": 100
+    },
+    {
+      "name": "8.2K 603 SMD Direnç - 10 Adet",
+      "code": "",
+      "qty": 10,
+      "packSize": 10,
+      "pieces": 100
+    },
+    {
+      "name": "MCP6002T-I/SN SOIC-8 Smd OpAmp Entegresi",
+      "code": "",
+      "qty": 2,
+      "packSize": 1,
+      "pieces": 2
+    },
+    {
+      "name": "BAT54S SMD Schottky Diyot",
+      "code": "",
+      "qty": 20,
+      "packSize": 1,
+      "pieces": 20
+    },
+    {
+      "name": "56K 603 SMD Direnç - 10 Adet",
+      "code": "",
+      "qty": 10,
+      "packSize": 10,
+      "pieces": 100
+    },
+    {
+      "name": "CJMCU-226 INA226 I2C Akım / Güç İzleme Sensörü",
+      "code": "",
+      "qty": 1,
+      "packSize": 1,
+      "pieces": 1
+    },
+    {
+      "name": "CH340G RS232 USB-TTL Dönüştürücü Converter",
+      "code": "",
+      "qty": 1,
+      "packSize": 1,
+      "pieces": 1
+    },
+    {
+      "name": "47K 603 SMD Direnç - 10 Adet",
+      "code": "",
+      "qty": 10,
+      "packSize": 10,
+      "pieces": 100
+    }
+  ],
+  "robocombo": [
+    {
+      "name": "4x100mm Düz Uçlu Elektronikçi Tornavida",
+      "code": "2309070001",
+      "qty": 1,
+      "packSize": 1,
+      "pieces": 1,
+      "unitLabel": ""
+    },
+    {
+      "name": "Panel Tipi 0-100V Voltmetre",
+      "code": "2405040002",
+      "qty": 2,
+      "packSize": 1,
+      "pieces": 2,
+      "unitLabel": ""
+    },
+    {
+      "name": "Arduino Rotary Enkoder Modülü",
+      "code": "1805280006",
+      "qty": 2,
+      "packSize": 1,
+      "pieces": 2,
+      "unitLabel": "ADET"
+    },
+    {
+      "name": "INA219 I2C Çift Yönlü Akım Sensörü Modülü",
+      "code": "2303310055",
+      "qty": 1,
+      "packSize": 1,
+      "pieces": 1,
+      "unitLabel": ""
+    },
+    {
+      "name": "Ad620 Yüksek Hassasiyetli Mikrovolt Küçük Sinyal Enstrümantasyon Amplifikatörü Modülü",
+      "code": "2403149001",
+      "qty": 1,
+      "packSize": 1,
+      "pieces": 1,
+      "unitLabel": ""
+    },
+    {
+      "name": "8'li DIP Switch",
+      "code": "1605200024",
+      "qty": 1,
+      "packSize": 1,
+      "pieces": 1,
+      "unitLabel": "Adet"
+    },
+    {
+      "name": "40 pin Erkek B Tipi Header 23mm (180 Derece)",
+      "code": "1605200032",
+      "qty": 3,
+      "packSize": 1,
+      "pieces": 3,
+      "unitLabel": "Adet"
+    },
+    {
+      "name": "2N2222 NPN Tip Transistör",
+      "code": "1905300001",
+      "qty": 2,
+      "packSize": 1,
+      "pieces": 2,
+      "unitLabel": "ADET"
+    },
+    {
+      "name": "Potansiyometre Başlığı Düğmesi Siyah",
+      "code": "2304190006",
+      "qty": 12,
+      "packSize": 1,
+      "pieces": 12,
+      "unitLabel": ""
+    },
+    {
+      "name": "10K Stereo Potansiyometre",
+      "code": "2302170018",
+      "qty": 3,
+      "packSize": 1,
+      "pieces": 3,
+      "unitLabel": ""
+    },
+    {
+      "name": "16'lı Entegre Soketi",
+      "code": "1603250319",
+      "qty": 5,
+      "packSize": 1,
+      "pieces": 5,
+      "unitLabel": "Adet"
+    },
+    {
+      "name": "8'li Entegre Soketi",
+      "code": "1603250312",
+      "qty": 5,
+      "packSize": 1,
+      "pieces": 5,
+      "unitLabel": "Adet"
+    },
+    {
+      "name": "14'lü Entegre Soketi",
+      "code": "1603250311",
+      "qty": 5,
+      "packSize": 1,
+      "pieces": 5,
+      "unitLabel": "Adet"
+    },
+    {
+      "name": "5V Röle",
+      "code": "1603250304",
+      "qty": 5,
+      "packSize": 1,
+      "pieces": 5,
+      "unitLabel": "Adet"
+    },
+    {
+      "name": "LM317 Ayarlanabilir Voltaj Regülatörü",
+      "code": "1603250160",
+      "qty": 7,
+      "packSize": 1,
+      "pieces": 7,
+      "unitLabel": "Adet"
+    },
+    {
+      "name": "LM1117 3,3V Voltaj Regülatörü",
+      "code": "1603250159",
+      "qty": 8,
+      "packSize": 1,
+      "pieces": 8,
+      "unitLabel": "Adet"
+    },
+    {
+      "name": "UF4007 Diyot",
+      "code": "1603250166",
+      "qty": 10,
+      "packSize": 1,
+      "pieces": 10,
+      "unitLabel": "Adet"
+    },
+    {
+      "name": "10x10cm Bakır Plaket",
+      "code": "1602160035",
+      "qty": 4,
+      "packSize": 1,
+      "pieces": 4,
+      "unitLabel": "Adet"
+    },
+    {
+      "name": "1N4728A 3,3V Zener Diyot",
+      "code": "1603250173",
+      "qty": 5,
+      "packSize": 1,
+      "pieces": 5,
+      "unitLabel": "Adet"
+    },
+    {
+      "name": "7815 15V Voltaj Regülatörü",
+      "code": "1603250150",
+      "qty": 3,
+      "packSize": 1,
+      "pieces": 3,
+      "unitLabel": "Adet"
+    },
+    {
+      "name": "7809 9V Voltaj Regülatörü",
+      "code": "1603250148",
+      "qty": 4,
+      "packSize": 1,
+      "pieces": 4,
+      "unitLabel": "Adet"
+    },
+    {
+      "name": "7824 24V Voltaj Regülatörü",
+      "code": "1603250151",
+      "qty": 2,
+      "packSize": 1,
+      "pieces": 2,
+      "unitLabel": "Adet"
+    },
+    {
+      "name": "7905 5V Negatif Voltaj Regülatörü",
+      "code": "1603250152",
+      "qty": 1,
+      "packSize": 1,
+      "pieces": 1,
+      "unitLabel": "Adet"
+    },
+    {
+      "name": "7909 9V Negatif Voltaj Regülatörü",
+      "code": "1603250153",
+      "qty": 1,
+      "packSize": 1,
+      "pieces": 1,
+      "unitLabel": "Adet"
+    },
+    {
+      "name": "7912 12V Negatif Voltaj Regülatörü",
+      "code": "1603250155",
+      "qty": 1,
+      "packSize": 1,
+      "pieces": 1,
+      "unitLabel": "Adet"
+    },
+    {
+      "name": "BT139-800E Triyak TO-220 16A 800V",
+      "code": "2312290001",
+      "qty": 4,
+      "packSize": 1,
+      "pieces": 4,
+      "unitLabel": ""
+    },
+    {
+      "name": "Sarı Flaşör 2 Bacaklı LED 5mm",
+      "code": "2406141002",
+      "qty": 7,
+      "packSize": 1,
+      "pieces": 7,
+      "unitLabel": ""
+    },
+    {
+      "name": "Felder Lötfett Lehim Pastası",
+      "code": "1602160045",
+      "qty": 2,
+      "packSize": 1,
+      "pieces": 2,
+      "unitLabel": "Adet"
+    },
+    {
+      "name": "LM2596 Ayarlanabilir Voltaj Regülatör Kartı (1.25-30V)",
+      "code": "1604260105",
+      "qty": 5,
+      "packSize": 1,
+      "pieces": 5,
+      "unitLabel": "Adet"
+    },
+    {
+      "name": "NRF24L01 2,4GHz RF Alıcı-Verici Modül",
+      "code": "1604260093",
+      "qty": 2,
+      "packSize": 1,
+      "pieces": 2,
+      "unitLabel": "Adet"
+    }
+  ]
+}

@@ -1,0 +1,1098 @@
+{
+  "_meta": {
+    "nativeName": "简体中文",
+    "dir": "ltr",
+    "reviewed": false
+  },
+  "app": {
+    "name": "Component Inventory",
+    "skip": "跳到内容"
+  },
+  "common": {
+    "cancel": "取消",
+    "close": "关闭",
+    "save": "保存",
+    "undo": "撤销",
+    "retry": "重试",
+    "loading": "加载中",
+    "errorPrefix": "错误："
+  },
+  "nav": {
+    "inventory": "库存",
+    "projects": "项目",
+    "import": "导入",
+    "backups": "备份",
+    "settings": "设置"
+  },
+  "sidebar": {
+    "label": "侧边栏",
+    "navLabel": "主菜单",
+    "categories": "分类",
+    "filterCategories": "筛选分类",
+    "allParts": "全部元件",
+    "collapse": "收起{name}",
+    "expand": "展开{name}",
+    "rename": "重命名{name}",
+    "storagePlaces": "存放位置"
+  },
+  "about": {
+    "github": "GitHub 上的项目"
+  },
+  "startup": {
+    "title": "无法打开库存",
+    "newerSchema": "此数据库由更新版本的 Component Inventory 写入。请安装最新版本；本版本不会修改该文件。",
+    "failed": "无法打开数据库：{error}",
+    "nothingChanged": "没有做任何更改。你的数据仍在此文件夹中：",
+    "openFolder": "打开数据文件夹",
+    "migrated": "库存已升级为新格式。升级前已保存旧文件的副本。",
+    "migratedAction": "查看备份"
+  },
+  "status": {
+    "syncOff": "Drive 同步已关闭",
+    "syncError": "Drive 同步失败：{error}",
+    "syncPending": "Drive 同步等待中",
+    "synced": "Drive 已同步 {time}",
+    "parts": {
+      "other": "{count} 种元件"
+    },
+    "pieces": {
+      "other": "{count} 件"
+    },
+    "lowStock": {
+      "other": "{count} 种库存不足"
+    },
+    "lastBackup": "备份 {time}",
+    "syncOn": "Drive 同步已开启"
+  },
+  "update": {
+    "available": "{version} 版本已发布。",
+    "download": "下载",
+    "current": "你使用的是最新版本（{version}）。",
+    "failed": "无法检查更新。请检查网络连接。"
+  },
+  "table": {
+    "label": "元件",
+    "selectAll": "选择所有显示的元件",
+    "actions": "操作",
+    "selectRow": "选择 {code}",
+    "editPart": "编辑 {code}",
+    "deletePart": "删除 {code}",
+    "lowStockTitle": "库存不足",
+    "usageTitle": "用于 {count} 个项目，共需 {required} 件",
+    "usage": {
+      "other": "{count} 个项目"
+    }
+  },
+  "inventory": {
+    "search": "搜索元件",
+    "searchPlaceholder": "搜索型号、描述、厂商...",
+    "clearSearch": "清除搜索",
+    "lowStock": {
+      "other": "库存不足（{count}）"
+    },
+    "removeFilter": "移除此筛选",
+    "showing": {
+      "other": "显示 {shown} / {count} 种"
+    },
+    "columns": "列",
+    "more": "更多操作",
+    "labelsAll": "为显示的元件打印标签",
+    "autoCategorize": "自动分类",
+    "export": "导出",
+    "import": "导入",
+    "add": "添加元件",
+    "emptyTitle": "还没有元件",
+    "emptyBody": "添加第一个元件，或导入订单、表格或 PDF。",
+    "noMatchTitle": "没有匹配的元件",
+    "noMatchSearch": "没有与“{query}”匹配的结果。请检查拼写或减少关键词。",
+    "noMatchFilter": "没有元件符合这些筛选条件。",
+    "clearFilters": "清除筛选"
+  },
+  "selection": {
+    "label": "已选元件",
+    "count": {
+      "other": "已选 {count} 种"
+    },
+    "assign": "添加到项目",
+    "labels": "标签",
+    "autoCategorize": "自动分类",
+    "delete": "删除",
+    "clear": "取消选择",
+    "moveToPlace": "移到存放位置"
+  },
+  "delete": {
+    "title": {
+      "other": "删除 {count} 种元件？"
+    },
+    "bodyOne": "{code} 及其库存记录将被删除。",
+    "bodyMany": {
+      "other": "{count} 种元件及其库存记录将被删除。"
+    },
+    "bodyUsed": {
+      "other": "其中 {count} 种在项目清单中；这些行也会删除。"
+    },
+    "bodyUndo": "删除后可以立即撤销。",
+    "confirm": "删除",
+    "done": {
+      "other": "已删除 {count} 种元件。"
+    },
+    "restored": {
+      "other": "已恢复 {count} 种元件。"
+    },
+    "restoredSkipped": {
+      "other": "{count} 种元件无法恢复：型号已被其他元件使用。"
+    }
+  },
+  "detail": {
+    "label": "{code} 详情",
+    "quantity": "数量",
+    "takeOne": "取出一个",
+    "addOne": "添加一个",
+    "setTo": "设为",
+    "set": "设定",
+    "qtyInvalid": "请输入 0 或更大的整数。",
+    "edit": "编辑",
+    "duplicate": "复制",
+    "printLabel": "标签",
+    "assign": "添加到项目",
+    "datasheet": "数据手册",
+    "delete": "删除",
+    "imageAlt": "{code} 的照片",
+    "imageMissing": "找不到图片文件。",
+    "facts": "详情",
+    "parameters": "参数",
+    "projects": "使用它的项目",
+    "needs": {
+      "other": "需要 {count}"
+    },
+    "noProjects": "不在任何项目清单中。",
+    "history": "库存记录",
+    "after": {
+      "other": "现为 {count}"
+    },
+    "noHistory": "还没有变更记录。",
+    "created": "添加于 {time}",
+    "updated": "最后修改 {time}"
+  },
+  "edit": {
+    "addTitle": "添加元件",
+    "editTitle": "编辑 {code}",
+    "add": "添加元件",
+    "save": "保存修改",
+    "formMode": "表单",
+    "simple": "简单",
+    "detailed": "详细",
+    "codeHint": "厂商型号，例如 LM7805 或 IRFZ44N。",
+    "errCodeRequired": "请输入型号。",
+    "errQuantity": "请输入 0 到 999,999,999 之间的整数。",
+    "errUrl": "链接必须以 https:// 或 http:// 开头。",
+    "errNumber": "{field}不是数字。",
+    "addToExisting": {
+      "other": "加到已有元件（库存 {count}）"
+    },
+    "openExisting": "打开已有元件",
+    "addedToExisting": {
+      "other": "已给 {code} 增加 {count} 件。"
+    },
+    "qtyHint": {
+      "other": "留空表示 {count} 件（你的默认值）。"
+    },
+    "newCategory": "新分类...",
+    "newCategoryName": "新分类名称",
+    "rulesKnow": "已知型号",
+    "fillEmpty": "填充空字段",
+    "filledFrom": "已从{source}填充空字段。",
+    "autoDescription": "生成描述",
+    "guessCategory": "根据描述推测分类",
+    "noCategoryGuess": "无法从描述判断分类。",
+    "categoryGuessed": "分类已设为{category}。",
+    "placeHint": "元件存放的地方：抽屉、盒子或架子。可选。",
+    "electrical": "电气参数",
+    "ratedVoltage": "额定电压",
+    "parameters": "此类型的参数",
+    "sourcing": "厂商和供应商",
+    "customFields": "自定义列",
+    "chooseImage": "选择图片",
+    "changeImage": "更换图片",
+    "removeImage": "移除图片",
+    "simpleNote": "切换到“详细”可填写厂商、供应商、电气参数、备注和图片。",
+    "discardTitle": "放弃修改？",
+    "discardBody": "你在此表单中输入的内容将丢失。",
+    "discard": "放弃",
+    "keepEditing": "继续编辑",
+    "added": "已添加 {code}。",
+    "saved": "已保存 {code}。",
+    "show": "显示"
+  },
+  "rename": {
+    "title": "重命名{name}",
+    "subTitle": "重命名{name}",
+    "newName": "新名称",
+    "hint": {
+      "other": "{count} 种元件将使用新名称。"
+    },
+    "errEmpty": "请输入名称。",
+    "mergeNote": "{name}已存在；元件将并入其中。",
+    "confirm": "重命名",
+    "done": {
+      "other": "已将 {count} 种元件移到{name}。"
+    }
+  },
+  "columns": {
+    "title": "表格列",
+    "body": "选择表格显示哪些列及其顺序。型号和数量始终显示。",
+    "reset": "默认列",
+    "moveUp": "上移{name}",
+    "moveDown": "下移{name}",
+    "newCustom": "新的自定义列",
+    "newCustomHint": "每个元件都有的文本字段，例如“购买渠道”。",
+    "add": "添加列"
+  },
+  "shortcuts": {
+    "title": "键盘快捷键",
+    "search": "搜索元件",
+    "add": "添加元件",
+    "import": "导入",
+    "move": "在行之间移动",
+    "open": "打开元件",
+    "select": "选择行",
+    "delete": "删除元件",
+    "close": "关闭面板或对话框",
+    "help": "显示此列表"
+  },
+  "labels": {
+    "title": {
+      "other": "{count} 种元件的标签"
+    },
+    "sheet": "标签纸",
+    "copies": "每个标签的份数",
+    "skip": "第一张已用的标签数",
+    "skipHint": "从其后开始打印。",
+    "show": "标签内容",
+    "qr": "含型号的二维码",
+    "save": "保存 PDF",
+    "saved": "标签已保存到 {path}",
+    "previewAlt": "{code} 的标签预览",
+    "summary": {
+      "other": "{count} 个标签，{pages} 页"
+    },
+    "sheets": {
+      "a4-2x7": "A4，2 x 7（95 x 38 毫米）",
+      "a4-3x8": "A4，3 x 8（63.5 x 33.9 毫米）",
+      "roll-50x25": "标签打印机卷纸，50 x 25 毫米"
+    }
+  },
+  "export": {
+    "title": "导出库存",
+    "format": "格式",
+    "run": "导出",
+    "saved": "已保存到 {path}",
+    "progress": "正在绘制页面",
+    "folder": "将在 {path} 中打开",
+    "onlyShown": {
+      "other": "仅当前显示的 {count} 种元件"
+    },
+    "allParts": {
+      "other": "将导出全部 {count} 种元件。"
+    },
+    "pdfTitle": {
+      "other": "库存，{count} 种元件"
+    },
+    "pdfPage": "第 {page} 页，共 {pages} 页",
+    "formats": {
+      "xlsx": {
+        "title": "Excel 工作簿",
+        "body": "一个汇总表，每个分类一个工作表，带筛选。"
+      },
+      "csv": {
+        "title": "CSV",
+        "body": "单个表格，任何表格软件都能打开。"
+      },
+      "json": {
+        "title": "JSON",
+        "body": "全部字段，供其他程序使用。"
+      },
+      "pdf": {
+        "title": "PDF 清单",
+        "body": "可打印的清单：型号、分类、数量和描述。"
+      }
+    }
+  },
+  "assign": {
+    "title": {
+      "other": "将 {count} 种元件加入项目"
+    },
+    "project": "项目",
+    "newProject": "新项目...",
+    "qty": "每种元件需要的数量",
+    "qtyHint": "如果元件已在清单中，则增加该行数量。",
+    "confirm": "添加",
+    "done": {
+      "other": "已将 {count} 种元件加入{name}。"
+    },
+    "open": "打开项目"
+  },
+  "projects": {
+    "list": "项目",
+    "newName": "新项目名称",
+    "create": "创建项目",
+    "lines": {
+      "other": "{count} 行"
+    },
+    "short": {
+      "other": "缺 {count}"
+    },
+    "ready": "有库存",
+    "moveUp": "上移{name}",
+    "moveDown": "下移{name}",
+    "addPart": "添加元件",
+    "addPartPlaceholder": "在你的元件中搜索",
+    "matches": "匹配的元件",
+    "required": "需要",
+    "add": "添加",
+    "addInvalid": "请选择元件并输入需要的数量。",
+    "stock": "库存",
+    "status": "状态",
+    "missing": {
+      "other": "缺 {count}"
+    },
+    "enough": "足够",
+    "requiredFor": "{code} 需要的数量",
+    "removeLine": "从清单移除 {code}",
+    "lineRemoved": "已从清单移除 {code}。",
+    "bomEmpty": "清单中还没有元件。在上方搜索元件以添加。",
+    "name": "项目名称",
+    "delete": "删除项目",
+    "deleteTitle": "删除{name}？",
+    "deleteBody": {
+      "other": "项目及其 {count} 行将被删除。你的元件保留。删除后可以立即撤销。"
+    },
+    "deleted": "已删除{name}。",
+    "summary": "{lines} 行，共需 {pieces} 件。",
+    "missingTotal": {
+      "other": "缺 {count} 件"
+    },
+    "allInStock": "全部有库存",
+    "tabs": "项目栏目",
+    "bom": "元件清单",
+    "schematic": "原理图",
+    "notes": "备注",
+    "description": "描述",
+    "emptyTitle": "还没有项目",
+    "emptyBody": "在左侧创建项目，然后添加所需元件。",
+    "nameRequired": "请输入项目名称。",
+    "schematicTitle": "从原理图生成元件清单",
+    "schematicBody": "原理图中 {matched} 种元件与库存匹配，{unmatched} 种不匹配。",
+    "schematicApply": {
+      "other": "添加 {count} 行"
+    },
+    "refs": "位号",
+    "unmatched": {
+      "other": "{count} 个符号没有匹配的元件"
+    },
+    "schematicAdded": {
+      "other": "已添加 {count} 行。"
+    }
+  },
+  "schematic": {
+    "emptyTitle": "没有原理图",
+    "emptyBody": "附加 PDF、图片或 KiCad 原理图（.kicad_sch）即可在此查看。",
+    "pick": "选择文件",
+    "change": "更换文件",
+    "remove": "移除",
+    "importBom": "据此生成元件清单",
+    "readError": "无法读取文件：{error}",
+    "pdfError": "无法打开此 PDF。",
+    "toolbar": "原理图查看",
+    "stage": "原理图",
+    "prevPage": "上一页",
+    "nextPage": "下一页",
+    "page": "第 {page} 页，共 {pages} 页",
+    "zoomIn": "放大",
+    "zoomOut": "缩小",
+    "fit": "适合窗口",
+    "kicadAlt": {
+      "other": "包含 {count} 种元件的原理图"
+    },
+    "kicadHint": "滚动缩放，拖动平移，双击适合窗口。",
+    "kicadEmpty": "此原理图中没有找到元件或连线。",
+    "imageAlt": "{name}的原理图",
+    "status": {
+      "ok": "有库存",
+      "short": "不足",
+      "extra": "有库存但不在清单中",
+      "unknown": "不在库存中",
+      "unassigned": "无值",
+      "power": "电源"
+    }
+  },
+  "bulk": {
+    "title": "自动分类",
+    "body": "根据型号、描述和元件库给出建议。应用前不会更改任何内容；会先备份。",
+    "scope": "查看范围",
+    "scopeAll": {
+      "other": "全部元件（{count}）"
+    },
+    "scopeUncategorized": "未分类元件",
+    "scopeSelected": {
+      "other": "已选元件（{count}）"
+    },
+    "kinds": "建议类型",
+    "kind": {
+      "categorize": "分类",
+      "normalize": "写法",
+      "enrich": "空字段",
+      "merge": "重复"
+    },
+    "source": {
+      "part-code": "来自型号",
+      "opto": "光耦系列",
+      "description": "来自描述",
+      "heuristic": "来自关键词"
+    },
+    "confidence": {
+      "high": "确定",
+      "medium": "可能",
+      "low": "猜测"
+    },
+    "misfiled": "似乎分错了",
+    "mergeTotal": {
+      "other": "合计 {count} 件"
+    },
+    "selectAll": "全选此列表",
+    "selectNone": "取消此列表全选",
+    "selected": {
+      "other": "已选 {count} 项"
+    },
+    "apply": {
+      "other": "应用 {count} 项"
+    },
+    "applied": {
+      "other": "已修改 {count} 种元件。"
+    },
+    "seeBackups": "备份",
+    "noneTitle": "没有建议",
+    "noneBody": {
+      "other": "所查看的 {count} 种元件在此无需修改。"
+    }
+  },
+  "backups": {
+    "create": "立即备份",
+    "created": "已创建备份。",
+    "openFolder": "打开备份文件夹",
+    "policy": {
+      "other": "有变动时每 {minutes} 分钟自动备份一次；保留最新的 {count} 个。手动备份和更新前的备份永不删除。"
+    },
+    "emptyTitle": "还没有备份",
+    "emptyBody": "现在创建一个；应用在每次导入和恢复前也会备份。",
+    "when": "时间",
+    "kind": "类型",
+    "size": "大小",
+    "compare": "有何变化",
+    "restore": "恢复",
+    "copyName": "复制 {name} 的路径",
+    "copied": "路径已复制。",
+    "restoreTitle": "恢复此备份？",
+    "restoreBody": "库存将回到 {time} 的状态。恢复前会先保存当前数据的副本，因此可以撤销。",
+    "restored": "备份已恢复。",
+    "restoreUndone": "已撤销恢复。",
+    "diffTitle": "{time} 以来的变化",
+    "diffBody": "“当时”为备份，“现在”为你的库存。",
+    "diffTabs": "变化类型",
+    "changed": "已更改",
+    "added": "之后新增",
+    "removed": "之后删除",
+    "field": "字段",
+    "then": "当时",
+    "now": "现在",
+    "noneChanged": "没有元件发生变化。",
+    "noneAdded": "没有新增元件。",
+    "noneRemoved": "没有删除元件。",
+    "kinds": {
+      "auto": "自动",
+      "manual": "手动",
+      "pre-import": "导入前",
+      "pre-undo": "撤销前",
+      "pre-bulk": "批量修改前",
+      "pre-restore": "恢复前",
+      "pre-delete": "删除前",
+      "pre-migration": "更新前",
+      "legacy": "旧版应用"
+    }
+  },
+  "import": {
+    "dropTitle": "将文件拖到这里",
+    "dropBody": "打印成 PDF 的订单或购物车页面、Excel 或 CSV 清单，或浏览器扩展生成的 .cinv.json 文件。",
+    "choose": "选择文件",
+    "reading": "正在读取 {name}",
+    "sources": {
+      "extension": {
+        "title": "来自商店页面",
+        "body": "浏览器扩展读取你在 Özdisan、Motorobit 或 Robocombo 的订单并在这里打开。"
+      },
+      "pdf": {
+        "title": "打印的页面",
+        "body": "将订单或购物车页面打印为 PDF。带数量的行会被读取；清单在小计处结束。"
+      },
+      "table": {
+        "title": "表格",
+        "body": "读取每个带有“型号”、“数量”或“描述”等列名的工作表。"
+      }
+    },
+    "errors": {
+      "tooLarge": "文件大于 {mb} MB。",
+      "empty": "文件中没有行。",
+      "noHeaders": "没有工作表包含本应用认识的列名（例如型号或数量）。",
+      "pdfNoText": "此 PDF 没有文字层（是扫描图片），无法读取。",
+      "pdfNoRows": "此 PDF 中没有找到带数量的行。",
+      "unknownType": "无法导入 .{ext} 文件。",
+      "link": "无法读取扩展发来的链接。",
+      "cinv": {
+        "invalid-json": "这不是有效的 .cinv.json 文件。",
+        "not-cinv": "此 JSON 文件不是扩展生成的。",
+        "unsupported-version": "此文件由更新的扩展生成。请更新应用。",
+        "no-items": "文件中没有元件。",
+        "no-valid-items": "文件中的行都无法读取。"
+      },
+      "linkFailed": "错误：无法打开扩展程序发来的清单（{error}）。请在扩展面板中选择“另存为文件”，然后将文件拖到这里。"
+    },
+    "linkReceived": {
+      "other": "来自 {shop} 的 {count} 行已准备好审核。"
+    },
+    "mapping": {
+      "title": {
+        "other": "列（{count}）"
+      },
+      "body": "文件中每一列填入哪个字段。设为“忽略”的列不会读取。",
+      "fieldFor": "{column} 列对应的字段",
+      "ignore": "忽略"
+    },
+    "review": {
+      "title": "审核：{source}",
+      "lineCount": {
+        "other": "{count} 行"
+      },
+      "pieceCount": {
+        "other": "{count} 件"
+      },
+      "toCheck": {
+        "other": "{count} 行需检查"
+      },
+      "unreadable": {
+        "other": "{count} 行没有数量或型号"
+      },
+      "excluded": {
+        "other": "{count} 行已排除"
+      },
+      "skipped": {
+        "other": "来源中有 {count} 行无法读取"
+      },
+      "filter": "显示",
+      "all": "全部",
+      "checkTab": "待检查",
+      "status": "状态",
+      "name": "来源中的名称",
+      "units": "单位数",
+      "pack": "每单位",
+      "pieces": "件数",
+      "stock": "库存",
+      "new": "新",
+      "inStock": {
+        "other": "现有 {count}"
+      },
+      "include": "导入 {name}",
+      "check": "需要检查",
+      "ok": "看起来正确",
+      "codeFor": "{name} 的型号",
+      "unitsFor": "{name} 的单位数",
+      "packFor": "{name} 每单位件数",
+      "showing": "显示第 1 至 {shown} 行，共 {total} 行。向下滚动查看更多。"
+    },
+    "why": {
+      "plain": {
+        "other": "{count} 件"
+      },
+      "pack": "{units} 单位 x 每包 {pack} 件 = {pieces} 件",
+      "unknown": "无法读取数量。"
+    },
+    "reason": {
+      "readFrom": "数量取自 {column} 列。",
+      "packRule": "名称以“- {size} Adet”结尾：商店按每包 {size} 件出售。",
+      "packExtension": "扩展识别出每包 {size} 件。",
+      "packEdited": "你设定了每单位 {size} 件。",
+      "perPiece": "每单位一件。"
+    },
+    "issue": {
+      "noQuantity": "没有数量列；按一件计算。",
+      "noQuantityRaw": "“{raw}”不是数量。",
+      "notWhole": "“{raw}”不是整数；已四舍五入。",
+      "noCode": "没有型号：请输入型号或排除此行。",
+      "nameAsCode": "未找到型号；以名称作为代码。",
+      "codeFromName": "型号取自名称。",
+      "shopCode": "{code} 是商店自己的编号，不是型号。",
+      "filledLibrary": "已从元件库填充空字段。",
+      "filledRules": "已根据已知型号填充空字段。",
+      "duplicate": {
+        "other": "此型号出现在 {count} 行中；数量将相加。"
+      }
+    },
+    "mode": {
+      "label": "如何应用",
+      "add": {
+        "title": "加到库存",
+        "body": "数量加到已有元件上；新型号成为新元件。"
+      },
+      "sync": {
+        "title": "设定数量",
+        "body": "文件中元件的库存被替换为文件中的数量；其他元件不变。"
+      },
+      "replace": {
+        "title": "全部替换",
+        "body": "库存将与此文件完全相同。不在文件中的元件会被删除。"
+      }
+    },
+    "backupNote": "写入前会先备份，之后也可以撤销此次导入。",
+    "apply": {
+      "other": "导入 {count} 行"
+    },
+    "replaceTitle": "替换整个库存？",
+    "replaceBody": {
+      "other": "你的 {count} 种元件将被此文件中的行替换。"
+    },
+    "replaceConfirm": "替换",
+    "doneTitle": "已导入",
+    "doneBody": "新元件 {created} 种，更新 {updated} 种，共 {pieces} 件。",
+    "doneUndoneTitle": "已撤销导入",
+    "doneUndoneBody": "库存已恢复到导入前的状态。",
+    "showInventory": "查看库存",
+    "another": "导入另一个文件",
+    "undo": "撤销导入",
+    "undoTitle": "撤销此次导入？",
+    "undoBody": "{source}：它新增的元件会被删除，修改的数量会恢复。你之后所做的修改会尽量保留。",
+    "undone": {
+      "other": "已撤销导入，{count} 种元件已恢复。"
+    },
+    "undoNote": {
+      "deleted_since": "{code} 在导入后被删除。",
+      "edited_since": "{code} 在导入后被编辑；你的修改已保留。",
+      "used_in_project": "{code} 在项目清单中，因此保留。",
+      "stock_below": "{code} 的数量少于导入所加的数量；已设为 0。",
+      "code_taken": "{code} 现在属于另一个元件。"
+    },
+    "history": {
+      "title": "以往的导入",
+      "empty": "还没有导入。",
+      "when": "时间",
+      "source": "来源",
+      "mode": "方式",
+      "result": "结果",
+      "counts": "新增 {created}，更新 {updated}，{pieces} 件",
+      "undone": "已撤销"
+    },
+    "linkQueued": "扩展程序发来的另一份清单正在等待，完成本次核对后将自动打开。"
+  },
+  "settings": {
+    "range": "请输入 {min} 到 {max} 之间的整数。",
+    "choose": "选择文件夹",
+    "clear": "清除",
+    "language": {
+      "title": "语言和外观",
+      "label": "语言",
+      "unreviewed": "尚未审校",
+      "unreviewedNote": "此翻译尚未经母语人士审校。欢迎在 GitHub 上提交修改。"
+    },
+    "theme": {
+      "label": "主题",
+      "system": "跟随 Windows",
+      "dark": "深色",
+      "light": "浅色",
+      "switchLight": "切换到浅色主题",
+      "switchDark": "切换到深色主题"
+    },
+    "parts": {
+      "title": "元件",
+      "defaultQuantity": "新元件的默认数量",
+      "lowStock": "库存不足阈值",
+      "lowStockHint": "数量不超过此值的元件会被标记。",
+      "formMode": "添加和编辑表单",
+      "storagePlace": "存放位置",
+      "storagePlaceHint": "元件存放的地方（抽屉、盒子、架子）。使用后显示。",
+      "placeAuto": "使用后显示",
+      "placeShow": "始终显示",
+      "placeHide": "隐藏"
+    },
+    "backups": {
+      "title": "备份",
+      "hint": "库存的副本，保存在数据文件夹中。",
+      "interval": "自动备份间隔（分钟）",
+      "intervalHint": "0 表示关闭自动备份。",
+      "retention": "保留的自动备份数量",
+      "retentionHint": "更早的会被删除。手动备份始终保留。",
+      "openData": "打开数据文件夹"
+    },
+    "export": {
+      "title": "导出文件夹",
+      "none": "未设置：每次由保存对话框询问。"
+    },
+    "drive": {
+      "title": "Google Drive 同步",
+      "hint": "每次修改后，应用会把 Excel、JSON 和数据库副本写入 Google Drive 桌面版中的一个文件夹。Drive 会上传它们；可以在手机上打开 Excel 文件。",
+      "enable": "将副本写入 Drive 文件夹",
+      "needFolder": "请先选择文件夹。",
+      "noFolder": "未选择文件夹",
+      "baseName": "文件名",
+      "baseNameHint": "文件名为 {name}.xlsx、{name}.json 和 {name}.db。",
+      "lastSync": "最后写入 {time}",
+      "syncNow": "立即写入"
+    },
+    "columns": {
+      "title": "自定义列",
+      "hint": "每个元件都有的附加字段。在库存的“列”对话框中添加。",
+      "none": "没有自定义列。",
+      "deleteTitle": "删除列{name}？",
+      "deleteBody": "该列及所有元件中的值将被删除。",
+      "delete": "删除列"
+    },
+    "updates": {
+      "title": "更新",
+      "auto": "启动时检查新版本",
+      "hint": "只显示通知；不会自动下载任何内容。",
+      "now": "立即检查"
+    },
+    "about": {
+      "title": "关于",
+      "version": "版本",
+      "data": "数据文件夹",
+      "schema": "数据库格式",
+      "library": "元件库",
+      "libraryOn": "可用",
+      "libraryOff": "未找到",
+      "languages": "语言",
+      "translate": "帮助翻译"
+    }
+  },
+  "field": {
+    "part_code": "型号",
+    "category": "分类",
+    "subcategory": "子分类",
+    "quantity": "数量",
+    "package": "封装",
+    "manufacturer": "厂商",
+    "mpn": "厂商型号",
+    "location": "存放位置",
+    "preferred_supplier": "供应商",
+    "voltage_max": "最大电压",
+    "current_max": "最大电流",
+    "resistance": "值",
+    "tolerance": "精度",
+    "power_rating": "功率",
+    "description": "描述",
+    "datasheet_url": "数据手册链接",
+    "unit_price": "单价",
+    "notes": "备注",
+    "image_path": "图片",
+    "updated_at": "最后修改",
+    "created_at": "添加时间"
+  },
+  "attr": {
+    "accuracy": "精度",
+    "bjt_type": "类型",
+    "channel": "沟道类型",
+    "channels": "通道数",
+    "color": "颜色",
+    "core": "CPU 内核",
+    "diode_type": "二极管类型",
+    "dropout": "压差",
+    "freq_max": "最高频率",
+    "freq_range": "频率范围",
+    "freq_tol": "精度",
+    "frequency": "频率",
+    "inductance": "电感",
+    "interface": "接口",
+    "io_pins": "I/O 引脚",
+    "load_cap": "负载电容",
+    "luminosity": "亮度",
+    "measurement": "测量对象",
+    "power_va": "功率",
+    "pz": "耗散功率",
+    "qg": "栅极电荷",
+    "range": "范围",
+    "reg_type": "类型",
+    "slew_rate": "压摆率",
+    "supply_v": "供电",
+    "tq": "关断时间",
+    "turns_ratio": "匝数比",
+    "v_supply": "供电",
+    "wavelength": "波长",
+    "ztol": "精度"
+  },
+  "movement": {
+    "create": "添加",
+    "edit": "编辑",
+    "adjust": "数量变更",
+    "delete": "删除",
+    "bulk-delete": "批量删除",
+    "restore": "恢复",
+    "import": "导入",
+    "import-replace": "被替换导入删除",
+    "import-undo": "撤销导入",
+    "merge": "合并",
+    "bulk": "批量修改",
+    "auto-categorize": "自动分类"
+  },
+  "errors": {
+    "generic": "出了点问题。请重试；如果仍然出现，数据文件夹中的备份是安全的。",
+    "database": "无法读取或写入数据库。",
+    "file": "无法读取或写入文件。",
+    "data": "无法读取已保存的数据。",
+    "not_found": "它已不存在，可能已被删除。列表已刷新。",
+    "invalid_input": "不允许此值。",
+    "duplicate_part_code": "另一个元件已使用此型号。",
+    "newer_schema": "数据库由更新版本的应用写入。",
+    "conflict": "期间数据已变化。请重试。",
+    "export": "无法写入导出文件。",
+    "network": "没有网络连接。",
+    "internal": "应用内部出错。",
+    "startup": "应用无法启动。"
+  },
+  "category": {
+    "Resistors": "电阻",
+    "Potentiometers": "电位器",
+    "Thermistors": "热敏电阻",
+    "Varistors": "压敏电阻",
+    "Capacitors": "电容",
+    "Inductors": "电感",
+    "Transformers": "变压器",
+    "Transistors": "晶体管",
+    "Thyristors": "晶闸管",
+    "Diodes": "二极管",
+    "LEDs": "LED",
+    "ICs": "集成电路",
+    "Microcontrollers": "单片机",
+    "Sensors": "传感器",
+    "Relays": "继电器",
+    "Connectors": "连接器",
+    "Crystals": "晶振",
+    "Switches": "开关",
+    "Modules": "模块",
+    "Mechanical": "机械件",
+    "Consumables": "耗材",
+    "Uncategorized": "未分类"
+  },
+  "subcategory": {
+    "Carbon Film": "碳膜",
+    "Metal Film": "金属膜",
+    "Through-Hole": "直插",
+    "Wirewound": "绕线",
+    "SMD": "贴片",
+    "Thick Film": "厚膜",
+    "Thin Film": "薄膜",
+    "Power": "功率",
+    "Precision": "精密",
+    "Network / Array": "排阻",
+    "Shunt": "分流电阻",
+    "Trimpot": "微调电位器",
+    "Single-turn": "单圈",
+    "Multi-turn": "多圈",
+    "Linear": "线性",
+    "Rotary": "旋转",
+    "Logarithmic": "对数",
+    "Slide": "滑动",
+    "NTC": "NTC",
+    "PTC": "PTC",
+    "MOV": "MOV",
+    "SIOV": "SIOV",
+    "Electrolytic": "电解",
+    "Ceramic": "陶瓷",
+    "Tantalum": "钽",
+    "Film": "薄膜",
+    "Polymer": "聚合物",
+    "Supercapacitor": "超级电容",
+    "MLCC": "MLCC",
+    "Variable / Trimmer": "可调 / 微调",
+    "Inductor": "电感",
+    "Ferrite Core": "铁氧体磁芯",
+    "Toroid Core": "环形磁芯",
+    "Common Mode Choke": "共模电感",
+    "Ferrite Bead": "磁珠",
+    "Step-Up": "升压",
+    "Step-Down": "降压",
+    "Isolation": "隔离",
+    "Audio": "音频",
+    "Toroidal": "环形",
+    "Pulse / Current": "脉冲 / 电流",
+    "BJT NPN - General Purpose": "BJT NPN - 通用",
+    "BJT NPN - HV": "BJT NPN - 高压",
+    "BJT NPN - HC": "BJT NPN - 大电流",
+    "BJT NPN - HF": "BJT NPN - 高频",
+    "BJT NPN": "BJT NPN",
+    "BJT PNP - General Purpose": "BJT PNP - 通用",
+    "BJT PNP - HV": "BJT PNP - 高压",
+    "BJT PNP - HC": "BJT PNP - 大电流",
+    "BJT PNP - HF": "BJT PNP - 高频",
+    "BJT PNP": "BJT PNP",
+    "MOSFET N-Channel": "MOSFET N 沟道",
+    "MOSFET N-Channel - HV": "MOSFET N 沟道 - 高压",
+    "MOSFET N-Channel - HC": "MOSFET N 沟道 - 大电流",
+    "MOSFET N-Channel - Logic-Level": "MOSFET N 沟道 - 逻辑电平",
+    "Power MOSFET": "功率 MOSFET",
+    "MOSFET P-Channel": "MOSFET P 沟道",
+    "MOSFET P-Channel - HV": "MOSFET P 沟道 - 高压",
+    "MOSFET P-Channel - HC": "MOSFET P 沟道 - 大电流",
+    "IGBT": "IGBT",
+    "JFET": "JFET",
+    "Darlington NPN": "达林顿 NPN",
+    "Darlington PNP": "达林顿 PNP",
+    "Darlington Array": "达林顿阵列",
+    "SCR": "单向可控硅",
+    "TRIAC": "双向可控硅",
+    "DIAC": "DIAC",
+    "Rectifier": "整流",
+    "Signal": "信号",
+    "Switching": "开关",
+    "Schottky": "肖特基",
+    "Zener": "稳压",
+    "TVS": "TVS",
+    "Fast Recovery": "快恢复",
+    "Bridge Rectifier": "整流桥",
+    "Varactor": "变容",
+    "Indicator": "指示",
+    "High-Power": "大功率",
+    "RGB": "RGB",
+    "Addressable": "可寻址",
+    "IR": "红外",
+    "UV": "紫外",
+    "Laser": "激光",
+    "7-Segment": "数码管",
+    "Photodiode / Phototransistor": "光电二极管 / 光电晶体管",
+    "Op-Amp": "运放",
+    "Op-Amps": "运放",
+    "Instrumentation Amplifier": "仪表放大器",
+    "Comparator": "比较器",
+    "Timer": "定时器",
+    "Voltage Regulator": "稳压器",
+    "Linear Regulator": "线性稳压器",
+    "LDO Regulator": "LDO 稳压器",
+    "Switching Regulator": "开关稳压器",
+    "Buck Converter": "降压转换器",
+    "Boost Converter": "升压转换器",
+    "DC-DC Converter": "DC-DC 转换器",
+    "Voltage Reference": "电压基准",
+    "Gate Driver": "栅极驱动",
+    "Motor Driver": "电机驱动",
+    "Stepper Driver": "步进电机驱动",
+    "PWM Controller": "PWM 控制器",
+    "Optocoupler": "光耦",
+    "Logic Gate": "逻辑门",
+    "Logic": "逻辑",
+    "Shift Register": "移位寄存器",
+    "Multiplexer": "多路复用器",
+    "LED Driver": "LED 驱动",
+    "RS-232 Driver": "RS-232 驱动",
+    "USB-UART": "USB-UART",
+    "RS-485 Transceiver": "RS-485 收发器",
+    "CAN Transceiver": "CAN 收发器",
+    "I/O Expander": "I/O 扩展",
+    "Interface": "接口",
+    "WiFi / BT SoC": "WiFi / 蓝牙 SoC",
+    "RF Transceiver": "射频收发器",
+    "Audio Amplifier": "音频功放",
+    "ADC": "ADC",
+    "DAC": "DAC",
+    "EEPROM / Flash": "EEPROM / Flash",
+    "EEPROM": "EEPROM",
+    "Flash Memory": "闪存",
+    "Real-Time Clock": "实时时钟",
+    "RTC": "RTC",
+    "Battery Charger": "充电管理",
+    "Current Sensor": "电流传感器",
+    "Microcontroller": "单片机",
+    "STM32 (ARM Cortex-M)": "STM32 (ARM Cortex-M)",
+    "AVR (Atmel)": "AVR (Atmel)",
+    "PIC": "PIC",
+    "MSP430": "MSP430",
+    "RP2040 (Pi Pico)": "RP2040 (Pi Pico)",
+    "8051": "8051",
+    "ESP32 / ESP8266": "ESP32 / ESP8266",
+    "Temperature": "温度",
+    "Humidity": "湿度",
+    "Pressure": "压力",
+    "Hall Effect": "霍尔",
+    "Current": "电流",
+    "Accelerometer": "加速度计",
+    "Gyroscope": "陀螺仪",
+    "IMU": "IMU",
+    "Proximity": "接近",
+    "Distance / ToF": "距离 / ToF",
+    "Ultrasonic": "超声波",
+    "PIR (Motion)": "人体红外 (PIR)",
+    "Light / Color": "光 / 颜色",
+    "Gas": "气体",
+    "Force / Strain": "力 / 应变",
+    "SPST": "SPST",
+    "SPDT": "SPDT",
+    "DPDT": "DPDT",
+    "Solid State": "固态",
+    "Reed": "干簧",
+    "Pin Header": "排针",
+    "Socket": "排母",
+    "Terminal Block": "接线端子",
+    "IC Socket": "IC 插座",
+    "JST": "JST",
+    "Molex": "Molex",
+    "USB": "USB",
+    "RJ45": "RJ45",
+    "D-Sub": "D-Sub",
+    "DC Jack": "DC 插座",
+    "XT60 / XT30": "XT60 / XT30",
+    "RF / Coaxial": "射频 / 同轴",
+    "IDC / Ribbon": "IDC / 排线",
+    "Crystal": "晶体",
+    "HC-49/S": "HC-49/S",
+    "Oscillator (XO)": "振荡器 (XO)",
+    "TCXO": "TCXO",
+    "Resonator": "谐振器",
+    "Tactile": "轻触",
+    "Toggle": "拨动",
+    "Encoder": "编码器",
+    "DIP": "拨码",
+    "Rocker": "船型",
+    "Limit": "限位",
+    "Power Supply": "电源",
+    "Sensor Board": "传感器板",
+    "Display": "显示屏",
+    "RF / Wireless": "射频 / 无线",
+    "Development Board": "开发板",
+    "Programmer / Debugger": "编程器 / 调试器",
+    "Panel Meter": "面板表",
+    "Heat Sink": "散热片",
+    "Standoff": "铜柱",
+    "Screw / Nut": "螺丝 / 螺母",
+    "Fan": "风扇",
+    "Cable / Wire": "线缆",
+    "PCB / Board": "电路板",
+    "Enclosure": "外壳",
+    "Battery Holder": "电池座",
+    "Solder": "焊锡",
+    "Flux": "助焊剂",
+    "Heat Shrink": "热缩管",
+    "Insulating Tape": "绝缘胶带",
+    "Cleaner": "清洁剂",
+    "Hand Tools": "手工具"
+  },
+  "place": {
+    "moveTitle": {
+      "other": "将 {count} 个零件放入存放位置"
+    },
+    "moveHint": "选择一个位置或输入新名称（盒子、抽屉、货架）。留空则将零件移出任何位置。",
+    "move": "移动",
+    "renameTitle": "重命名 {name}",
+    "joinNote": "{name} 已存在；零件将并入其中。",
+    "done": {
+      "other": "{count} 个零件现在位于 {name}。"
+    },
+    "cleared": {
+      "other": "已将 {count} 个零件移出存放位置。"
+    }
+  }
+}

@@ -1,0 +1,31 @@
+/* The extension panel. Colors are Bugra tokens (src/styles/tokens.css, scoped to :host). */
+:host { color-scheme: light dark; }
+.panel, .pill { font-family: var(--font-ui); font-size: 13px; line-height: 1.5; color: var(--ink); }
+.panel {
+  display: flex; flex-direction: column; gap: 10px; width: 300px; padding: 14px 14px 12px;
+  background: var(--surface); border: 1px solid var(--line-strong); border-radius: var(--radius); box-shadow: var(--shadow-menu);
+}
+.panel[hidden], .pill[hidden], .qty[hidden], .note[hidden] { display: none; }
+header { display: flex; align-items: center; gap: 8px; }
+header strong { flex: 1; font-weight: 600; }
+.mark, .pill svg { display: inline-grid; width: 20px; height: 20px; color: var(--accent-ink); }
+.mark svg { width: 20px; height: 20px; }
+.status { margin: 0; color: var(--muted); }
+.qty { display: flex; align-items: center; gap: 8px; }
+.qty input { width: 90px; min-height: 32px; padding: 0 10px; font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--border-control); border-radius: var(--radius-sm); }
+.actions { display: flex; flex-wrap: wrap; gap: 6px; }
+button {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 32px; padding: 0 14px;
+  font: inherit; font-weight: 500; color: var(--ink); background: transparent; border: 1px solid var(--line-strong); border-radius: var(--pill); cursor: pointer;
+}
+button:hover { background: var(--surface-2); border-color: var(--ink); }
+button:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 3px; }
+button:disabled { color: var(--disabled-ink); background: var(--disabled-fill); border-color: transparent; cursor: not-allowed; }
+button.primary { flex: 1 0 100%; color: var(--on-accent); background: var(--accent); border-color: var(--accent-ink); }
+button.primary:hover { background: var(--accent-hover); }
+button.quiet { border-color: transparent; color: var(--muted); }
+button.icon { min-height: 28px; width: 28px; padding: 0; border-color: transparent; color: var(--muted); font-size: 16px; }
+.note { padding: 10px 12px; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); }
+.note button { margin-top: 8px; width: 100%; }
+.pill { min-height: 40px; padding: 0 16px 0 12px; background: var(--surface); border-color: var(--line-strong); box-shadow: var(--shadow-menu); }
+.pill svg { width: 18px; height: 18px; }

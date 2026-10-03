@@ -1,0 +1,50 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Local scratch files
+.commit-msg.tmp
+.release-notes.tmp
+*.bak
+
+# Browser extension build output
+extension/dist
+out.cinv.json
+release/
+
+# Page captures taken from a logged-in browser: personal data until reviewed
+.captures/
+
+# Rust build output (workspace)
+/target/
+
+# SQLite side files
+*.db-shm
+*.db-wal
+
+# Frontend build output
+/dist/
+
+extension/*.zip
+test-results/

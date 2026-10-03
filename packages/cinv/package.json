@@ -1,0 +1,8 @@
+{
+  "name": "@cinv/core",
+  "private": true,
+  "version": "1.0.0-beta.4",
+  "description": "The cinv interchange format between the browser extension and Component Inventory: types, validator, deep-link codec.",
+  "type": "module",
+  "main": "src/index.ts"
+}

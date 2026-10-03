@@ -1,0 +1,66 @@
+/** Typed wrappers for every command. Names match crates/inventory-core/src/api.rs and src-tauri. */
+import { withTaxonomy } from '../domain/libraryMap';
+import { call, callBytes, callDesktop, callWithBody } from './invoke';
+import type * as T from './types';
+
+export const api = {
+  appInfo: () => call<T.AppInfo>('app_info'),
+  listComponents: () => call<T.Component[]>('list_components'),
+  getComponent: (id: number) => call<T.ComponentDetail>('get_component', { id }),
+  saveComponent: (component: T.ComponentInput) => call<T.Component>('save_component', { component }),
+  deleteComponents: (ids: number[]) => call<T.DeletedSnapshot>('delete_components', { ids }),
+  restoreComponents: (snapshot: T.DeletedSnapshot) => call<T.RestoreReport>('restore_components', { snapshot }),
+  adjustQuantity: (id: number, delta: number) => call<T.Component>('adjust_quantity', { id, delta }),
+  renameCategory: (from: string, to: string, parent: string | null) => call<T.CountResult>('rename_category', { from, to, parent }),
+  applyPatches: (patches: T.ComponentPatch[], reason: string) => call<T.CountResult>('apply_patches', { patches, reason }),
+  mergeComponents: (keepId: number, mergeIds: number[], partCode: string | null) =>
+    call<T.Component>('merge_components', { keep_id: keepId, merge_ids: mergeIds, part_code: partCode }),
+  listMovements: (componentId: number, limit = 50) => call<T.Movement[]>('list_movements', { component_id: componentId, limit }),
+  listCustomColumns: () => call<T.CustomColumn[]>('list_custom_columns'),
+  saveCustomColumn: (column: T.CustomColumnInput) => call<T.CustomColumn>('save_custom_column', { column }),
+  deleteCustomColumn: (id: number) => call<null>('delete_custom_column', { id }),
+  getSettings: () => call<T.AppSettings>('get_settings'),
+  updateSettings: (patch: Partial<T.AppSettings>) => call<T.AppSettings>('update_settings', { patch }),
+  importLegacySettings: (values: Record<string, string>) => call<T.AppSettings>('import_legacy_settings', { values }),
+  applyImport: (request: T.ImportRequest) => call<T.ImportResult>('apply_import', { request }),
+  listImports: () => call<T.ImportBatch[]>('list_imports'),
+  getImport: (id: number) => call<T.ImportBatchDetail>('get_import', { id }),
+  undoImport: (id: number) => call<T.UndoResult>('undo_import', { id }),
+  listProjects: () => call<T.Project[]>('list_projects'),
+  createProject: (name: string) => call<T.Project>('create_project', { name }),
+  updateProject: (patch: T.ProjectPatch) => call<T.Project>('update_project', { patch }),
+  deleteProject: (id: number) => call<T.ProjectSnapshot>('delete_project', { id }),
+  restoreProject: (snapshot: T.ProjectSnapshot) => call<T.Project>('restore_project', { snapshot }),
+  reorderProjects: (ids: number[]) => call<null>('reorder_projects', { ids }),
+  listBom: (projectId: number) => call<T.BomRow[]>('list_bom', { id: projectId }),
+  upsertBomLine: (line: T.BomLineInput) => call<T.BomRow>('upsert_bom_line', { line }),
+  addBomLines: (lines: T.BomLineInput[]) => call<T.CountResult>('add_bom_lines', { lines }),
+  updateBomLine: (patch: T.BomLinePatch) => call<T.BomRow>('update_bom_line', { patch }),
+  deleteBomLine: (id: number) => call<T.BomLink>('delete_bom_line', { id }),
+  projectUsage: () => call<T.UsageSummary[]>('project_usage'),
+  createBackup: (kind = 'manual') => call<T.BackupEntry>('create_backup', { kind }),
+  listBackups: () => call<T.BackupEntry[]>('list_backups'),
+  restoreBackup: (fileName: string) => call<T.RestoreBackupResult>('restore_backup', { file_name: fileName }),
+  diffBackup: (fileName: string) => call<T.BackupDiff>('diff_backup', { file_name: fileName }),
+  // Library parts come back in the app's taxonomy (src/domain/libraryMap.ts).
+  searchLibrary: async (term: string, limit = 15) => (await call<T.LibraryPart[]>('search_library', { term, limit })).map(withTaxonomy),
+  lookupLibrary: async (codes: string[]) => (await call<Array<T.LibraryPart | null>>('lookup_library', { codes })).map((p) => (p ? withTaxonomy(p) : null)),
+  syncStatus: () => call<T.SyncStatus>('sync_status'),
+  syncNow: () => call<T.SyncStatus>('sync_now'),
+
+  // Desktop only (native dialogs, links, files the owner picked).
+  startupStatus: () => callDesktop<T.StartupStatus>('startup_status'),
+  pickFolder: (kind: 'export' | 'drive') => callDesktop<T.AppSettings | null>('pick_folder', { kind }),
+  pickComponentImage: (partCode: string) => callDesktop<string | null>('pick_component_image', { partCode }),
+  readImage: (path: string) => callBytes('read_image', { path }),
+  pickSchematic: (projectId: number) => callDesktop<T.Project | null>('pick_schematic', { projectId }),
+  readSchematic: (projectId: number) => callBytes('read_schematic', { projectId }),
+  exportInventory: (format: 'csv' | 'json' | 'xlsx') => callDesktop<string | null>('export_inventory', { format }),
+  saveGeneratedFile: (bytes: Uint8Array, fileName: string, extension: string) =>
+    callWithBody<string | null>('save_generated_file', bytes, { 'x-file-name': fileName, 'x-extension': extension }),
+  openUrl: (url: string) => callDesktop<null>('open_url', { url }),
+  openFolder: (target: 'data' | 'backups' | 'drive') => callDesktop<null>('open_folder', { target }),
+  takeDeepLinks: () => callDesktop<string[]>('take_deep_links'),
+  checkUpdate: (manual = false) => callDesktop<T.UpdateCheck>('check_update', { manual }),
+  fetchShopPage: (url: string) => callDesktop<string>('fetch_shop_page', { url }),
+};

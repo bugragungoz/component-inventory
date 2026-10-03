@@ -1,0 +1,43 @@
+name: Release
+
+# A tag v1.0.0-beta.N builds the Windows installers and the extension zip and publishes them as a
+# pre-release. The tag must match the version in package.json (tools/check-versions.mjs keeps every
+# other file in step). Signing is prepared in docs/RELEASING.md and not switched on yet.
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: npm ci
+      - name: The tag matches the version
+        shell: bash
+        run: |
+          want="v$(node -p "require('./package.json').version")"
+          if [ "$GITHUB_REF_NAME" != "$want" ]; then echo "tag $GITHUB_REF_NAME, package.json says $want"; exit 1; fi
+          node tools/check-versions.mjs
+      - run: npm run verify
+      - run: npx tauri build
+      - run: npm run ext:zip
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: Component Inventory ${{ github.ref_name }}
+          prerelease: ${{ contains(github.ref_name, 'beta') }}
+          body_path: docs/release-notes.md
+          files: |
+            target/release/bundle/msi/*.msi
+            target/release/bundle/nsis/*.exe
+            extension/*.zip

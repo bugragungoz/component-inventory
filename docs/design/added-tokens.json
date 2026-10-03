@@ -1,0 +1,19 @@
+{
+  "note": "Tokens the app adds to Bugra for a data-heavy desktop app. Each is listed for the owner in docs/design/ADDED.md and can be moved into the Bugra artifact. Values derive from existing Bugra tokens.",
+  "size": [
+    { "name": "row-h", "value": "36px", "usage": "Inventory table row height (dense desktop list). (added)" },
+    { "name": "table-head-h", "value": "36px", "usage": "Table header row height. (added)" },
+    { "name": "toolbar-h", "value": "56px", "usage": "Height of the window toolbar. (added)" },
+    { "name": "statusbar-h", "value": "30px", "usage": "Height of the status bar at the bottom of the window. (added)" },
+    { "name": "sidebar-w", "value": "296px", "usage": "Width of the sidebar with navigation and categories. (added)" },
+    { "name": "panel-w", "value": "440px", "usage": "Width of the detail panel that opens beside the table. (added)" },
+    { "name": "icon-ui", "value": "18px", "usage": "Default UI icon size in toolbars and rows. (added)" },
+    { "name": "icon-category", "value": "20px", "usage": "Category and subcategory icons in the sidebar. (added)" },
+    { "name": "dialog-w", "value": "560px", "usage": "Width of form dialogs (Bugra's own dialog is 420px for questions). (added)" },
+    { "name": "dialog-w-wide", "value": "1080px", "usage": "Width of the import review and diff dialogs. (added)" }
+  ],
+  "zIndex": [
+    { "name": "z-panel", "value": "25", "usage": "Detail panel over the table. (added)" },
+    { "name": "z-tooltip", "value": "65", "usage": "Tooltips, above dialogs and snackbars. (added)" }
+  ]
+}
