@@ -2,29 +2,28 @@
 
 # Component Inventory
 
-Elektronik bileşenler için Windows'ta çalışan, verisi bilgisayarınızda kalan bir stok uygulaması.
-Elinizdeki parçaları, nerede durduklarını ve projelerinizin neye ihtiyaç duyduğunu tutar; Türk
-elektronik mağazalarından verdiğiniz siparişleri tarayıcı eklentisiyle ya da bir tablodan alır.
+Elektronik bileşenler için Windows'ta çalışan, verisi bilgisayarınızda kalan bir stok yönetimi uygulaması.
+Elinizdeki parçaları, hangi kutularda durduklarını ve projelerinizin neye ihtiyaç duyduğunu tutar; Türk
+elektronik mağazalarından verdiğiniz siparişler veya seçtiğiniz komponentler tarayıcı eklentisiyle uygulama içine doğrudan eklenebilir ya da uygun formatlarda içeri aktarılabilir.
 
 [English](README.en.md) · [Değişiklikler](CHANGELOG.md) · [Katkı](CONTRIBUTING.md) · [İndir](https://github.com/bugragungoz/component-inventory/releases/latest)
 
 ![Envanter, koyu tema](docs/screenshots/inventory-dark.png)
 
-## Neler yapar
+## Özellikler
 
-- **Tam adet.** Sayfasız, 100.000 satırda bile akıcı bir tablo; Türkçe harfleri doğru eşleyen arama
-  (`direnc` yazınca `DİRENÇ` bulunur); her kategori ve alt kategori için simge; azalan stok işareti ve
+- **Akıcı arayüz** Sayfasız, 100.000 satırda bile akıcı bir tablo; Türkçe harfleri doğru eşleyen arama
+  (`direnc` yazınca `DİRENÇ` eşleşmesi); her kategori ve alt kategori için simge; azalan stok işareti ve
   her değişikliğin stok geçmişi.
-- **Önce kontrol, sonra kayıt.** Mağaza siparişleri eklentiyle, Excel ve CSV dosyaları içe aktarma
+- **Kapsamlı içe aktarma yapısı** Mağaza siparişleri eklentiyle, Excel ve CSV dosyaları içe aktarma
   ekranıyla gelir. Her satırda adedin neden öyle olduğu görünür ("10 birim x 10'lu paket = 100 adet").
-  Stoka ekleyin, adetleri eşitleyin ya da tamamını değiştirin; içe aktarmayı sonradan geri alın.
-- **Saklama yerleri.** Parçaları masanızdaki kutu ve çekmecelerle aynı adlı yerlere koyun; bir yerin
-  adını değiştirince içindeki bütün parçalar taşınır.
-- **Projeler.** Her proje için eksikleri gösteren parça listesi ve yanında şema (PDF, görsel ya da
+  İçe aktarma esnasında düzenleme yapabilme,içe aktarmayı daha sonra geri alabilme gibi özellikler mevcut.
+- **Saklama yerleri** Daha gerçeğe yakın ve tutarlı bir görünüm için komponentleri masanızdaki kutu ve çekmecelerle aynı adlı yerlere koyabilirsiniz, böylece neyin nerede olduğunu takip etmek daha da kolaylaşır.
+- **Projeler** Proje oluşturma ve komponentleri istenen projelere atayabilme,proje için eksikleri gösteren parça listesi ve yanında şema (PDF, görsel ya da
   KiCad).
-- **Etiket ve dışa aktarma.** QR kodlu etiket kâğıtları; Excel, CSV, JSON ve PDF liste.
-- **Veri sizde.** Her şey bilgisayarınızdaki bir SQLite veritabanında durur. Her toplu işlemden önce
-  yedek alınır. İsteğe bağlı Google Drive kopyasıyla stoka telefondan bakılır.
+- **Etiket ve dışa aktarma** Etiket oluşturma özelliği ile gerçek kutulamanıza uygun olacak şekilde kutularınıza yapıştırabileceğiniz etiketler hazırlama; Excel, CSV, JSON ve PDF olarak envanter listenizi dışa aktarabilme.
+- **Yerel çalışma** Her şey bilgisayarınızdaki bir SQLite veritabanında durur. Her toplu işlemden önce
+  yedek alınır. Sadece GitHub üzerinden internete  çıkar ve otomatik güncelleme kontrolü yapar, başka herhangi bir amaçla uygulama internet erişimini kullanmaz, istenirse internet erişimi kapatılabilir. Ayrıca eğer istenirse bilgisayarınızda kurulu Google Drive uygulamasının yedekleme klasörlerinin senkronize edebileceği bir klasöre yazma yapabilir, böylece hem sizin isteğinizle Drive hesabınıza otomatik yedekleme sağlanmış olur hem de telefonunuzdan Google Sheets üzerinden envanterinizi görebilirsiniz.
 
 | İçe aktarma incelemesi | Proje parça listesi |
 |---|---|
@@ -56,20 +55,18 @@ Verilerin yeri: `%APPDATA%\com.bugragungoz.component-inventory` (Ayarlar'da da y
    sorarsa izin verin.
 
 Uygulama açılmazsa panelde **Dosya olarak kaydet**'e basın ve inen `.cinv.json` dosyasını uygulamanın
-İçe aktar ekranına bırakın. Yeni sürümde zip'i aynı klasöre açıp eklenti kartındaki yenile düğmesine
+İçe aktar ekranına bırakın. Yeni sürümler geldikçe zip'i aynı klasöre açıp eklenti kartındaki yenile düğmesine
 basmanız yeter.
 
 ## Sonra eklenecekler
 
-- **PDF içe aktarma:** yazdırılmış sipariş sayfalarından okuma şu an çalışmıyor, düzeltilecek.
-- Taranmış (görüntü) PDF'ler için metin tanıma.
+- **PDF içe aktarma:** yazdırılmış sipariş sayfalarından okuma şu an çalışmıyor olabilir, düzeltilecek. Sadece uzantı üzerinden geliştirdim bu sürümü, dosya import etme henüz test edilmedi.
 - Mağaza ürün sayfasından kategori ve kılıf bilgisini otomatik doldurma.
-- İmzalı kurulum dosyaları.
 
 ## Çeviriler
 
-Türkçe ve İngilizce tam. Almanca, Rusça, Basitleştirilmiş Çince ve Arapça çevrilmiş ama anadili olan
-biri tarafından okunmadı; uygulamada "gözden geçirilmedi" diye görünürler.
+Türkçe ve İngilizceyi kontrol ettim. Almanca, Rusça, Basitleştirilmiş Çince ve Arapça çevirmenliğini yapay zeka yaptı ve anadili olan
+biri tarafından okunmadı; uygulamada "gözden geçirilmedi" diye görünürler. Ana dili olan kişiler ilgili çevirileri düzeltmek için bana ulaşabilir.
 
 Düzeltmek ya da yeni dil eklemek için `src/locales/<dil>.json` dosyasını düzenleyin, `npm run
 check:locales` ile denetleyin ve bir pull request açın. Ayrıntılar:
@@ -98,9 +95,9 @@ cargo test --workspace # Rust çekirdeği
 
 ## Gizlilik
 
-Hesap yok, telemetri yok. Uygulama internete yalnızca yeni sürüm kontrolü için (kapatılabilir) ve
-açarsanız Google Drive klasörünüze kopya yazmak için çıkar. Eklenti sayfadan yalnızca ürün adlarını ve
-adetleri okur, veriyi yalnızca bu bilgisayardaki uygulamaya gönderir.
+Hesap yok, telemetri yok. Uygulama internete yalnızca yeni sürüm kontrolü için (kapatılabilir) çıkar. Envanter listeniz ise eğer siz ayarlardan 
+açarsanız Google Drive klasörünüze kopya yazmak için kullanılabilir, varsayılan olarak kapalı. Eklenti sayfadan yalnızca ürün adlarını ve
+adetleri okur, veriyi yalnızca sizin bilgisayarınızdaki uygulamaya gönderir.
 
 ## Lisans
 
@@ -109,3 +106,7 @@ adetleri okur, veriyi yalnızca bu bilgisayardaki uygulamaya gönderir.
 ---
 
 Opus 5.5 ile kodlanmıştır.
+
+Uygulama teması için kullandığım referans: https://github.com/cobanov (tv debloat deposu)
+
+Henüz tam test etmedim, olası sorunlar için geri dönüş yapabilirsiniz. 
