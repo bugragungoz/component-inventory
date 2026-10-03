@@ -107,6 +107,6 @@ adetleri okur, veriyi yalnızca sizin bilgisayarınızdaki uygulamaya gönderir.
 
 Opus 5.5 ile kodlanmıştır.
 
-Uygulama teması için kullandığım referans: https://github.com/cobanov (tv debloat deposu)
+Uygulama teması için kullandığım referans: https://github.com/cobanov (tv debloat reposu)
 
 Henüz tam test etmedim, olası sorunlar için geri dönüş yapabilirsiniz. 
