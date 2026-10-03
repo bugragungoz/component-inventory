@@ -46,7 +46,8 @@ const shot = (page, name) => page.screenshot({ path: path.join(shots, `${name}.p
 
 /** Reads the app's database next to the running app (SQLite allows readers while it writes). */
 function query(sql, ...params) {
-  const db = new DatabaseSync(dbFile, { readOnly: true });
+  // The app may be writing (a restore replaces the file): wait for it instead of failing at once.
+  const db = new DatabaseSync(dbFile, { readOnly: true, timeout: 5000 });
   try {
     return db.prepare(sql).all(...params);
   } finally {

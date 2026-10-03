@@ -36,7 +36,8 @@ pub fn start(app: AppHandle, core: Arc<Core>) {
     });
 
     let _ = std::thread::Builder::new().name("drive-sync".into()).spawn(move || {
-        let enabled = |core: &Core| core.read(inventory_core::settings::get).map(|s| s.drive_enabled && s.drive_folder.is_some()).unwrap_or(false);
+        let enabled =
+            |core: &Core| core.read(inventory_core::settings::get).map(|s| s.drive_enabled && s.drive_folder.is_some()).unwrap_or(false);
         // The Drive copy can be older than the database (another app version wrote it, or the
         // last change was made with Drive off), and the phone reads that copy: write it once at
         // start so it matches and the status bar has a real time.

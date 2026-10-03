@@ -29,9 +29,9 @@ browser extension or from a spreadsheet.
 ## Install
 
 1. From [Releases](https://github.com/bugragungoz/component-inventory/releases/latest) download **one**:
-   - `Component Inventory_<version>_x64-setup.exe`: installs for your Windows user only, no admin
+   - `Component.Inventory_<version>_x64-setup.exe`: installs for your Windows user only, no admin
      rights (recommended).
-   - `Component Inventory_<version>_x64_en-US.msi`: installs for the whole computer, asks for admin.
+   - `Component.Inventory_<version>_x64_en-US.msi`: installs for the whole computer, asks for admin.
 2. Run it. The installers are not signed yet; if SmartScreen asks, choose **More info** > **Run anyway**.
 3. Over an older version, install the same kind on top. On the first start a copy of your database goes
    to `backups`, then it is moved to the new format.

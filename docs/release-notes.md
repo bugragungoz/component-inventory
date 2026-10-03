@@ -5,8 +5,8 @@ alınabiliyor. Eski veritabanınız ilk açılışta kopyalanıp yeni biçime ta
 
 **Kurulum:** aşağıdan birini seçin.
 
-- `Component Inventory_1.0.0-beta.4_x64-setup.exe`: yalnızca sizin kullanıcınıza, yönetici izni istemez (önerilen).
-- `Component Inventory_1.0.0-beta.4_x64_tr-TR.msi` / `_en-US.msi`: bilgisayarın tamamına, yönetici onayı ister.
+- `Component.Inventory_1.0.0-beta.4_x64-setup.exe`: yalnızca sizin kullanıcınıza, yönetici izni istemez (önerilen).
+- `Component.Inventory_1.0.0-beta.4_x64_tr-TR.msi` / `_en-US.msi`: bilgisayarın tamamına, yönetici onayı ister.
 
 **Tarayıcı eklentisi:** `component-inventory-extension-1.0.0-beta.4.zip` dosyasını bir klasöre açın;
 Brave, Chrome ya da Edge'de eklentiler sayfasında **Geliştirici modu** > **Paketlenmemiş öğe yükle** ile

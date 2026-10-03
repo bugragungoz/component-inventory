@@ -34,9 +34,9 @@ elektronik mağazalarından verdiğiniz siparişleri tarayıcı eklentisiyle ya 
 
 1. [Releases](https://github.com/bugragungoz/component-inventory/releases/latest) sayfasından **birini**
    indirin:
-   - `Component Inventory_<sürüm>_x64-setup.exe`: yalnızca sizin kullanıcınıza kurulur, yönetici izni
+   - `Component.Inventory_<sürüm>_x64-setup.exe`: yalnızca sizin kullanıcınıza kurulur, yönetici izni
      istemez (önerilen).
-   - `Component Inventory_<sürüm>_x64_tr-TR.msi`: bilgisayarın tamamına kurulur, yönetici onayı ister.
+   - `Component.Inventory_<sürüm>_x64_tr-TR.msi`: bilgisayarın tamamına kurulur, yönetici onayı ister.
 2. Çalıştırın. Kurulum dosyaları henüz imzalı değil; Windows SmartScreen sorarsa **Ek bilgi** >
    **Yine de çalıştır**.
 3. Eski bir sürüm kuruluysa aynı türden kurulumla üzerine kurun. İlk açılışta veritabanınızın bir

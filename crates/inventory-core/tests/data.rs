@@ -101,15 +101,21 @@ fn patches_move_parts_into_a_storage_place_and_keep_counts() {
     let (_d, core) = common::fresh();
     let a = api::save_component(&core, SaveComponentArgs { component: part("A", 5) }).unwrap();
     let b = api::save_component(&core, SaveComponentArgs { component: part("B", 2) }).unwrap();
-    let patch = |id: i64, place: &str| inventory_core::components::ComponentPatch { id, location: Some(place.into()), ..Default::default() };
-    let r = api::apply_patches(&core, PatchArgs { patches: vec![patch(a.id, "Kutu 1"), patch(b.id, "Kutu 1")], reason: "storage place".into() }).unwrap();
+    let patch =
+        |id: i64, place: &str| inventory_core::components::ComponentPatch { id, location: Some(place.into()), ..Default::default() };
+    let r = api::apply_patches(
+        &core,
+        PatchArgs { patches: vec![patch(a.id, "Kutu 1"), patch(b.id, "Kutu 1")], reason: "storage place".into() },
+    )
+    .unwrap();
     assert_eq!(r.count, 2);
     assert!(!r.backup_file.is_empty(), "a bulk change takes a backup first");
     let list = api::list_components(&core, NoArgs {}).unwrap();
     assert!(list.iter().all(|c| c.location == "Kutu 1"));
     assert_eq!(list.iter().map(|c| c.quantity).sum::<i64>(), 7);
     // Renaming a box is the same patch on every part in it; an empty place takes a part out.
-    api::apply_patches(&core, PatchArgs { patches: vec![patch(a.id, "Raf A / Kutu 1"), patch(b.id, "")], reason: "storage place".into() }).unwrap();
+    api::apply_patches(&core, PatchArgs { patches: vec![patch(a.id, "Raf A / Kutu 1"), patch(b.id, "")], reason: "storage place".into() })
+        .unwrap();
     let list = api::list_components(&core, NoArgs {}).unwrap();
     assert_eq!(list.iter().find(|c| c.part_code == "A").unwrap().location, "Raf A / Kutu 1");
     assert_eq!(list.iter().find(|c| c.part_code == "B").unwrap().location, "");
