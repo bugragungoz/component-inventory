@@ -44,6 +44,41 @@ fn add_mode_creates_adds_and_sums_duplicates() {
     assert_eq!(backups.iter().filter(|b| b.kind == "pre-import").count(), 2);
 }
 
+/// The review screen treats "ne555" and "NE555" as one code: it sums the lines and shows the
+/// stock of the part already there. What is written must be what was reviewed.
+#[test]
+fn codes_differing_only_in_case_are_one_part_as_in_the_review() {
+    let (_d, core) = common::fresh();
+    import(&core, ImportMode::Add, vec![row("NE555", 5)]);
+    let r = import(&core, ImportMode::Add, vec![row("ne555", 2), row("Ne555", 3)]);
+    assert_eq!((r.created, r.updated, r.pieces), (0, 1, 5));
+    assert_eq!(qty(&core, "NE555"), Some(10));
+    assert_eq!(api::list_components(&core, NoArgs {}).unwrap().len(), 1, "no second part was made");
+
+    // Sync sets the summed count of the lines.
+    import(&core, ImportMode::Sync, vec![row("ne555", 1), row("NE555", 2)]);
+    assert_eq!(qty(&core, "NE555"), Some(3));
+
+    // New codes on several lines in different case become one part, spelled as the first line.
+    let r = import(&core, ImportMode::Add, vec![row("irfz44n", 1), row("IRFZ44N", 4)]);
+    assert_eq!((r.created, r.pieces), (1, 5));
+    assert_eq!(qty(&core, "irfz44n"), Some(5));
+
+    // An exact match wins over one that differs in case.
+    api::save_component(
+        &core,
+        SaveComponentArgs { component: ComponentInput { part_code: "bc547".into(), quantity: 1, ..Default::default() } },
+    )
+    .unwrap();
+    api::save_component(
+        &core,
+        SaveComponentArgs { component: ComponentInput { part_code: "BC547".into(), quantity: 1, ..Default::default() } },
+    )
+    .unwrap();
+    import(&core, ImportMode::Add, vec![row("BC547", 6)]);
+    assert_eq!((qty(&core, "bc547"), qty(&core, "BC547")), (Some(1), Some(7)));
+}
+
 #[test]
 fn add_mode_fills_empty_fields_but_keeps_curated_ones() {
     let (_d, core) = common::fresh();

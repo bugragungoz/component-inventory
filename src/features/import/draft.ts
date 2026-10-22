@@ -204,6 +204,22 @@ export function draftFromCinv(p: CleanPayload, kind: 'cinv' | 'link', dropped: n
   return { label: p.source.site ? shopLabel(p.source.site) : 'cinv', kind, rows, skipped: p.skipped + dropped, site: p.source.site };
 }
 
+/**
+ * The stock a line's code already has, found as the import writes it: the exact code first, else a
+ * code that differs only in case (the oldest such part). Null for a new part.
+ */
+export function stockLookup(parts: ReadonlyArray<{ id: number; part_code: string; quantity: number }>): (code: string) => number | null {
+  const exact = new Map<string, number>();
+  const folded = new Map<string, { id: number; quantity: number }>();
+  for (const p of parts) {
+    exact.set(p.part_code, p.quantity);
+    const k = p.part_code.toUpperCase();
+    const seen = folded.get(k);
+    if (!seen || p.id < seen.id) folded.set(k, { id: p.id, quantity: p.quantity });
+  }
+  return (code) => exact.get(code.trim()) ?? folded.get(code.trim().toUpperCase())?.quantity ?? null;
+}
+
 /** The same code twice in one import is summed when written; say so on each line. */
 export function markDuplicates(rows: DraftRow[]): void {
   const count = new Map<string, number>();
