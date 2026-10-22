@@ -589,6 +589,7 @@
       "noHeaders": "No sheet has column names this app knows (such as Part code or Quantity).",
       "pdfNoText": "This PDF has no text layer (it is a scanned image), so it cannot be read.",
       "pdfNoRows": "No lines with a quantity were found in this PDF.",
+      "pdfTimeout": "The PDF could not be read within {seconds} seconds. Print the order page to PDF again, or save the order as a CSV or Excel file.",
       "unknownType": "Files ending in .{ext} cannot be imported.",
       "link": "The link from the extension could not be read.",
       "cinv": {

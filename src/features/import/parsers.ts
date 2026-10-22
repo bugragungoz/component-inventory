@@ -286,10 +286,36 @@ export function shopFromLinks(links: string[]): string | null {
   return null;
 }
 
+/** How long reading a PDF may take before it is given up and reported (B17: a stuck read showed nothing). */
+export const PDF_READ_MS = 45_000;
+
+/** A PDF that was not read within the time allowed. */
+export class PdfTimeout extends Error {
+  constructor(public readonly seconds: number) {
+    super(`the PDF was not read within ${seconds} s`);
+  }
+}
+
+/** Runs `work` with a signal that aborts after `ms`; then rejects with PdfTimeout. */
+export function withinTime<T>(work: (signal: AbortSignal) => Promise<T>, ms: number): Promise<T> {
+  const ctrl = new AbortController();
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => {
+      ctrl.abort();
+      reject(new PdfTimeout(Math.round(ms / 1000)));
+    }, ms);
+    work(ctrl.signal).then(
+      (v) => { clearTimeout(timer); resolve(v); },
+      (e: unknown) => { clearTimeout(timer); reject(e); },
+    );
+  });
+}
+
 /** Positioned text lines of a PDF (at most 40 pages), with link annotations attached by position. */
-export async function pdfLines(bytes: Uint8Array): Promise<{ lines: PdfLine[]; hasText: boolean; pages: number }> {
+export async function pdfLines(bytes: Uint8Array, signal?: AbortSignal): Promise<{ lines: PdfLine[]; hasText: boolean; pages: number }> {
   const { openPdf } = await import('../projects/pdfjs');
-  const doc = await openPdf(bytes.slice());
+  const doc = await openPdf(bytes.slice(), signal);
+  signal?.addEventListener('abort', () => void doc.destroy(), { once: true });
   try {
     return await linesFromDocument(doc);
   } finally {

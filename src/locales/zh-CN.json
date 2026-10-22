@@ -545,6 +545,7 @@
       "noHeaders": "没有工作表包含本应用认识的列名（例如型号或数量）。",
       "pdfNoText": "此 PDF 没有文字层（是扫描图片），无法读取。",
       "pdfNoRows": "此 PDF 中没有找到带数量的行。",
+      "pdfTimeout": "{seconds} 秒内未能读取此 PDF。请重新将订单页面打印为 PDF，或将订单保存为 CSV 或 Excel 文件。",
       "unknownType": "无法导入 .{ext} 文件。",
       "link": "无法读取扩展发来的链接。",
       "cinv": {

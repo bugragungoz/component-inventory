@@ -589,6 +589,7 @@
       "noHeaders": "Hiçbir sayfada bu uygulamanın tanıdığı sütun adı (Parça kodu, Adet gibi) yok.",
       "pdfNoText": "Bu PDF'de metin katmanı yok (taranmış görüntü), bu yüzden okunamıyor.",
       "pdfNoRows": "Bu PDF'de adet içeren satır bulunamadı.",
+      "pdfTimeout": "PDF {seconds} saniye içinde okunamadı. Sipariş sayfasını yeniden PDF olarak yazdırın ya da siparişi CSV veya Excel dosyası olarak kaydedin.",
       "unknownType": ".{ext} uzantılı dosyalar içe aktarılamaz.",
       "link": "Eklentiden gelen bağlantı okunamadı.",
       "cinv": {

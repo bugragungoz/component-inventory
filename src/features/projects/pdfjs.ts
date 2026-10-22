@@ -12,7 +12,10 @@ export function loadPdfjs(): Promise<typeof PdfJs> {
   return lib;
 }
 
-export async function openPdf(bytes: Uint8Array): Promise<PdfJs.PDFDocumentProxy> {
+/** Opens a PDF. Aborting `signal` tells pdf.js and its worker to give up. */
+export async function openPdf(bytes: Uint8Array, signal?: AbortSignal): Promise<PdfJs.PDFDocumentProxy> {
   const pdfjs = await loadPdfjs();
-  return pdfjs.getDocument({ data: bytes, enableXfa: false }).promise;
+  const task = pdfjs.getDocument({ data: bytes, enableXfa: false });
+  signal?.addEventListener('abort', () => void task.destroy(), { once: true });
+  return task.promise;
 }
