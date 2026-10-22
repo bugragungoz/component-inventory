@@ -406,6 +406,30 @@ await scenario('import: a deep link from the extension opens the review', { loca
   check('after the last Cancel no review opens again', (await page.locator('.review').count()) === 0);
 });
 
+await scenario('a small window: notices never cover the import button, and repeats do not stack', { locale: 'en-US', viewport: { width: 960, height: 640 } }, async (h) => {
+  const { page } = h;
+  await h.open();
+  for (let k = 0; k < 3; k++) {
+    const payload = { format: 'cinv', version: 1, source: { site: 'motorobit', kind: 'order', url: '' }, items: [{ name: `NE555 Timer ${k}`, code: `NE555-${k}`, qty: k + 1 }] };
+    h.state.deepLinks.push(`component-inventory://import?d=${Buffer.from(JSON.stringify(payload)).toString('base64url')}`);
+    await h.emit('deep-link-pending', null);
+    await page.waitForTimeout(150);
+  }
+  await page.waitForSelector('.review');
+  check('two lists waiting give one notice, not two', await page.locator('.bg-snackbar', { hasText: 'waiting' }).count() === 1, `${await page.locator('.bg-snackbar').count()} notices`);
+  await page.evaluate(() => { const el = document.querySelector('.review').closest('.view-body'); el.scrollTop = el.scrollHeight; });
+  await page.waitForTimeout(200);
+  const covered = await page.evaluate(() => {
+    const b = document.querySelector('.review-apply .bg-btn').getBoundingClientRect();
+    return [...document.querySelectorAll('.bg-snackbar')].map((e) => e.getBoundingClientRect())
+      .filter((r) => !(r.right <= b.left || r.left >= b.right || r.bottom <= b.top || r.top >= b.bottom)).length;
+  });
+  check('scrolled to the end, no notice covers the import button', covered === 0, `${covered} covering`);
+  const sidebarRight = await page.locator('.sidebar').evaluate((el) => el.getBoundingClientRect().right);
+  const stackLeft = await page.locator('.snackbars').evaluate((el) => el.getBoundingClientRect().left);
+  check('notices start just past the narrow sidebar', stackLeft - sidebarRight >= 0 && stackLeft - sidebarRight <= 24, `${Math.round(stackLeft - sidebarRight)} px`);
+});
+
 await scenario('the update check only shows a toast (B6)', { locale: 'en-US' }, async (h) => {
   const { page } = h;
   h.state.update = () => ({ status: 'available', current: '1.0.0-beta.1', latest: '1.0.0-beta.2', url: 'https://github.com/bugragungoz/component-inventory/releases/tag/v1.0.0-beta.2' });

@@ -212,4 +212,7 @@
   .split { grid-template-columns: 240px minmax(0, 1fr); }
   .settings-section { grid-template-columns: 1fr; gap: var(--space-2); }
   .review-foot, .labels-layout, .bulk-head { grid-template-columns: 1fr; }
+  /* The import button spans the window here; room under it lets it scroll clear of the notices
+     at the bottom (two of them, 120 px). (added) */
+  .review-foot { padding-bottom: 96px; }
 }
