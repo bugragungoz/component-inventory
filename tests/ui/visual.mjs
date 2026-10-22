@@ -22,7 +22,7 @@ const part = (code, category, subcategory, quantity, location = '') => ({
 });
 
 /** Elements whose text is wider than their box, outside the places meant to truncate. */
-const CLIPPED = () => [...document.querySelectorAll('.wordmark-text, .bg-btn, .tab, .nav-item span, .bg-chip, .badge, .bg-field-label, .choice-text strong, .menu-item, h1, h2')]
+const CLIPPED = () => [...document.querySelectorAll('.wordmark-text, .bg-btn, .tab, .nav-item span, .bg-chip, .badge, .bg-field-label, .choice-text strong, .menu-item, .review-table th, h1, h2')]
   .filter((el) => el.offsetParent !== null && !el.closest('.truncate, .sr-only') && el.scrollWidth > el.clientWidth + 1)
   .map((el) => `${el.className || el.tagName}: "${el.textContent.trim().slice(0, 30)}"`);
 

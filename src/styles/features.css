@@ -173,11 +173,14 @@
 /* The review fills its box at every window size: units, pack and pieces always stay in view, and
    the secondary columns go first when the box is narrow. */
 .review-table { table-layout: fixed; width: 100%; }
+/* Narrow number columns: a header that does not fit ("Birimdeki adet") goes onto a second line,
+   between words, instead of being cut. (added) */
+.review-table th { white-space: normal; vertical-align: bottom; }
 .review-table .col-check { width: 44px; }
 .review-table .col-flag { width: 34px; }
 .review-table .col-code { width: 26%; }
 .review-table .col-units { width: 92px; }
-.review-table .col-pack { width: 78px; }
+.review-table .col-pack { width: 90px; }
 .review-table .col-pieces { width: 68px; }
 .review-table .col-cat { width: 13%; }
 .review-table .col-stock { width: 88px; }
