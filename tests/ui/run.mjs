@@ -223,6 +223,28 @@ await scenario('import: CSV review, pack size edit, apply, undo from history', {
   check('undo puts the counts back and removes what the import created', undone.LM7805 === 4 && !('NE555' in undone), JSON.stringify(undone));
 });
 
+// B17: the owner's PDF import did nothing in the app. The same three printed orders the unit tests
+// read with Node go through the built page here, so the browser's pdf.js and its worker are covered.
+await scenario('import: three printed order PDFs, every line and piece (B17)', { locale: 'en-US' }, async (h) => {
+  const { page } = h;
+  const expected = JSON.parse(fs.readFileSync(path.join(ROOT, 'test-fixtures/orders/expected.json'), 'utf8'));
+  await h.open();
+  await page.getByRole('button', { name: 'Import', exact: true }).first().click();
+  for (const shop of ['ozdisan', 'motorobit', 'robocombo']) {
+    const want = expected[shop];
+    const pieces = want.reduce((a, w) => a + w.pieces, 0);
+    const t0 = Date.now();
+    await page.setInputFiles('input[type=file]', path.join(ROOT, 'test-fixtures/orders/pdf', `${shop}-order.pdf`));
+    await page.waitForSelector('.review', { timeout: 30_000 });
+    const rows = await page.locator('.review-table tbody tr').count();
+    const summary = (await page.locator('.review-head p').innerText()).trim();
+    check(`${shop}: the review lists every line with its pieces`, rows === want.length && summary.startsWith(`${want.length} lines · ${pieces.toLocaleString('en-US')} pieces`), `${rows} rows, "${summary}", ${Date.now() - t0} ms`);
+    await page.locator('.review-head').getByRole('button', { name: 'Cancel', exact: true }).click();
+    await page.waitForSelector('.review', { state: 'detached' });
+  }
+  check('nothing was written by looking at the reviews', (await h.call('list_components', {})).length === 0);
+});
+
 await scenario('labels, export, a KiCad parts list and auto-categorize', { locale: 'en-US' }, async (h) => {
   const { page } = h;
   for (const p of [part('NE555', { category: 'ICs', quantity: 4, description: 'Timer DIP-8' }), part('LM7805', { category: 'ICs', quantity: 2, description: 'Regulator' }),
