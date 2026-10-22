@@ -3,7 +3,9 @@
 //!
 //! File names: `backup_YYYYMMDD_HHMMSS-<kind>.db` (local time). The old app wrote
 //! `backup_YYYYMMDD_HHMMSS.db`; those are listed as kind "legacy". Migration backups are
-//! `pre-migration-v<from>-YYYYMMDD_HHMMSS.db` and are never pruned, nor are manual ones.
+//! `pre-migration-v<from>-YYYYMMDD_HHMMSS.db` and are never pruned, nor are manual ones. Retention
+//! only ever deletes the automatic backups this app wrote: legacy backups and any other `.db` file
+//! in the folder are listed and left alone.
 
 use rusqlite::{backup::Backup, Connection};
 use std::path::{Path, PathBuf};
@@ -15,7 +17,8 @@ use crate::error::{invalid, CoreError, Result};
 use crate::model::{BackupEntry, Component};
 
 pub const KINDS: &[&str] = &["auto", "manual", "pre-import", "pre-undo", "pre-bulk", "pre-restore", "pre-delete"];
-const NEVER_PRUNED: &[&str] = &["manual", "pre-migration"];
+/// The kinds retention may delete: the ones this app writes on its own.
+const PRUNABLE: &[&str] = &["auto", "pre-import", "pre-undo", "pre-bulk", "pre-restore", "pre-delete"];
 
 fn stamp() -> String {
     chrono::Local::now().format("%Y%m%d_%H%M%S").to_string()
@@ -111,12 +114,14 @@ pub fn list(dir: &Path) -> Result<Vec<BackupEntry>> {
     Ok(out)
 }
 
-/// Keeps the newest `retention` prunable backups (0 keeps all). Manual and migration backups stay.
+/// Keeps the newest `retention` automatic backups (0 keeps all). Manual, migration and legacy
+/// backups stay, and so does any file whose name this app did not write.
 pub fn prune(dir: &Path, retention: i64) -> Result<usize> {
     if retention <= 0 {
         return Ok(0);
     }
-    let prunable: Vec<BackupEntry> = list(dir)?.into_iter().filter(|e| !NEVER_PRUNED.contains(&e.kind.as_str())).collect();
+    let prunable: Vec<BackupEntry> =
+        list(dir)?.into_iter().filter(|e| PRUNABLE.contains(&e.kind.as_str()) && parse_name(&e.file_name).is_some()).collect();
     let mut removed = 0;
     for e in prunable.iter().skip(retention as usize) {
         if std::fs::remove_file(&e.path).is_ok() {

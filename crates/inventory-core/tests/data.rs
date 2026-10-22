@@ -265,6 +265,31 @@ fn backups_restore_diff_and_retention() {
     assert!(list.iter().any(|b| b.file_name == b1.file_name));
 }
 
+/// Retention removes only the backups this app wrote for itself. A database someone put in the
+/// folder, or a backup of the old app, is never deleted by it.
+#[test]
+fn retention_never_deletes_files_it_did_not_write() {
+    let (_d, core) = common::fresh();
+    api::save_component(&core, SaveComponentArgs { component: part("A", 1) }).unwrap();
+    let first = api::create_backup(&core, CreateBackupArgs { kind: String::new() }).unwrap();
+    let dir = std::path::Path::new(&first.path).parent().unwrap().to_path_buf();
+    let others = ["notes.db", "backup_20200101_120000.db", "inventory copy.db", "pre-migration-v0-20200101_120000.db"];
+    for name in others {
+        std::fs::copy(&first.path, dir.join(name)).unwrap();
+    }
+    api::update_settings(&core, UpdateSettingsArgs { patch: json!({"backup_retention": 1}) }).unwrap();
+    for i in 0..3 {
+        api::save_component(&core, SaveComponentArgs { component: part(&format!("X{i}"), 1) }).unwrap();
+        assert!(api::auto_backup(&core, NoArgs {}).unwrap().is_some());
+        std::thread::sleep(std::time::Duration::from_millis(1100));
+    }
+    for name in others {
+        assert!(dir.join(name).exists(), "{name} was deleted");
+    }
+    let list = api::list_backups(&core, NoArgs {}).unwrap();
+    assert_eq!(list.iter().filter(|b| b.kind == "auto").count(), 1, "{list:?}");
+}
+
 #[test]
 fn restoring_an_old_schema_backup_migrates_it_again() {
     let dir = common::v0_data_dir();
