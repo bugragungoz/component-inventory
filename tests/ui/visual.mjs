@@ -26,6 +26,18 @@ const CLIPPED = () => [...document.querySelectorAll('.wordmark-text, .bg-btn, .t
   .filter((el) => el.offsetParent !== null && !el.closest('.truncate, .sr-only') && el.scrollWidth > el.clientWidth + 1)
   .map((el) => `${el.className || el.tagName}: "${el.textContent.trim().slice(0, 30)}"`);
 
+/** Sidebar names broken inside a word (B14: the owner wants whole words, never "Resi-stors"). */
+const SPLIT_WORDS = () => [...document.querySelectorAll('.tree-label')].filter((el) => {
+  const text = el.firstChild;
+  if (!text || text.nodeType !== Node.TEXT_NODE) return false;
+  return [...text.textContent.matchAll(/\S+/g)].some((m) => {
+    const r = document.createRange();
+    r.setStart(text, m.index);
+    r.setEnd(text, m.index + m[0].length);
+    return r.getClientRects().length > 1;
+  });
+}).map((el) => el.textContent);
+
 const SCREENS = [
   ['inventory', async () => {}],
   ['add-dialog', async (page) => { await page.keyboard.press('Control+n'); await page.waitForTimeout(400); }],
@@ -65,6 +77,10 @@ for (const [language, theme] of [['tr', 'dark'], ['en-XA', 'dark'], ['de', 'ligh
       const wide = await h.page.locator('.review-table-wrap').evaluate((el) => el.scrollWidth - el.clientWidth);
       check(`${language} review: units, pack and pieces fit without scrolling sideways`, wide <= 1, `${wide}px`);
     }
+    if (name === 'inventory') {
+      const split = await h.page.evaluate(SPLIT_WORDS);
+      check(`${language} inventory: sidebar names keep their words whole`, split.length === 0, split.join(', '));
+    }
     const clipped = await h.page.evaluate(CLIPPED);
     check(`${language} ${name}: no label is cut off`, clipped.length === 0, clipped.slice(0, 4).join(' ; '));
     await h.page.screenshot({ path: path.join(out, `${language}-${theme}-${name}.png`) });
@@ -73,5 +89,19 @@ for (const [language, theme] of [['tr', 'dark'], ['en-XA', 'dark'], ['de', 'ligh
   check(`${language}: no page errors`, h.state.errors.length === 0, h.state.errors.slice(0, 2).join(' ; '));
   await h.stop();
 }
+// Five-digit counts take room from the names in the narrow sidebar: the longest Turkish and German
+// category names must still keep their words whole.
+for (const language of ['tr', 'de']) {
+  const h = await startHarness({ locale: 'en-US', theme: 'dark', viewport: { width: 960, height: 640 } });
+  await h.call('update_settings', { patch: { language } });
+  await h.call('seed_components', { count: 50_000 });
+  await h.open('', 240_000);
+  await h.page.waitForSelector('.tree-label', { timeout: 240_000 });
+  const split = await h.page.evaluate(SPLIT_WORDS);
+  check(`${language}, 10,000 parts a category: sidebar names keep their words whole`, split.length === 0, split.join(', '));
+  await h.page.screenshot({ path: path.join(out, `${language}-sidebar-large-counts.png`) });
+  await h.stop();
+}
+
 console.log(failed ? `\n${failed} check(s) failed` : '\nall checks passed');
 process.exit(failed ? 1 : 0);
