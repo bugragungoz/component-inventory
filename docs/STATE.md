@@ -1,7 +1,25 @@
 # State of the work
 
-Updated 2026-10-03, after the rebuild session (cloud). Short on purpose: what was proven, what is only
+Updated 2026-10-22, after a cloud review session. Short on purpose: what was proven, what is only
 unit-tested, what is unproven. History is in git; owner reports are in `FEEDBACK.md`.
+
+## Cloud review, 2026-10-22 (branch `claude/confident-cannon-f4cbps`, not merged)
+
+Verified (ran, with the result): `npm run verify` (131 unit tests), `cargo test --workspace`, `npm run
+test:ui`, `node tests/ui/visual.mjs`, and CI on the branch (Linux harness and the built app in WebView2
+on Windows, all checks passed).
+
+- B17: the PDF import works in the built app in WebView2 (CI: 381 ms, 13 lines) and in the harness
+  (three printed orders). Not reproduced; a read that takes over 45 s is now stopped with a message.
+- An import wrote a second part for a code that differed only in case ("ne555" next to "NE555"),
+  although the review had summed the lines and shown the existing stock. Lines now match regardless
+  of case, as the review shows (`cargo test`: fails on the old code).
+- Seen and left earlier, now fixed, each with a check that fails on the old code: sidebar names
+  broke inside a word in the narrow sidebar (also in German and Russian with small counts); notices
+  covered the import button in small windows, and the same notice stacked.
+- The chosen filter chip no longer reads "check mark" to a screen reader.
+
+Not verified: any of it on the owner's laptop.
 
 ## The 1.0.0-beta.1 rebuild
 
@@ -91,8 +109,10 @@ if something was synced.
 
 ### Small things seen and left
 
-- With five-digit counts (100,000 parts) the narrow sidebar shortens category names ("Resi...").
-- Several notices at once can cover the review's main button until they close (4 to 12 s).
+- With five-digit counts (100,000 parts) the narrow sidebar shortens category names ("Resi..."). Fixed
+  on 2026-10-22.
+- Several notices at once can cover the review's main button until they close (4 to 12 s). Fixed on
+  2026-10-22.
 
 ### How the Windows real-app run got there
 

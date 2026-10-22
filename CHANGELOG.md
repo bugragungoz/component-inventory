@@ -3,6 +3,19 @@
 Versions follow `1.0.0-beta.N` until 1.0.0 (docs/adr/0006-versions-and-releases.md). Dates are when a
 version was tagged.
 
+## Unreleased
+
+### Fixed
+
+- An import that had a part code in different case from the one in the inventory ("ne555" for
+  NE555) made a second part instead of adding to the first, although the review showed the lines
+  summed and the existing stock. Codes now match regardless of case, as the review shows.
+- A PDF that pdf.js never finished reading left "Reading..." on screen with no message. After 45
+  seconds the read is stopped and the screen says what to do.
+- In windows under 1100 px, sidebar names broke in the middle of a word, and notices covered the
+  import button; the same notice no longer stacks.
+- Screen readers no longer read "check mark" as part of a chosen filter chip's name.
+
 ## 1.0.0-beta.4 (2026-10-03)
 
 ### Fixed
