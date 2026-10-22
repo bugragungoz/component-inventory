@@ -13,7 +13,8 @@ version was tagged.
 - A PDF that pdf.js never finished reading left "Reading..." on screen with no message. After 45
   seconds the read is stopped and the screen says what to do.
 - In windows under 1100 px, sidebar names broke in the middle of a word, and notices covered the
-  import button; the same notice no longer stacks.
+  import button; the same notice no longer stacks. The review's "Birimdeki adet" header was cut
+  in a 960 px window; review headers now wrap between words.
 - Screen readers no longer read "check mark" as part of a chosen filter chip's name.
 
 ## 1.0.0-beta.4 (2026-10-03)
