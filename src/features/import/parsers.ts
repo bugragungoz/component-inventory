@@ -4,7 +4,7 @@
  * The PDF logic is split: `pdfLines` reads positions with pdf.js, `rowsFromPdfLines` is pure.
  */
 import { detectShop } from '@cinv/core';
-import type { PDFDocumentProxy } from 'pdfjs-dist';
+import type { PDFDocumentProxy } from 'pdfjs-dist/legacy/build/pdf.mjs';
 import { detectDelimiter, isSummaryRow, normalizeHeader, tableToRows, type RawRow } from '../../domain/importCore';
 
 export const MAX_FILE_BYTES = 30 * 1024 * 1024;

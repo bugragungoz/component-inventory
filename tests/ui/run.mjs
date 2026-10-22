@@ -245,6 +245,28 @@ await scenario('import: three printed order PDFs, every line and piece (B17)', {
   check('nothing was written by looking at the reviews', (await h.call('list_components', {})).length === 0);
 });
 
+// The schematic tab draws a PDF with pdf.js in the page: the first page is painted on the canvas.
+await scenario('projects: a PDF schematic is drawn', { locale: 'en-US' }, async (h) => {
+  const { page } = h;
+  await h.open();
+  await page.getByRole('button', { name: 'Projects' }).click();
+  await page.getByPlaceholder('New project name').fill('Board');
+  await page.getByRole('button', { name: 'Create project' }).click();
+  await page.getByRole('tab', { name: 'Schematic' }).click();
+  h.state.nextSchematic = path.join(ROOT, 'test-fixtures/orders/pdf/ozdisan-order.pdf');
+  await page.getByRole('button', { name: 'Choose a file' }).click();
+  await page.waitForSelector('.viewer canvas', { timeout: 30_000 });
+  await page.waitForTimeout(1500);
+  const painted = await page.locator('.viewer canvas').evaluate((c) => {
+    const { data } = c.getContext('2d').getImageData(0, 0, c.width, c.height);
+    let dark = 0;
+    for (let i = 0; i < data.length; i += 4) if (data[i + 3] > 0 && data[i] < 128) dark++;
+    return { w: c.width, h: c.height, dark };
+  });
+  check('the first page of the PDF is painted', painted.w > 100 && painted.h > 100 && painted.dark > 1000, JSON.stringify(painted));
+  check('the page count is shown', /Page 1 of \d+/.test(await page.locator('.viewer-bar').innerText()), await page.locator('.viewer-bar').innerText());
+});
+
 await scenario('labels, export, a KiCad parts list and auto-categorize', { locale: 'en-US' }, async (h) => {
   const { page } = h;
   for (const p of [part('NE555', { category: 'ICs', quantity: 4, description: 'Timer DIP-8' }), part('LM7805', { category: 'ICs', quantity: 2, description: 'Regulator' }),

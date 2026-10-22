@@ -1,5 +1,5 @@
 /** A PDF schematic: page buttons, zoom buttons, Ctrl + wheel to zoom, scroll to pan. */
-import type { PDFDocumentProxy, RenderTask } from 'pdfjs-dist';
+import type { PDFDocumentProxy, RenderTask } from 'pdfjs-dist/legacy/build/pdf.mjs';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { IconButton } from '../../components/IconButton';
 import { Spinner } from '../../components/Misc';
