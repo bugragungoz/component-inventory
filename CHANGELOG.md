@@ -20,6 +20,13 @@ version was tagged.
   import button; the same notice no longer stacks. The review's "Birimdeki adet" header was cut
   in a 960 px window; review headers now wrap between words.
 - Screen readers no longer read "check mark" as part of a chosen filter chip's name.
+- PDF schematics stayed blank in the Projects page in some WebView2 versions: pdf.js's modern
+  build uses a JavaScript function they lack. PDFs are now drawn and read with its legacy build.
+
+### Security
+
+- pdf.js is updated to 6.4.299. Versions from 5.6.83 to 6.2.107 could run a script hidden in a
+  PDF when it was opened (GHSA-hq66-cqwq-w95j).
 
 ## 1.0.0-beta.4 (2026-10-03)
 
