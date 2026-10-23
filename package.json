@@ -1,7 +1,7 @@
 {
   "name": "component-inventory",
   "private": true,
-  "version": "1.0.0-beta.4",
+  "version": "1.0.0-beta.5",
   "type": "module",
   "description": "Local-first inventory of electronic components, with a browser extension for Turkish electronics shops.",
   "license": "MIT",

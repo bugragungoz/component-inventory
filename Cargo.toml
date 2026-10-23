@@ -4,7 +4,7 @@ default-members = ["crates/inventory-core", "crates/inventory-bridge", "src-taur
 resolver = "2"
 
 [workspace.package]
-version = "1.0.0-beta.4"
+version = "1.0.0-beta.5"
 edition = "2021"
 license = "MIT"
 authors = ["bugragungoz"]

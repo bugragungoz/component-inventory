@@ -459,7 +459,7 @@ dependencies = [
 
 [[package]]
 name = "component-inventory"
-version = "1.0.0-beta.4"
+version = "1.0.0-beta.5"
 dependencies = [
  "chrono",
  "inventory-core",
@@ -1806,7 +1806,7 @@ dependencies = [
 
 [[package]]
 name = "inventory-bridge"
-version = "1.0.0-beta.4"
+version = "1.0.0-beta.5"
 dependencies = [
  "inventory-core",
  "rusqlite",
@@ -1816,7 +1816,7 @@ dependencies = [
 
 [[package]]
 name = "inventory-core"
-version = "1.0.0-beta.4"
+version = "1.0.0-beta.5"
 dependencies = [
  "chrono",
  "rusqlite",
