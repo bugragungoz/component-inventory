@@ -20,11 +20,16 @@ export function dismissToast(id: number): void {
   toasts.value = toasts.value.filter((t) => t.id !== id);
 }
 
+/**
+ * Shows a notice. The same notice again (same words, no action) replaces the one on screen and
+ * starts its time again, so repeats do not stack up over the buttons.
+ */
 export function toast(message: string, opts: Partial<Omit<Toast, 'id' | 'message'>> = {}): number {
   const id = next++;
   const tone = opts.tone ?? 'info';
   const duration = opts.duration ?? (tone === 'warn' ? 0 : opts.actionLabel ? 8000 : 4000);
-  toasts.value = [...toasts.value.slice(-3), { id, message, tone, duration, actionLabel: opts.actionLabel, onAction: opts.onAction }];
+  const others = opts.actionLabel ? toasts.value : toasts.value.filter((x) => x.actionLabel || x.message !== message || x.tone !== tone);
+  toasts.value = [...others.slice(-3), { id, message, tone, duration, actionLabel: opts.actionLabel, onAction: opts.onAction }];
   if (duration > 0) setTimeout(() => dismissToast(id), duration);
   return id;
 }

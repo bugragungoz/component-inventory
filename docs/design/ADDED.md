@@ -33,6 +33,7 @@ artifact if the owner wants it there.
 | Menu | A popover list with arrow keys and Escape. |
 | Tabs | Pill tabs with a count. |
 | Badge | A small pill with a word; status never by color alone. |
+| Chip check | A chosen filter chip shows a check drawn by CSS with empty alternative text, so a screen reader hears the chip's name and "pressed", not "check mark". |
 | Empty state | Says what is missing and offers the next action. |
 | Progress, spinner | A thin line and an inline spinner. |
 | Kbd | Keyboard keys in the shortcut list and the search hint. |

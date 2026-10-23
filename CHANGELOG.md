@@ -3,6 +3,36 @@
 Versions follow `1.0.0-beta.N` until 1.0.0 (docs/adr/0006-versions-and-releases.md). Dates are when a
 version was tagged.
 
+## Unreleased
+
+### Fixed
+
+- Backup retention could delete any other `.db` file in the backups folder, such as a copy put
+  there by hand or a backup of the old app, once thirty newer backups existed. It now deletes only
+  the automatic backups this app writes.
+
+- An import that had a part code in different case from the one in the inventory ("ne555" for
+  NE555) made a second part instead of adding to the first, although the review showed the lines
+  summed and the existing stock. Codes now match regardless of case, as the review shows.
+- A PDF that pdf.js never finished reading left "Reading..." on screen with no message. After 45
+  seconds the read is stopped and the screen says what to do.
+- In windows under 1100 px, sidebar names broke in the middle of a word, and notices covered the
+  import button; the same notice no longer stacks. The review's "Birimdeki adet" header was cut
+  in a 960 px window; review headers now wrap between words.
+- Screen readers no longer read "check mark" as part of a chosen filter chip's name.
+- PDF schematics stayed blank in the Projects page in some WebView2 versions: pdf.js's modern
+  build uses a JavaScript function they lack. PDFs are now drawn and read with its legacy build.
+
+### Security
+
+- pdf.js is updated to 6.4.299. Versions from 5.6.83 to 6.2.107 could run a script hidden in a
+  PDF when it was opened (GHSA-hq66-cqwq-w95j).
+- SheetJS, which reads Excel files for the import, is updated from 0.18.5 to 0.20.3. A crafted
+  file could change the page's built-in objects (GHSA-4r6h-8v6p-xvw6) or freeze the window
+  (GHSA-5pgg-2g8v-p4x9). SheetJS no longer publishes to npm, so it comes from its own CDN.
+- DOMPurify, which jsPDF brings along, is updated to 3.4.17 (GHSA-cg2g-xh64-v4q7). The app never
+  used the part of jsPDF that loads it.
+
 ## 1.0.0-beta.4 (2026-10-03)
 
 ### Fixed

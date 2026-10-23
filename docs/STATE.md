@@ -1,7 +1,31 @@
 # State of the work
 
-Updated 2026-10-03, after the rebuild session (cloud). Short on purpose: what was proven, what is only
+Updated 2026-10-22, after a cloud review session. Short on purpose: what was proven, what is only
 unit-tested, what is unproven. History is in git; owner reports are in `FEEDBACK.md`.
+
+## Cloud review, 2026-10-22 (branch `claude/confident-cannon-f4cbps`, not merged)
+
+Verified (ran, with the result): `npm run verify` (132 unit tests), `cargo test --workspace`, `npm run
+test:ui`, `node tests/ui/visual.mjs`, and CI on the branch (Linux harness and the built app in WebView2
+on Windows, all checks passed). In one local `test:ui` run in a busy container the 2,000-line import
+took 3.8 s against its 3 s budget; run alone it took 2.1 s twice.
+
+- B17: the PDF import works in the built app in WebView2 (CI: 381 ms, 13 lines) and in the harness
+  (three printed orders). Not reproduced; a read that takes over 45 s is now stopped with a message.
+- An import wrote a second part for a code that differed only in case ("ne555" next to "NE555"),
+  although the review had summed the lines and shown the existing stock. Lines now match regardless
+  of case, as the review shows (`cargo test`: fails on the old code).
+- Seen and left earlier, now fixed, each with a check that fails on the old code: sidebar names
+  broke inside a word in the narrow sidebar (also in German and Russian with small counts); notices
+  covered the import button in small windows, and the same notice stacked.
+- The chosen filter chip no longer reads "check mark" to a screen reader.
+- PDF schematics were blank in Chromium 141: pdf.js's modern build calls
+  `Map.prototype.getOrInsertComputed`, which it lacks. PDFs are drawn and read with the legacy build
+  (UI check: fails on the old code).
+- `npm audit --omit=dev` is clean: pdf.js 6.4.299 (GHSA-hq66-cqwq-w95j), SheetJS 0.20.3 from
+  cdn.sheetjs.com (GHSA-4r6h-8v6p-xvw6, GHSA-5pgg-2g8v-p4x9), DOMPurify 3.4.17 through jsPDF.
+
+Not verified: any of it on the owner's laptop.
 
 ## The 1.0.0-beta.1 rebuild
 
@@ -91,8 +115,10 @@ if something was synced.
 
 ### Small things seen and left
 
-- With five-digit counts (100,000 parts) the narrow sidebar shortens category names ("Resi...").
-- Several notices at once can cover the review's main button until they close (4 to 12 s).
+- With five-digit counts (100,000 parts) the narrow sidebar shortens category names ("Resi..."). Fixed
+  on 2026-10-22.
+- Several notices at once can cover the review's main button until they close (4 to 12 s). Fixed on
+  2026-10-22.
 
 ### How the Windows real-app run got there
 

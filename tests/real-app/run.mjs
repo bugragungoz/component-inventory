@@ -103,7 +103,9 @@ async function launch(name, args = []) {
   const pages = browser.contexts()[0].pages();
   const page = pages.find((p) => !p.url().startsWith('devtools')) ?? pages[0];
   const errors = [];
+  const consoleLines = [];
   page.on('pageerror', (e) => errors.push(e.message));
+  page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') consoleLines.push(`${m.type()}: ${m.text()}`.slice(0, 300)); });
   await page.waitForSelector('.app, .startup-error', { timeout: 60_000 });
   const startMs = Date.now() - t0;
   async function close() {
@@ -113,7 +115,7 @@ async function launch(name, args = []) {
     for (let i = 0; i < 30 && (await portOpen()); i++) await sleep(500);
     await sleep(1000);
   }
-  return { app, page, errors, startMs, close };
+  return { app, page, errors, consoleLines, startMs, close };
 }
 
 /** One part of the run; a failure is reported and the next part still runs. */
@@ -143,6 +145,20 @@ await part('first start on an empty profile', async (keep) => {
   const backups = fs.existsSync(path.join(dataDir, 'backups')) ? fs.readdirSync(path.join(dataDir, 'backups')) : [];
   check('a new database needs no migration copy', !backups.some((f) => f.startsWith('pre-migration')), backups.join(', '));
   await shot(s.page, 'empty');
+
+  // B17: a printed order PDF read by pdf.js and its worker inside WebView2.
+  const want = JSON.parse(fs.readFileSync(path.join(ROOT, 'test-fixtures/orders/expected.json'), 'utf8')).motorobit;
+  await s.page.getByRole('button', { name: 'Import', exact: true }).first().click();
+  const t0 = Date.now();
+  await s.page.setInputFiles('input[type=file]', path.join(ROOT, 'test-fixtures/orders/pdf/motorobit-order.pdf'));
+  const reviewed = await s.page.waitForSelector('.review', { timeout: 60_000 }).then(() => true, () => false);
+  const note = reviewed ? `${Date.now() - t0} ms` : `${await s.page.locator('.import-start').innerText().catch(() => '')} | ${s.consoleLines.slice(-6).join(' ; ')}`;
+  check('a printed order PDF opens the review in WebView2 (B17)', reviewed, note);
+  await shot(s.page, reviewed ? 'pdf-review' : 'pdf-review-missing');
+  if (reviewed) {
+    check('the PDF review lists every line', await s.page.locator('.review-table tbody tr').count() === want.length);
+    await s.page.locator('.review-head').getByRole('button', { name: 'Cancel', exact: true }).click();
+  }
   return s;
 });
 

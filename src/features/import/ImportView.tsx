@@ -19,7 +19,7 @@ import { components, loadInventory } from '../../state/inventory';
 import { toast } from '../../state/toasts';
 import { view } from '../../state/ui';
 import { categoryLabel, errorMessage, fieldLabel } from '../inventory/labels';
-import { markDuplicates, needsLook, pieces, toImportRows, totals, type Draft, type DraftRow, type Issue, type Reason } from './draft';
+import { markDuplicates, needsLook, pieces, stockLookup, toImportRows, totals, type Draft, type DraftRow, type Issue, type Reason } from './draft';
 import { draftFromMappedTable, ImportReadError, importBusy, pendingDraft, readFile } from './sources';
 
 const ACCEPT = '.csv,.tsv,.txt,.xlsx,.xls,.ods,.pdf,.json';
@@ -212,7 +212,7 @@ function Review({ draft }: { draft: Draft }) {
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<ImportResult | null>(null);
   useEffect(() => setRows(draft.rows), [draft]);
-  const stock = useMemo(() => new Map(components.value.map((c) => [c.part_code.toUpperCase(), c.quantity])), [components.value]);
+  const stock = useMemo(() => stockLookup(components.value), [components.value]);
   const sum = totals(rows);
   const shown = filter === 'check' ? rows.filter((r) => needsLook(r) || r.units === null) : rows;
   // A long file (an old inventory sheet) is drawn in steps, so the review opens at once.
@@ -290,7 +290,7 @@ function Review({ draft }: { draft: Draft }) {
             </tr>
           </thead>
           <tbody>
-            {visible.map((r) => <ReviewRow key={r.key} r={r} onChange={update} existing={r.part_code ? stock.get(r.part_code.toUpperCase()) ?? null : null} />)}
+            {visible.map((r) => <ReviewRow key={r.key} r={r} onChange={update} existing={r.part_code ? stock(r.part_code) : null} />)}
             {hasMore ? (
               <tr ref={moreRef} class="review-more">
                 <td colSpan={9} class="muted small">{t('import.review.showing', { shown: visible.length, total: shown.length })}</td>

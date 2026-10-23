@@ -589,6 +589,7 @@
       "noHeaders": "Kein Blatt hat Spaltennamen, die diese App kennt (etwa Teilecode oder Menge).",
       "pdfNoText": "Dieses PDF hat keine Textebene (es ist ein gescanntes Bild) und kann nicht gelesen werden.",
       "pdfNoRows": "In diesem PDF wurden keine Zeilen mit einer Menge gefunden.",
+      "pdfTimeout": "Das PDF konnte nicht innerhalb von {seconds} Sekunden gelesen werden. Drucken Sie die Bestellseite erneut als PDF oder speichern Sie die Bestellung als CSV- oder Excel-Datei.",
       "unknownType": "Dateien mit der Endung .{ext} können nicht importiert werden.",
       "link": "Der Link aus der Erweiterung konnte nicht gelesen werden.",
       "cinv": {

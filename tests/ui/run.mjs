@@ -223,6 +223,50 @@ await scenario('import: CSV review, pack size edit, apply, undo from history', {
   check('undo puts the counts back and removes what the import created', undone.LM7805 === 4 && !('NE555' in undone), JSON.stringify(undone));
 });
 
+// B17: the owner's PDF import did nothing in the app. The same three printed orders the unit tests
+// read with Node go through the built page here, so the browser's pdf.js and its worker are covered.
+await scenario('import: three printed order PDFs, every line and piece (B17)', { locale: 'en-US' }, async (h) => {
+  const { page } = h;
+  const expected = JSON.parse(fs.readFileSync(path.join(ROOT, 'test-fixtures/orders/expected.json'), 'utf8'));
+  await h.open();
+  await page.getByRole('button', { name: 'Import', exact: true }).first().click();
+  for (const shop of ['ozdisan', 'motorobit', 'robocombo']) {
+    const want = expected[shop];
+    const pieces = want.reduce((a, w) => a + w.pieces, 0);
+    const t0 = Date.now();
+    await page.setInputFiles('input[type=file]', path.join(ROOT, 'test-fixtures/orders/pdf', `${shop}-order.pdf`));
+    await page.waitForSelector('.review', { timeout: 30_000 });
+    const rows = await page.locator('.review-table tbody tr').count();
+    const summary = (await page.locator('.review-head p').innerText()).trim();
+    check(`${shop}: the review lists every line with its pieces`, rows === want.length && summary.startsWith(`${want.length} lines · ${pieces.toLocaleString('en-US')} pieces`), `${rows} rows, "${summary}", ${Date.now() - t0} ms`);
+    await page.locator('.review-head').getByRole('button', { name: 'Cancel', exact: true }).click();
+    await page.waitForSelector('.review', { state: 'detached' });
+  }
+  check('nothing was written by looking at the reviews', (await h.call('list_components', {})).length === 0);
+});
+
+// The schematic tab draws a PDF with pdf.js in the page: the first page is painted on the canvas.
+await scenario('projects: a PDF schematic is drawn', { locale: 'en-US' }, async (h) => {
+  const { page } = h;
+  await h.open();
+  await page.getByRole('button', { name: 'Projects' }).click();
+  await page.getByPlaceholder('New project name').fill('Board');
+  await page.getByRole('button', { name: 'Create project' }).click();
+  await page.getByRole('tab', { name: 'Schematic' }).click();
+  h.state.nextSchematic = path.join(ROOT, 'test-fixtures/orders/pdf/ozdisan-order.pdf');
+  await page.getByRole('button', { name: 'Choose a file' }).click();
+  await page.waitForSelector('.viewer canvas', { timeout: 30_000 });
+  await page.waitForTimeout(1500);
+  const painted = await page.locator('.viewer canvas').evaluate((c) => {
+    const { data } = c.getContext('2d').getImageData(0, 0, c.width, c.height);
+    let dark = 0;
+    for (let i = 0; i < data.length; i += 4) if (data[i + 3] > 0 && data[i] < 128) dark++;
+    return { w: c.width, h: c.height, dark };
+  });
+  check('the first page of the PDF is painted', painted.w > 100 && painted.h > 100 && painted.dark > 1000, JSON.stringify(painted));
+  check('the page count is shown', /Page 1 of \d+/.test(await page.locator('.viewer-bar').innerText()), await page.locator('.viewer-bar').innerText());
+});
+
 await scenario('labels, export, a KiCad parts list and auto-categorize', { locale: 'en-US' }, async (h) => {
   const { page } = h;
   for (const p of [part('NE555', { category: 'ICs', quantity: 4, description: 'Timer DIP-8' }), part('LM7805', { category: 'ICs', quantity: 2, description: 'Regulator' }),
@@ -382,6 +426,30 @@ await scenario('import: a deep link from the extension opens the review', { loca
   await page.locator('.review-head').getByRole('button', { name: 'Vazgeç' }).click();
   await page.waitForTimeout(800);
   check('after the last Cancel no review opens again', (await page.locator('.review').count()) === 0);
+});
+
+await scenario('a small window: notices never cover the import button, and repeats do not stack', { locale: 'en-US', viewport: { width: 960, height: 640 } }, async (h) => {
+  const { page } = h;
+  await h.open();
+  for (let k = 0; k < 3; k++) {
+    const payload = { format: 'cinv', version: 1, source: { site: 'motorobit', kind: 'order', url: '' }, items: [{ name: `NE555 Timer ${k}`, code: `NE555-${k}`, qty: k + 1 }] };
+    h.state.deepLinks.push(`component-inventory://import?d=${Buffer.from(JSON.stringify(payload)).toString('base64url')}`);
+    await h.emit('deep-link-pending', null);
+    await page.waitForTimeout(150);
+  }
+  await page.waitForSelector('.review');
+  check('two lists waiting give one notice, not two', await page.locator('.bg-snackbar', { hasText: 'waiting' }).count() === 1, `${await page.locator('.bg-snackbar').count()} notices`);
+  await page.evaluate(() => { const el = document.querySelector('.review').closest('.view-body'); el.scrollTop = el.scrollHeight; });
+  await page.waitForTimeout(200);
+  const covered = await page.evaluate(() => {
+    const b = document.querySelector('.review-apply .bg-btn').getBoundingClientRect();
+    return [...document.querySelectorAll('.bg-snackbar')].map((e) => e.getBoundingClientRect())
+      .filter((r) => !(r.right <= b.left || r.left >= b.right || r.bottom <= b.top || r.top >= b.bottom)).length;
+  });
+  check('scrolled to the end, no notice covers the import button', covered === 0, `${covered} covering`);
+  const sidebarRight = await page.locator('.sidebar').evaluate((el) => el.getBoundingClientRect().right);
+  const stackLeft = await page.locator('.snackbars').evaluate((el) => el.getBoundingClientRect().left);
+  check('notices start just past the narrow sidebar', stackLeft - sidebarRight >= 0 && stackLeft - sidebarRight <= 24, `${Math.round(stackLeft - sidebarRight)} px`);
 });
 
 await scenario('the update check only shows a toast (B6)', { locale: 'en-US' }, async (h) => {

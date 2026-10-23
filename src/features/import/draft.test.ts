@@ -1,8 +1,9 @@
 import { buildPayload, parseCinvPayload } from '@cinv/core';
 import { describe, expect, it } from 'vitest';
 import { guessColumnMap } from '../../domain/importCore';
-import { draftFromCinv, draftFromTable, enrich, markDuplicates, needsLook, pieces, toImportRows, totals } from './draft';
-import { decodeText, parseCsv, rowsFromCsv } from './parsers';
+import { draftFromCinv, draftFromTable, enrich, markDuplicates, needsLook, pieces, stockLookup, toImportRows, totals } from './draft';
+import * as XLSX from 'xlsx';
+import { decodeText, parseCsv, rowsFromCsv, rowsFromXlsx } from './parsers';
 
 const cinv = (site: string, items: Array<{ name: string; code?: string; qty: number; packSize?: number }>) => {
   const r = parseCinvPayload(buildPayload({ site, kind: 'order', url: '', items }));
@@ -80,5 +81,41 @@ describe('CSV', () => {
     const cp1254 = Uint8Array.from([0x50, 0x61, 0x72, 0xe7, 0x61, 0x3b, 0x41, 0x64, 0x65, 0x74, 0x0a, 0x44, 0xfe, 0x3b, 0x32, 0x0a]);
     expect(decodeText(cp1254)).toBe('Parça;Adet\nDş;2\n');
     expect(rowsFromCsv(new TextEncoder().encode('﻿Part Code,Quantity\nNE555,4\n'))).toEqual([{ 'Part Code': 'NE555', Quantity: '4' }]);
+  });
+});
+
+describe('Excel', () => {
+  it('reads every sheet with known headers, with numbers as typed, and skips the others', async () => {
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([['Parça Kodu', 'Adet'], ['NE555', 4], ['BC547', 100]]), 'Sipariş');
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([['Kargo', 'Teslim'], ['Yurtiçi', 'yarın']]), 'Kargo');
+    const bytes = new Uint8Array(XLSX.write(wb, { type: 'array', bookType: 'xlsx' }) as ArrayBuffer);
+    const { rows, sheets } = await rowsFromXlsx(bytes);
+    expect(sheets).toEqual(['Sipariş']);
+    expect(rows).toEqual([
+      { 'Parça Kodu': 'NE555', Adet: '4' },
+      { 'Parça Kodu': 'BC547', Adet: '100' },
+    ]);
+  });
+});
+
+describe('stockLookup', () => {
+  const parts = [
+    { id: 3, part_code: 'NE555', quantity: 5 },
+    { id: 7, part_code: 'ne555', quantity: 2 },
+    { id: 9, part_code: 'Lm7805', quantity: 4 },
+  ];
+  const stock = stockLookup(parts);
+  it('finds the exact code first', () => {
+    expect(stock('ne555')).toBe(2);
+    expect(stock('NE555')).toBe(5);
+  });
+  it('else a code that differs only in case, the oldest part, as the import writes it', () => {
+    expect(stock('Ne555')).toBe(5);
+    expect(stock('LM7805')).toBe(4);
+    expect(stock(' lm7805 ')).toBe(4);
+  });
+  it('says null for a new code', () => {
+    expect(stock('BC547')).toBeNull();
   });
 });

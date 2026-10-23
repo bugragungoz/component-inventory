@@ -135,7 +135,9 @@ pub struct UndoResult {
 }
 
 /// Same code on several lines counts once, quantities summed; other fields keep the first
-/// non-empty value. Lines are cleaned and checked; an invalid line fails the whole import.
+/// non-empty value. Codes that differ only in case are the same code, as on the review screen; the
+/// first line's spelling is kept. Lines are cleaned and checked; an invalid line fails the whole
+/// import.
 pub fn consolidate(rows: &[ImportRow]) -> Result<Vec<ImportRow>> {
     if rows.len() > MAX_IMPORT_ROWS {
         return Err(invalid(format!("an import holds at most {MAX_IMPORT_ROWS} lines")));
@@ -153,7 +155,7 @@ pub fn consolidate(rows: &[ImportRow]) -> Result<Vec<ImportRow>> {
         if raw.quantity < 0 || raw.quantity > MAX_IMPORT_QUANTITY {
             return Err(invalid(format!("line {}: quantity must be between 0 and {MAX_IMPORT_QUANTITY}", i + 1)));
         }
-        match index.get(code) {
+        match index.get(&code.to_uppercase()) {
             Some(&at) => {
                 let seen = &mut out[at];
                 seen.quantity = (seen.quantity + raw.quantity).min(MAX_QUANTITY);
@@ -182,7 +184,7 @@ pub fn consolidate(rows: &[ImportRow]) -> Result<Vec<ImportRow>> {
             None => {
                 let mut r = raw.clone();
                 r.part_code = code.to_string();
-                index.insert(code.to_string(), out.len());
+                index.insert(code.to_uppercase(), out.len());
                 out.push(r);
             }
         }
@@ -293,6 +295,18 @@ fn add_item(
     Ok(())
 }
 
+/// The part a line goes to, found as the review screen finds it: the exact code first, else a
+/// code that differs only in case (the oldest such part). `folded` maps upper-case codes to ids.
+fn find_for_line(tx: &Transaction, code: &str, folded: &std::collections::HashMap<String, i64>) -> Result<Option<Component>> {
+    if let Some(c) = find_by_code(tx, code)? {
+        return Ok(Some(c));
+    }
+    match folded.get(&code.to_uppercase()) {
+        Some(&id) => Ok(Some(get(tx, id)?)),
+        None => Ok(None),
+    }
+}
+
 /// Applies an import in one transaction. `backup_file` is the backup taken just before.
 pub fn apply(conn: &mut Connection, req: &ImportRequest, backup_file: &str) -> Result<ImportResult> {
     let rows = consolidate(&req.rows)?;
@@ -330,8 +344,19 @@ pub fn apply(conn: &mut Connection, req: &ImportRequest, backup_file: &str) -> R
         res.removed = ids.len() as i64;
     }
 
+    let mut folded = std::collections::HashMap::<String, i64>::new();
+    if req.mode != ImportMode::Replace {
+        // Newest first, so the oldest part with a code wins.
+        let mut stmt = tx.prepare("SELECT id, part_code FROM components ORDER BY id DESC")?;
+        let pairs = stmt.query_map([], |r| Ok((r.get::<_, i64>(0)?, text(r, 1))))?;
+        for pair in pairs {
+            let (id, code) = pair?;
+            folded.insert(code.to_uppercase(), id);
+        }
+    }
+
     for row in &rows {
-        let existing = if req.mode == ImportMode::Replace { None } else { find_by_code(&tx, &row.part_code)? };
+        let existing = if req.mode == ImportMode::Replace { None } else { find_for_line(&tx, &row.part_code, &folded)? };
         match existing {
             None => {
                 let input = sanitize(&row_to_input(row))?;

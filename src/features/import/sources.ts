@@ -10,7 +10,7 @@ import { t } from '../../i18n';
 import { toast } from '../../state/toasts';
 import { view } from '../../state/ui';
 import { draftFromCinv, draftFromTable, enrich, type Draft } from './draft';
-import { MAX_FILE_BYTES, pdfLines, rowsFromCsv, rowsFromPdfLines, rowsFromXlsx, shopFromLinks } from './parsers';
+import { MAX_FILE_BYTES, PDF_READ_MS, PdfTimeout, pdfLines, rowsFromCsv, rowsFromPdfLines, rowsFromXlsx, shopFromLinks, withinTime } from './parsers';
 
 /** The draft waiting on the review screen (one at a time). */
 export const pendingDraft = signal<Draft | null>(null);
@@ -55,7 +55,9 @@ export async function readFile(name: string, bytes: Uint8Array): Promise<Draft> 
     return withLibrary(draftFromTable(rows, guessColumnMap(rows), 'xlsx', name));
   }
   if (ext === 'pdf') {
-    const { lines, hasText } = await pdfLines(bytes);
+    const { lines, hasText } = await withinTime((signal) => pdfLines(bytes, signal), PDF_READ_MS).catch((e: unknown) => {
+      throw e instanceof PdfTimeout ? new ImportReadError('import.errors.pdfTimeout', { seconds: e.seconds }) : e;
+    });
     if (!hasText) throw new ImportReadError('import.errors.pdfNoText');
     const { rows, links } = rowsFromPdfLines(lines);
     if (!rows.length) throw new ImportReadError('import.errors.pdfNoRows');
