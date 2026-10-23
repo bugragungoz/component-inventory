@@ -27,6 +27,11 @@ version was tagged.
 
 - pdf.js is updated to 6.4.299. Versions from 5.6.83 to 6.2.107 could run a script hidden in a
   PDF when it was opened (GHSA-hq66-cqwq-w95j).
+- SheetJS, which reads Excel files for the import, is updated from 0.18.5 to 0.20.3. A crafted
+  file could change the page's built-in objects (GHSA-4r6h-8v6p-xvw6) or freeze the window
+  (GHSA-5pgg-2g8v-p4x9). SheetJS no longer publishes to npm, so it comes from its own CDN.
+- DOMPurify, which jsPDF brings along, is updated to 3.4.17 (GHSA-cg2g-xh64-v4q7). The app never
+  used the part of jsPDF that loads it.
 
 ## 1.0.0-beta.4 (2026-10-03)
 
