@@ -3,14 +3,13 @@
 Versions follow `1.0.0-beta.N` until 1.0.0 (docs/adr/0006-versions-and-releases.md). Dates are when a
 version was tagged.
 
-## Unreleased
+## 1.0.0-beta.5 (2026-10-23)
 
 ### Fixed
 
 - Backup retention could delete any other `.db` file in the backups folder, such as a copy put
   there by hand or a backup of the old app, once thirty newer backups existed. It now deletes only
   the automatic backups this app writes.
-
 - An import that had a part code in different case from the one in the inventory ("ne555" for
   NE555) made a second part instead of adding to the first, although the review showed the lines
   summed and the existing stock. Codes now match regardless of case, as the review shows.
