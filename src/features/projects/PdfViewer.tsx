@@ -21,8 +21,8 @@ export function PdfViewer({ bytes }: { bytes: Uint8Array }) {
   useEffect(() => {
     let d: PDFDocumentProxy | null = null;
     let cancelled = false;
-    openPdf(bytes.slice()).then((x) => { d = x; if (!cancelled) setDoc(x); else void x.destroy(); }, () => { if (!cancelled) setError(true); });
-    return () => { cancelled = true; void d?.destroy(); };
+    openPdf(bytes.slice()).then((x) => { d = x; if (!cancelled) setDoc(x); else void x.loadingTask.destroy(); }, () => { if (!cancelled) setError(true); });
+    return () => { cancelled = true; void d?.loadingTask.destroy(); };
   }, [bytes]);
 
   useEffect(() => {

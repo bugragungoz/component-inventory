@@ -315,11 +315,11 @@ export function withinTime<T>(work: (signal: AbortSignal) => Promise<T>, ms: num
 export async function pdfLines(bytes: Uint8Array, signal?: AbortSignal): Promise<{ lines: PdfLine[]; hasText: boolean; pages: number }> {
   const { openPdf } = await import('../projects/pdfjs');
   const doc = await openPdf(bytes.slice(), signal);
-  signal?.addEventListener('abort', () => void doc.destroy(), { once: true });
+  signal?.addEventListener('abort', () => void doc.loadingTask.destroy(), { once: true });
   try {
     return await linesFromDocument(doc);
   } finally {
-    void doc.destroy();
+    void doc.loadingTask.destroy();
   }
 }
 

@@ -40,7 +40,7 @@
     "@tauri-apps/api": "2.10.1",
     "jspdf": "4.2.1",
     "jspdf-autotable": "5.0.8",
-    "pdfjs-dist": "5.7.284",
+    "pdfjs-dist": "6.4.299",
     "preact": "10.29.8",
     "qrcode": "1.5.4",
     "xlsx": "0.18.5"
