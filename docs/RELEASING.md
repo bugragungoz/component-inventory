@@ -8,9 +8,13 @@
    (`version` `1.0.0.N`, `version_name` `1.0.0-beta.N`). `npm run check:versions` says what is out of
    step.
 2. Move the CHANGELOG entry from "not tagged yet" to the date, and update `docs/release-notes.md`.
-3. Commit, then tag and push the tag: `git tag v1.0.0-beta.N && git push origin v1.0.0-beta.N`.
+3. Commit, open a PR and merge it into `master`. A push to `master` whose version has no release yet
+   starts the release and creates the tag `v1.0.0-beta.N` on that commit. Pushing the tag by hand
+   (`git tag v1.0.0-beta.N && git push origin v1.0.0-beta.N`) does the same.
 4. `.github/workflows/release.yml` checks that the tag matches `package.json`, runs `npm run verify`,
-   builds the MSI and NSIS installers and the extension zip, and publishes them as a pre-release.
+   builds the MSI and NSIS installers and the extension zip, and publishes them as a pre-release
+   with `docs/release-notes.md` as its text. On a push to `master` whose version is already
+   released it does nothing.
 5. Install the MSI over the previous version on a real machine and open it once: the data must still be
    there, and `backups/` must hold the copy made before any migration.
 

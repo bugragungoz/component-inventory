@@ -12,5 +12,8 @@
   `1.0.0.N` for `1.0.0-beta.N`.
 - Releases are tagged `vX.Y.Z[-beta.N]`; `.github/workflows/release.yml` builds the MSI, the NSIS
   installer and the extension zip and attaches them. `CHANGELOG.md` gets one section per release.
+- Amended 2026-10-23: a push to `master` whose version has no release yet also releases it, creating
+  the tag on that commit, so that merging the version bump is the whole release (the owner's
+  decision). A pushed tag still works.
 - Code signing is prepared (`bundle.windows.certificateThumbprint` and `signCommand` are documented in
   `docs/RELEASING.md`) and done last, by the owner's decision.
